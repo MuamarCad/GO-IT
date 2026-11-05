@@ -1,0 +1,27 @@
+{{define "header"}}
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="GO-IT — на главную">{{template "logo"}}<span>GO<span class="dash">-</span>IT</span></a>
+    <nav class="nav" id="site-nav" aria-label="Основная навигация">
+      <a href="/directions" {{if eq .Active "directions"}}aria-current="page"{{end}}>Направления</a>
+      <a href="/cases" {{if eq .Active "cases"}}aria-current="page"{{end}}>Первый кейс</a>
+      <a href="/mentors" {{if eq .Active "mentors"}}aria-current="page"{{end}}>Менторы</a>
+      <a href="/volunteering" {{if eq .Active "volunteering"}}aria-current="page"{{end}}>Волонтёрство</a>
+      <a href="/roadmaps" {{if eq .Active "roadmaps"}}aria-current="page"{{end}}>Roadmaps</a>
+      <a href="/blog" {{if eq .Active "blog"}}aria-current="page"{{end}}>Блог</a>
+      <a href="/about" {{if eq .Active "about"}}aria-current="page"{{end}}>О проекте</a>
+    </nav>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" data-theme-toggle aria-pressed="false" aria-label="Переключить тему">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button type="button" class="icon-btn" data-contrast-toggle aria-pressed="false" aria-label="Режим высокой контрастности">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </button>
+      <button type="button" class="icon-btn nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+{{end}}

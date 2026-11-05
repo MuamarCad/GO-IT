@@ -1,0 +1,13 @@
+{{define "content"}}
+<div class="wrap page-narrow">
+  <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/directions">Направления</a><span aria-hidden="true">/</span><span aria-current="page">{{.Data.Title}}</span></nav>
+  <div class="ic" aria-hidden="true">{{.Data.Icon}}</div>
+  <h1 class="h1" style="margin-top:20px">{{.Data.Title}}</h1>
+  <p class="lead">{{.Data.Summary}}</p>
+  <div class="btn-row" style="margin-top:28px">
+    {{if .Data.CaseSlug}}<a class="btn btn--cta" href="/cases/{{.Data.CaseSlug}}">Пройти кейс</a>{{end}}
+    <a class="btn {{if .Data.CaseSlug}}btn--outline{{else}}btn--primary{{end}}" href="/roadmaps/{{.Data.RoadmapSlug}}">Смотреть roadmap</a>
+  </div>
+  {{if not .Data.CaseSlug}}<p class="hint">Кейс для этого направления пока в разработке. Начните с дорожной карты или попробуйте <a href="/cases">доступный кейс</a>.</p>{{end}}
+</div>
+{{end}}

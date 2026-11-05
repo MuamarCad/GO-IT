@@ -1,0 +1,32 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">P2P-менторство</p>
+    <h1 class="h1">Наставники-студенты</h1>
+    <p class="lead">Демонстрационные профили. В MVP нет чата и календаря — только заявка, которая сохраняется в базе.</p>
+    <ul class="filters" aria-label="Фильтр по направлению">
+      <li><a href="/mentors" {{if not .Data.Filter}}aria-current="true"{{end}}>Все</a></li>
+      {{range .Data.Filters}}<li><a href="/mentors?dir={{.}}" {{if eq . $.Data.Filter}}aria-current="true"{{end}}>{{.}}</a></li>{{end}}
+    </ul>
+  </header>
+  {{if .Data.Items}}
+  <div class="grid-2" style="padding-bottom:80px">
+    {{range .Data.Items}}
+    <article class="card">
+      <div class="person">
+        <div class="avatar" aria-hidden="true">{{initials .DisplayName}}</div>
+        <div><h2 style="margin:0">{{.DisplayName}}</h2><small>{{.Specialization}} · {{.Level}} · {{.Format}}</small></div>
+      </div>
+      <p>{{.Description}}</p>
+      <a class="more" href="/mentors/{{.Slug}}">Открыть профиль →</a>
+    </article>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="empty">
+    <h2>Наставников по этому направлению пока нет</h2>
+    <p><a href="/mentors">Показать всех наставников</a></p>
+  </div>
+  {{end}}
+</div>
+{{end}}

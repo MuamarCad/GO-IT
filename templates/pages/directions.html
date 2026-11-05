@@ -1,0 +1,19 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Направления</p>
+    <h1 class="h1">С чего начать</h1>
+    <p class="lead">Выберите направление: у каждого есть дорожная карта, а у некоторых — кейс, где можно попробовать работу на практике.</p>
+  </header>
+  <div class="grid-3" style="padding-bottom:80px">
+    {{range .Data}}
+    <article class="card">
+      <div class="ic" aria-hidden="true">{{.Icon}}</div>
+      <h2>{{.Title}}</h2>
+      <p>{{.Summary}}</p>
+      <a class="more" href="/directions/{{.Slug}}">Подробнее →</a>
+    </article>
+    {{end}}
+  </div>
+</div>
+{{end}}

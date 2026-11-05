@@ -1,0 +1,1379 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GO-IT: Социальный код API",
+    "version": "1.0.0",
+    "description": "REST API социально значимого образовательного проекта GO-IT. Платформа помогает начинающим изучать IT-профессии через интерактивные кейсы, находить наставников, участвовать в цифровом волонтёрстве и пользоваться образовательными материалами.",
+    "contact": {
+      "name": "GO-IT Development Team"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Локальная среда разработки"
+    },
+    {
+      "url": "https://api.example.com",
+      "description": "Пример адреса развёрнутого сервера"
+    }
+  ],
+  "tags": [
+    {
+      "name": "System",
+      "description": "Состояние и доступность сервиса"
+    },
+    {
+      "name": "Career Cases",
+      "description": "Профориентационные интерактивные кейсы"
+    },
+    {
+      "name": "Mentors",
+      "description": "Каталог студенческих наставников"
+    },
+    {
+      "name": "Volunteering",
+      "description": "Задачи цифрового волонтёрства"
+    },
+    {
+      "name": "Resources",
+      "description": "Образовательные материалы и дорожные карты"
+    },
+    {
+      "name": "Articles",
+      "description": "Статьи и новости проекта"
+    }
+  ],
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Проверить состояние сервера",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Сервис доступен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "service": "go-it-api",
+                  "version": "1.0.0"
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/cases": {
+      "get": {
+        "tags": [
+          "Career Cases"
+        ],
+        "summary": "Получить список профориентационных кейсов",
+        "operationId": "listCases",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "name": "profession",
+            "in": "query",
+            "required": false,
+            "description": "Фильтр по IT-направлению",
+            "schema": {
+              "$ref": "#/components/schemas/Profession"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "required": false,
+            "description": "Уровень сложности кейса",
+            "schema": {
+              "$ref": "#/components/schemas/Difficulty"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список кейсов успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/cases/{caseId}": {
+      "get": {
+        "tags": [
+          "Career Cases"
+        ],
+        "summary": "Получить подробную информацию о кейсе",
+        "operationId": "getCase",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Кейс найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareerCase"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/cases/{caseId}/attempts": {
+      "post": {
+        "tags": [
+          "Career Cases"
+        ],
+        "summary": "Отправить ответы на профориентационный кейс",
+        "description": "Проверяет ответы пользователя и возвращает результат прохождения. Для MVP результат может рассчитываться сервером без регистрации пользователя.",
+        "operationId": "submitCaseAttempt",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseAttemptRequest"
+              },
+              "example": {
+                "answers": [
+                  {
+                    "questionId": "q1",
+                    "optionId": "q1_b"
+                  },
+                  {
+                    "questionId": "q2",
+                    "optionId": "q2_a"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ответы проверены, результат сформирован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseAttemptResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/mentors": {
+      "get": {
+        "tags": [
+          "Mentors"
+        ],
+        "summary": "Получить список наставников",
+        "operationId": "listMentors",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "name": "specialization",
+            "in": "query",
+            "required": false,
+            "description": "Фильтр по специализации наставника",
+            "schema": {
+              "$ref": "#/components/schemas/Profession"
+            }
+          },
+          {
+            "name": "available",
+            "in": "query",
+            "required": false,
+            "description": "Показывать только наставников, готовых принимать запросы",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список наставников получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MentorListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/mentors/{mentorId}": {
+      "get": {
+        "tags": [
+          "Mentors"
+        ],
+        "summary": "Получить информацию о наставнике",
+        "operationId": "getMentor",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MentorId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Наставник найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mentor"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/volunteer/opportunities": {
+      "get": {
+        "tags": [
+          "Volunteering"
+        ],
+        "summary": "Получить список задач цифрового волонтёрства",
+        "operationId": "listVolunteerOpportunities",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "description": "Категория волонтёрской задачи",
+            "schema": {
+              "$ref": "#/components/schemas/VolunteerCategory"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Статус задачи",
+            "schema": {
+              "$ref": "#/components/schemas/VolunteerStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список задач получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerOpportunityListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/volunteer/opportunities/{opportunityId}": {
+      "get": {
+        "tags": [
+          "Volunteering"
+        ],
+        "summary": "Получить подробности волонтёрской задачи",
+        "operationId": "getVolunteerOpportunity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OpportunityId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Задача найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerOpportunity"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/volunteer/requests": {
+      "post": {
+        "tags": [
+          "Volunteering"
+        ],
+        "summary": "Отправить заявку на цифровое волонтёрство",
+        "description": "Создаёт заявку на участие в задаче. До внедрения аутентификации рекомендуется использовать демонстрационные данные и ограничивать частоту отправки запросов.",
+        "operationId": "createVolunteerRequest",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VolunteerRequestCreate"
+              },
+              "example": {
+                "opportunityId": "vol-001",
+                "name": "Алексей",
+                "email": "alex@example.com",
+                "message": "Готов помочь с созданием сайта"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Заявка создана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerRequestCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/resources": {
+      "get": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "Получить образовательные материалы",
+        "operationId": "listResources",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "name": "profession",
+            "in": "query",
+            "required": false,
+            "description": "IT-направление, к которому относится материал",
+            "schema": {
+              "$ref": "#/components/schemas/Profession"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Тип материала",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список материалов получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/resources/{resourceId}": {
+      "get": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "Получить образовательный материал",
+        "operationId": "getResource",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Материал найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/articles": {
+      "get": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Получить список статей и новостей",
+        "operationId": "listArticles",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список статей получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{articleId}": {
+      "get": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Получить статью",
+        "operationId": "getArticle",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ArticleId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Статья найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Article"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "description": "Номер страницы, начиная с 1",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Количество элементов на странице",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      },
+      "CaseId": {
+        "name": "caseId",
+        "in": "path",
+        "required": true,
+        "description": "Уникальный идентификатор кейса",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "MentorId": {
+        "name": "mentorId",
+        "in": "path",
+        "required": true,
+        "description": "Уникальный идентификатор наставника",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "OpportunityId": {
+        "name": "opportunityId",
+        "in": "path",
+        "required": true,
+        "description": "Уникальный идентификатор волонтёрской задачи",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "ResourceId": {
+        "name": "resourceId",
+        "in": "path",
+        "required": true,
+        "description": "Уникальный идентификатор материала",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "ArticleId": {
+        "name": "articleId",
+        "in": "path",
+        "required": true,
+        "description": "Уникальный идентификатор статьи",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "service",
+          "version"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "example": "go-it-api"
+          },
+          "version": {
+            "type": "string",
+            "example": "1.0.0"
+          }
+        }
+      },
+      "Profession": {
+        "type": "string",
+        "enum": [
+          "frontend",
+          "backend",
+          "project_manager",
+          "design",
+          "qa",
+          "other"
+        ],
+        "example": "backend"
+      },
+      "Difficulty": {
+        "type": "string",
+        "enum": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "example": "beginner"
+      },
+      "CareerCase": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "profession",
+          "difficulty",
+          "questions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "backend-001"
+          },
+          "title": {
+            "type": "string",
+            "example": "Первый день Backend-разработчика"
+          },
+          "description": {
+            "type": "string",
+            "example": "Разберитесь с типичной задачей серверной разработки."
+          },
+          "profession": {
+            "$ref": "#/components/schemas/Profession"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/Difficulty"
+          },
+          "estimatedMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 10
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CaseQuestion"
+            }
+          }
+        }
+      },
+      "CaseQuestion": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "options"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "q1"
+          },
+          "text": {
+            "type": "string",
+            "example": "Что следует сделать перед изменением API?"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/components/schemas/CaseOption"
+            }
+          }
+        }
+      },
+      "CaseOption": {
+        "type": "object",
+        "required": [
+          "id",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "q1_a"
+          },
+          "text": {
+            "type": "string",
+            "example": "Изучить требования и существующие контракты"
+          }
+        }
+      },
+      "CaseAnswer": {
+        "type": "object",
+        "required": [
+          "questionId",
+          "optionId"
+        ],
+        "properties": {
+          "questionId": {
+            "type": "string"
+          },
+          "optionId": {
+            "type": "string"
+          }
+        }
+      },
+      "CaseAttemptRequest": {
+        "type": "object",
+        "required": [
+          "answers"
+        ],
+        "properties": {
+          "answers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/CaseAnswer"
+            }
+          }
+        }
+      },
+      "CaseAttemptResult": {
+        "type": "object",
+        "required": [
+          "caseId",
+          "score",
+          "maxScore",
+          "feedback",
+          "recommendations"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 2
+          },
+          "maxScore": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 3
+          },
+          "feedback": {
+            "type": "string",
+            "example": "Вы понимаете основные принципы работы Backend-разработчика."
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Изучите основы HTTP",
+              "Попробуйте написать простой REST API на Go"
+            ]
+          }
+        }
+      },
+      "CaseListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareerCase"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Mentor": {
+        "type": "object",
+        "required": [
+          "id",
+          "displayName",
+          "specialization",
+          "description",
+          "available"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "mentor-001"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Александр"
+          },
+          "specialization": {
+            "$ref": "#/components/schemas/Profession"
+          },
+          "description": {
+            "type": "string",
+            "example": "Помогаю начинающим разобраться в Go и проектировании API."
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Go",
+              "SQL",
+              "REST API"
+            ]
+          },
+          "available": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "MentorListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mentor"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "VolunteerCategory": {
+        "type": "string",
+        "enum": [
+          "website",
+          "design",
+          "content",
+          "consulting",
+          "other"
+        ],
+        "example": "website"
+      },
+      "VolunteerStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "in_progress",
+          "completed"
+        ],
+        "example": "open"
+      },
+      "VolunteerOpportunity": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "category",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "vol-001"
+          },
+          "title": {
+            "type": "string",
+            "example": "Создание сайта для социальной организации"
+          },
+          "description": {
+            "type": "string",
+            "example": "Необходимо подготовить простой информационный сайт."
+          },
+          "category": {
+            "$ref": "#/components/schemas/VolunteerCategory"
+          },
+          "organization": {
+            "type": "string",
+            "example": "Социальный центр"
+          },
+          "requiredSkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "HTML",
+              "CSS"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/VolunteerStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VolunteerOpportunityListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VolunteerOpportunity"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "VolunteerRequestCreate": {
+        "type": "object",
+        "required": [
+          "opportunityId",
+          "name",
+          "email"
+        ],
+        "properties": {
+          "opportunityId": {
+            "type": "string",
+            "example": "vol-001"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Алексей"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "example": "alex@example.com"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 2000,
+            "example": "Готов помочь с созданием сайта."
+          }
+        }
+      },
+      "VolunteerRequestCreated": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "request-001"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "example": "Заявка успешно отправлена."
+          }
+        }
+      },
+      "ResourceType": {
+        "type": "string",
+        "enum": [
+          "roadmap",
+          "article",
+          "course",
+          "tool",
+          "book"
+        ],
+        "example": "roadmap"
+      },
+      "Resource": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "resource-001"
+          },
+          "title": {
+            "type": "string",
+            "example": "Дорожная карта Backend-разработчика"
+          },
+          "description": {
+            "type": "string",
+            "example": "Последовательность тем и практических заданий для начинающих."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "profession": {
+            "$ref": "#/components/schemas/Profession"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/learning-resource"
+          },
+          "isFree": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ResourceListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Resource"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "content",
+          "publishedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "article-001"
+          },
+          "title": {
+            "type": "string",
+            "example": "Как выбрать первое направление в IT"
+          },
+          "summary": {
+            "type": "string",
+            "example": "Практические рекомендации для начинающих."
+          },
+          "content": {
+            "type": "string",
+            "description": "Полный текст статьи. Формат хранения определяется реализацией.",
+            "example": "Начните с небольших практических задач..."
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author": {
+            "type": "string",
+            "example": "Команда GO-IT"
+          }
+        }
+      },
+      "ArticleListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Article"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "page",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 20
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 42
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "NOT_FOUND"
+              },
+              "message": {
+                "type": "string",
+                "example": "Запрашиваемый ресурс не найден."
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Некорректные параметры или тело запроса",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": {
+                "code": "BAD_REQUEST",
+                "message": "Проверьте параметры запроса."
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Ресурс не найден",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": {
+                "code": "NOT_FOUND",
+                "message": "Запрашиваемый ресурс не найден."
+              }
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Ошибка валидации данных",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Переданные данные не прошли проверку.",
+                "details": [
+                  "Поле answers не должно быть пустым."
+                ]
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Превышен лимит запросов",
+        "headers": {
+          "Retry-After": {
+            "description": "Количество секунд до возможности повторного запроса",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": {
+                "code": "RATE_LIMIT_EXCEEDED",
+                "message": "Слишком много запросов. Попробуйте позже."
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Внутренняя ошибка сервера",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": {
+                "code": "INTERNAL_SERVER_ERROR",
+                "message": "При обработке запроса произошла ошибка."
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Сервис временно недоступен",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}

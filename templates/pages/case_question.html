@@ -1,0 +1,27 @@
+{{define "content"}}
+<section class="wrap case-screen">
+  <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">{{capfirst .Data.Case.Profession}}</span></nav>
+  <p class="meta"><span>{{capfirst .Data.Case.Profession}} · Кейс</span><span>Шаг {{.Data.Step}} из {{.Data.Total}}</span></p>
+  <div class="progress" role="progressbar" aria-label="Прогресс кейса" aria-valuemin="0" aria-valuemax="{{.Data.Total}}" aria-valuenow="{{sub .Data.Step 1}}" aria-valuetext="Шаг {{.Data.Step}} из {{.Data.Total}}"><span style="width: {{pct (sub .Data.Step 1) .Data.Total}}%"></span></div>
+  <h1 data-focus>{{.Data.Case.Title}}</h1>
+  {{if eq .Data.Step 1}}<p class="lead" style="margin-top:0">{{.Data.Case.Intro}}</p>{{end}}
+  {{if .FlashError}}<div class="alert alert--error" role="alert">{{.FlashError}}</div>{{end}}
+  <form class="case-form" method="post" action="/cases/{{.Data.Case.Slug}}/answer"
+        hx-boost="true" hx-target="#main" hx-select="#main" hx-swap="outerHTML show:window:top" hx-disabled-elt="find button[type=submit]">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <input type="hidden" name="question" value="{{.Data.Question.ID}}">
+    <fieldset>
+      <legend>{{.Data.Question.Text}}</legend>
+      {{range $i, $o := .Data.Question.Options}}
+      <label class="option">
+        <input type="radio" name="option" value="{{$o.ID}}" required>
+        <span class="letter" aria-hidden="true">{{letter $i}}</span>
+        <span>{{$o.Text}}</span>
+      </label>
+      {{end}}
+    </fieldset>
+    <div><button class="btn btn--primary" type="submit">{{if eq .Data.Step .Data.Total}}Ответить и узнать результат{{else}}Ответить{{end}}</button></div>
+  </form>
+  <p class="hint">Ответ проверит сервер на Go.</p>
+</section>
+{{end}}

@@ -1,0 +1,12 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/blog">Блог</a><span aria-hidden="true">/</span><span aria-current="page">{{.Data.Title}}</span></nav>
+  </header>
+  <article class="prose">
+    {{if .Data.PublishedAt}}<p class="prose-meta"><time datetime="{{.Data.PublishedAt}}">{{ruDate .Data.PublishedAt}}</time></p>{{end}}
+    {{safe .Data.HTML}}
+    <div class="page-actions"><a class="btn btn--cta" href="/cases/frontend">Пройти первый кейс</a><a class="btn btn--outline" href="/blog">Все статьи</a></div>
+  </article>
+</div>
+{{end}}

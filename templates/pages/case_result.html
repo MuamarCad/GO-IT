@@ -1,0 +1,39 @@
+{{define "content"}}
+<article class="wrap case-screen">
+  <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">Результат</span></nav>
+  <p class="eyebrow">Результат · {{.Data.Case.Title}}</p>
+  <h1 data-focus class="visually-hidden">Результат кейса</h1>
+  <p class="score"><strong>{{.Data.Score}} из {{.Data.MaxScore}}</strong><span>подходящих решений</span></p>
+  <div class="progress" role="img" aria-label="{{.Data.Score}} из {{.Data.MaxScore}}"><span style="width: {{pct .Data.Score .Data.MaxScore}}%"></span></div>
+  <p class="hint">{{.Data.Disclaimer}}</p>
+
+  {{if .Data.Topics}}
+  <h2 class="h3" style="margin-top:32px">По темам</h2>
+  {{range .Data.Topics}}
+  <div class="topic-row">
+    <span>{{.Topic}}</span><span>{{.Score}} из {{.Max}}</span>
+    <div class="progress" aria-hidden="true"><span style="width: {{pct .Score .Max}}%"></span></div>
+  </div>
+  {{end}}
+  {{end}}
+
+  <h2 class="h3" style="margin-top:36px">Разбор ответов</h2>
+  <ol class="result-list">
+    {{range .Data.Details}}
+    <li class="result-item {{if .IsCorrect}}is-ok{{else}}is-miss{{end}}">
+      {{if .Question.Topic}}<span class="tag">{{.Question.Topic}}</span>{{end}}
+      <p style="margin-top:10px"><strong>{{.Question.Text}}</strong></p>
+      <p>Ваш ответ: {{.Chosen.Text}}</p>
+      {{if .IsCorrect}}<p class="status ok">✓ Подходящий выбор</p>{{else}}<p class="status miss">✗ Более точный вариант: {{.Correct.Text}}</p>{{end}}
+      <p>{{.Explanation}}</p>
+    </li>
+    {{end}}
+  </ol>
+
+  <div class="btn-row" style="margin-top:32px">
+    <a class="btn btn--cta" href="/roadmaps/{{.Data.Case.RoadmapSlug}}">Перейти к roadmap</a>
+    <a class="btn btn--outline" href="/cases/{{.Data.Case.Slug}}">Пройти заново</a>
+    <a class="btn btn--outline" href="/mentors">Найти наставника</a>
+  </div>
+</article>
+{{end}}

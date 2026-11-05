@@ -1,0 +1,14 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/roadmaps">Roadmaps</a><span aria-hidden="true">/</span><span aria-current="page">{{.Data.Roadmap.Title}}</span></nav>
+  </header>
+  <article class="prose" data-roadmap="{{.Data.Roadmap.Slug}}" data-toc>
+    {{safe .Data.Roadmap.HTML}}
+    <div class="page-actions">
+      {{if .Data.CaseSlug}}<a class="btn btn--cta" href="/cases/{{.Data.CaseSlug}}">Проверить себя на кейсе</a>{{end}}
+      <a class="btn btn--outline" href="/mentors">Найти наставника</a>
+    </div>
+  </article>
+</div>
+{{end}}

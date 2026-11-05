@@ -1,0 +1,31 @@
+{{define "application_form"}}
+<form class="card" method="post" action="{{.Action}}" data-once>
+  <h2>{{.Title}}</h2>
+  {{if .Form.Sent}}<div class="alert alert--ok" role="status"><strong>{{.SentText}}</strong>Это демонстрационный путь: уведомления не отправляются.</div>{{end}}
+  {{if .Form.Failed}}<div class="alert alert--error" role="alert"><strong>Не удалось сохранить.</strong>Попробуйте ещё раз чуть позже.</div>{{end}}
+  {{if .Form.Errors}}<div class="alert alert--error" role="alert" data-focus><strong>Проверьте форму.</strong>Исправьте поля, отмеченные ниже.</div>{{end}}
+  <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+  <div class="field">
+    <label for="f-name">Имя</label>
+    <input id="f-name" name="name" maxlength="100" required autocomplete="name" value="{{index .Form.Values "name"}}"
+      {{if index .Form.Errors "name"}}aria-invalid="true" aria-describedby="f-name-err"{{end}}>
+    {{with index .Form.Errors "name"}}<span class="field-error" id="f-name-err">{{.}}</span>{{end}}
+  </div>
+  <div class="field">
+    <label for="f-contact">Контакт</label>
+    <small id="f-contact-hint">Email или Telegram. Используем только для ответа и не публикуем.</small>
+    <input id="f-contact" name="contact" maxlength="254" required autocomplete="email" value="{{index .Form.Values "contact"}}"
+      aria-describedby="f-contact-hint{{if index .Form.Errors "contact"}} f-contact-err{{end}}"
+      {{if index .Form.Errors "contact"}}aria-invalid="true"{{end}}>
+    {{with index .Form.Errors "contact"}}<span class="field-error" id="f-contact-err">{{.}}</span>{{end}}
+  </div>
+  <div class="field">
+    <label for="f-message">Сообщение <small>(необязательно)</small></label>
+    <textarea id="f-message" name="message" maxlength="2000" rows="4"
+      {{if index .Form.Errors "message"}}aria-invalid="true" aria-describedby="f-message-err"{{end}}>{{index .Form.Values "message"}}</textarea>
+    {{with index .Form.Errors "message"}}<span class="field-error" id="f-message-err">{{.}}</span>{{end}}
+  </div>
+  <button class="btn btn--primary" type="submit" data-busy="Отправляем…">{{.Submit}}</button>
+  <p class="visually-hidden" role="status" data-status></p>
+</form>
+{{end}}

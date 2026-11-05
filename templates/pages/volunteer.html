@@ -1,0 +1,17 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/volunteering">Волонтёрство</a><span aria-hidden="true">/</span><span aria-current="page">{{.Data.Task.Title}}</span></nav>
+  </header>
+  <div class="split">
+    <article class="prose" style="padding:0">
+      <p class="eyebrow">{{.Data.Task.Organization}}</p>
+      <h1>{{.Data.Task.Title}}</h1>
+      <p><span class="tag">{{.Data.Task.Skills}}</span> <span class="tag">{{.Data.Task.Scale}}</span></p>
+      <p>{{.Data.Task.Description}}</p>
+      <p><strong>Ожидаемый результат:</strong> {{.Data.Task.ExpectedResult}}</p>
+    </article>
+    {{template "application_form" dict "Action" (printf "/volunteering/%s/applications" .Data.Task.Slug) "Title" "Отклик на задачу" "Submit" "Отправить отклик" "SentText" "Отклик сохранён." "Form" .Data.Form "CSRF" .CSRF}}
+  </div>
+</div>
+{{end}}

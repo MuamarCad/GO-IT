@@ -1,0 +1,22 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Блог</p>
+    <h1 class="h1">Статьи и заметки</h1>
+  </header>
+  {{if .Data}}
+  <div class="grid-2" style="padding-bottom:80px">
+    {{range .Data}}
+    <article class="card">
+      {{if .PublishedAt}}<span class="tag tag--warm"><time datetime="{{.PublishedAt}}">{{ruDate .PublishedAt}}</time></span>{{end}}
+      <h2>{{.Title}}</h2>
+      <p>{{.Summary}}</p>
+      <a class="more" href="/blog/{{.Slug}}">Читать →</a>
+    </article>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="empty"><h2>Статей пока нет</h2><p>Начните с <a href="/roadmaps">дорожных карт</a>.</p></div>
+  {{end}}
+</div>
+{{end}}

@@ -1,0 +1,136 @@
+{{define "content"}}
+<section class="band-navy hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="tag tag--on-navy">Социальная образовательная платформа</span>
+      <h1 class="h1">Найди свой путь в <span class="accent">IT</span></h1>
+      <p class="hero-lead">Профориентация через практические ситуации, бесплатные учебные маршруты, наставничество от студентов и цифровое волонтёрство — в одном месте.</p>
+      <div class="btn-row">
+        <a class="btn btn--cta" href="/cases/frontend">Пройти первый кейс</a>
+        <a class="btn btn--ghost" href="/directions">Выбрать направление</a>
+      </div>
+    </div>
+    <aside class="preview" aria-label="Пример шага кейса">
+      <div class="meta"><span class="tag">Frontend · Кейс</span><span>Шаг 2 из 4</span></div>
+      <div class="progress" aria-hidden="true"><span style="width: 50%"></span></div>
+      <p class="preview-q">Кнопка «Отправить» остаётся активной после отправки формы. Что делаем?</p>
+      <ul class="preview-opts">
+        <li><b>A</b> Скрыть кнопку через CSS</li>
+        <li class="on"><b>B</b> Блокировать повторную отправку и показать статус</li>
+        <li><b>C</b> Ничего, пользователь сам разберётся</li>
+      </ul>
+      <p class="hint">Ответ проверит сервер на Go</p>
+    </aside>
+  </div>
+</section>
+
+<section class="section band" id="directions">
+  <div class="wrap">
+    <p class="eyebrow">Направления</p>
+    <h2 class="h2">С чего начать, если IT — тёмный лес</h2>
+    <p class="lead">Новичкам трудно понять, чем занимаются специалисты, и составить план обучения. Выберите направление и посмотрите, как выглядит реальная работа.</p>
+    <div class="grid-3">
+      {{range .Data.Directions}}
+      <article class="card">
+        <div class="ic" aria-hidden="true">{{.Icon}}</div>
+        <h3>{{.Title}}</h3>
+        <p>{{.Summary}}</p>
+        <a class="more" href="/roadmaps/{{.RoadmapSlug}}">Смотреть roadmap →</a>
+      </article>
+      {{end}}
+    </div>
+  </div>
+</section>
+
+<section class="section" id="case">
+  <div class="wrap">
+    <p class="eyebrow">Первый кейс</p>
+    <h2 class="h2">Попробуй профессию за несколько минут</h2>
+    <ol class="steps-row">
+      <li><span class="n" aria-hidden="true">01</span><h3>Выбери направление</h3><p>Frontend, Backend или IT Project Manager.</p></li>
+      <li><span class="n" aria-hidden="true">02</span><h3>Прочитай ситуацию</h3><p>Короткая вводная из реальной рабочей задачи.</p></li>
+      <li><span class="n" aria-hidden="true">03</span><h3>Ответь на вопросы</h3><p>Сервер проверяет каждый шаг и ведёт дальше.</p></li>
+      <li><span class="n" aria-hidden="true">04</span><h3>Получи результат</h3><p>Баллы, пояснения и ссылка на дорожную карту.</p></li>
+    </ol>
+    <p class="hint">Результат ознакомительный: это не диагноз и не окончательная рекомендация профессии.</p>
+  </div>
+</section>
+
+<section class="section band-navy" id="help">
+  <div class="wrap">
+    <p class="eyebrow">Взаимопомощь</p>
+    <h2 class="h2">Равный равному — и польза для других</h2>
+    <div class="grid-2">
+      <article class="card">
+        <span class="tag">P2P-менторство</span>
+        {{with .Data.Mentor}}
+        <div class="person">
+          <div class="avatar" aria-hidden="true">{{initials .DisplayName}}</div>
+          <div><b>{{.DisplayName}}</b><small>{{.Specialization}} · {{.Level}} · {{.Format}}</small></div>
+        </div>
+        {{end}}
+        <p>Студенты помогают начинающим: выберите наставника, отправьте заявку на консультацию.</p>
+        <a class="btn btn--cta" href="/mentors">Найти наставника</a>
+      </article>
+      <article class="card">
+        <span class="tag">Цифровой волонтёр</span>
+        {{with .Data.Task}}
+        <div class="person">
+          <div><b>{{.Title}}</b><small>Нужные навыки: {{.Skills}} · {{.Scale}}</small></div>
+        </div>
+        {{end}}
+        <p>Небольшие цифровые задачи от социальных и образовательных организаций. Откликнитесь и примените навыки.</p>
+        <a class="btn btn--cta" href="/volunteering">Смотреть задачи</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="roadmaps">
+  <div class="wrap">
+    <p class="eyebrow">Материалы</p>
+    <h2 class="h2">Дорожные карты и статьи — бесплатно</h2>
+    <div class="grid-3">
+      {{range .Data.Roadmaps}}
+      <article class="card">
+        <span class="tag">Roadmap</span>
+        <h3>{{.Title}}</h3>
+        <p>{{.Summary}}</p>
+        <a class="more" href="/roadmaps/{{.Slug}}">Открыть →</a>
+      </article>
+      {{end}}
+      {{range .Data.Articles}}
+      <article class="card">
+        <span class="tag tag--warm">Блог</span>
+        <h3>{{.Title}}</h3>
+        <p>{{.Summary}}</p>
+        <a class="more" href="/blog/{{.Slug}}">Читать →</a>
+      </article>
+      {{end}}
+    </div>
+  </div>
+</section>
+
+<section class="section band" id="about-value">
+  <div class="wrap">
+    <p class="eyebrow">Социальная значимость</p>
+    <h2 class="h2">Зачем нужен GO-IT</h2>
+    <ol class="num-grid">
+      <li><span class="n" aria-hidden="true">01</span><p>Снижает барьер входа в IT за счёт бесплатных структурированных материалов</p></li>
+      <li><span class="n" aria-hidden="true">02</span><p>Знакомит с профессиями через практические ситуации, а не только описания</p></li>
+      <li><span class="n" aria-hidden="true">03</span><p>Развивает культуру взаимного обучения между студентами</p></li>
+      <li><span class="n" aria-hidden="true">04</span><p>Связывает цифровые навыки студентов с задачами социальных организаций</p></li>
+      <li><span class="n" aria-hidden="true">05</span><p>Заботится о доступности: светлая и тёмная темы, высокая контрастность</p></li>
+      <li><span class="n" aria-hidden="true">06</span><p>Развивает способность к самообучению и повышению квалификации</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band-cta">
+  <div class="wrap">
+    <h2 class="h2" style="margin: 0 auto">Готов сделать первый шаг?</h2>
+    <p>Пройди ознакомительный кейс и получи ссылку на подходящую дорожную карту.</p>
+    <a class="btn btn--cta" href="/cases/frontend">Пройти первый кейс</a>
+  </div>
+</section>
+{{end}}

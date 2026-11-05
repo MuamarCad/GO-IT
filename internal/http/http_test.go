@@ -1,0 +1,338 @@
+package web
+
+import (
+	"io"
+	"net/http"
+	"net/http/cookiejar"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"strings"
+	"testing"
+
+	"go-it/internal/cases"
+	"go-it/internal/content"
+	"go-it/internal/http/handlers"
+	"go-it/internal/http/render"
+	"go-it/internal/repository/memory"
+	"go-it/internal/service"
+	"go-it/internal/session"
+)
+
+func testServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	root := moduleRoot(t)
+	if err := os.Chdir(root); err != nil {
+		t.Fatal(err)
+	}
+	r, err := render.New("templates")
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := memory.New()
+	h := &handlers.Server{
+		Render:   r,
+		Sessions: session.New("test-secret"),
+		CaseSvc:  service.NewCaseService(cases.All()),
+		Apps:     service.NewApplicationService(store, store),
+		Catalog:  store,
+		Content:  content.New("content"),
+	}
+	return httptest.NewServer(NewRouter(h, "static"))
+}
+
+func moduleRoot(t *testing.T) string {
+	t.Helper()
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("caller")
+	}
+	return filepath.Clean(filepath.Join(filepath.Dir(file), "..", ".."))
+}
+
+func TestHomeAnd404(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != 200 || !strings.Contains(string(body), "Найди свой") {
+		t.Fatalf("home %d %s", res.StatusCode, body)
+	}
+
+	res404, err := http.Get(ts.URL + "/no-such-page")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res404.Body.Close()
+	if res404.StatusCode != 404 {
+		t.Fatalf("status %d", res404.StatusCode)
+	}
+}
+
+func TestCaseFlowRedirect(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	res, err := client.Get(ts.URL + "/cases/frontend")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	csrf := find(t, string(body), `name="csrf_token" value="([^"]+)"`)
+	q := find(t, string(body), `name="question" value="([^"]+)"`)
+
+	form := url.Values{
+		"csrf_token": {csrf},
+		"question":   {q},
+		"option":     {"q1_b"},
+	}
+	res, err = client.PostForm(ts.URL+"/cases/frontend/answer", form)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.Request.URL.Path != "/cases/frontend" {
+		t.Fatalf("path %s", res.Request.URL.Path)
+	}
+}
+
+func TestMentorApplicationRedirect(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	res, err := client.Get(ts.URL + "/mentors/ivan-frontend")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	csrf := find(t, string(body), `name="csrf_token" value="([^"]+)"`)
+
+	form := url.Values{
+		"csrf_token": {csrf},
+		"name":       {"Анна Тестова"},
+		"contact":    {"anna@example.com"},
+		"message":    {"Нужна помощь"},
+	}
+	res, err = client.PostForm(ts.URL+"/mentors/ivan-frontend/applications", form)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.Request.URL.Query().Get("sent") != "1" {
+		t.Fatalf("expected sent=1, got %s", res.Request.URL.String())
+	}
+}
+
+func TestInvalidFormStaysSafe(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+	res, err := client.Get(ts.URL + "/mentors/ivan-frontend")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	csrf := find(t, string(body), `name="csrf_token" value="([^"]+)"`)
+	form := url.Values{"csrf_token": {csrf}, "name": {"A"}, "contact": {"x"}}
+	res, err = client.PostForm(ts.URL+"/mentors/ivan-frontend/applications", form)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if strings.Contains(string(mustRead(res)), "SQL") {
+		t.Fatal("leaked sql")
+	}
+}
+
+func find(t *testing.T, body, pattern string) string {
+	t.Helper()
+	re := regexp.MustCompile(pattern)
+	m := re.FindStringSubmatch(body)
+	if len(m) < 2 {
+		t.Fatalf("pattern %s not in %s", pattern, body[:min(400, len(body))])
+	}
+	return m[1]
+}
+
+func mustRead(res *http.Response) []byte {
+	b, _ := io.ReadAll(res.Body)
+	return b
+}
+
+func get(t *testing.T, client *http.Client, u string) (int, string) {
+	t.Helper()
+	res, err := client.Get(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	return res.StatusCode, string(mustRead(res))
+}
+
+// Все страницы отдаются, собираются из base.html и не содержат следов шаблонных ошибок.
+func TestAllPagesRender(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	client := &http.Client{Jar: func() *cookiejar.Jar { j, _ := cookiejar.New(nil); return j }()}
+
+	pages := []string{
+		"/", "/about", "/directions", "/directions/frontend", "/directions/backend", "/directions/project-manager",
+		"/cases", "/cases/frontend", "/mentors", "/mentors?dir=Backend", "/mentors?dir=Nope", "/mentors/ivan-frontend",
+		"/volunteering", "/volunteering/nko-landing", "/roadmaps", "/roadmaps/frontend", "/roadmaps/backend",
+		"/roadmaps/project-manager", "/blog", "/blog/first-steps-in-it", "/blog/how-to-build-a-pet-project",
+	}
+	for _, p := range pages {
+		status, body := get(t, client, ts.URL+p)
+		if status != http.StatusOK {
+			t.Errorf("%s: статус %d", p, status)
+			continue
+		}
+		for _, bad := range []string{"ZgotmplZ", "<no value>", "%!"} {
+			if strings.Contains(body, bad) {
+				t.Errorf("%s: в HTML найдено %q", p, bad)
+			}
+		}
+		for _, want := range []string{`<main id="main">`, `class="skip-link"`, `/static/js/theme-init.js`, `aria-label="Основная навигация"`} {
+			if !strings.Contains(body, want) {
+				t.Errorf("%s: нет %q", p, want)
+			}
+		}
+		if strings.Contains(body, "unpkg.com") {
+			t.Errorf("%s: внешний CDN не нужен, HTMX лежит в static", p)
+		}
+	}
+
+	status, body := get(t, client, ts.URL+"/no-such-page")
+	if status != http.StatusNotFound || !strings.Contains(body, "Страница не найдена") || !strings.Contains(body, `<main id="main">`) {
+		t.Errorf("404 должна быть оформленной страницей, статус %d", status)
+	}
+}
+
+func TestDirectionWithoutCaseHidesCTA(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	client := &http.Client{}
+
+	_, backend := get(t, client, ts.URL+"/directions/backend")
+	if strings.Contains(backend, `href="/cases/`) || !strings.Contains(backend, "в разработке") {
+		t.Fatal("у Backend нет кейса: кнопка «Пройти кейс» не должна вести на чужой кейс")
+	}
+	_, front := get(t, client, ts.URL+"/directions/frontend")
+	if !strings.Contains(front, `href="/cases/frontend"`) {
+		t.Fatal("у Frontend кнопка кейса должна быть")
+	}
+}
+
+func TestMentorsFilter(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	client := &http.Client{}
+
+	_, body := get(t, client, ts.URL+"/mentors?dir=Backend")
+	if !strings.Contains(body, "Дарья") || strings.Contains(body, "Иван С.") {
+		t.Fatal("фильтр Backend должен оставить только Backend-менторов")
+	}
+	_, empty := get(t, client, ts.URL+"/mentors?dir=Nope")
+	if !strings.Contains(empty, "пока нет") {
+		t.Fatal("для пустого фильтра нужно пустое состояние")
+	}
+}
+
+func TestInvalidFormShowsFieldErrors(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	_, body := get(t, client, ts.URL+"/volunteering/nko-landing")
+	csrf := find(t, body, `name="csrf_token" value="([^"]+)"`)
+	res, err := client.PostForm(ts.URL+"/volunteering/nko-landing/applications", url.Values{
+		"csrf_token": {csrf}, "name": {"A"}, "contact": {""}, "message": {"привет"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	page := string(mustRead(res))
+	if res.StatusCode != http.StatusUnprocessableEntity {
+		t.Fatalf("ожидали 422, получили %d", res.StatusCode)
+	}
+	for _, want := range []string{"Введите имя", "Укажите контакт", `aria-invalid="true"`, `value="A"`, "привет"} {
+		if !strings.Contains(page, want) {
+			t.Errorf("в ответе нет %q", want)
+		}
+	}
+}
+
+func TestForeignCSRFShowsErrorPage(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	res, err := http.PostForm(ts.URL+"/mentors/ivan-frontend/applications", url.Values{"csrf_token": {"bad"}, "name": {"Анна"}, "contact": {"a@b.c"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	page := string(mustRead(res))
+	if res.StatusCode != http.StatusForbidden || !strings.Contains(page, "Сессия устарела") || !strings.Contains(page, `<main id="main">`) {
+		t.Fatalf("403 должна быть оформленной страницей, статус %d", res.StatusCode)
+	}
+}
+
+func TestRoadmapLinksToCaseOnlyWhenItExists(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	client := &http.Client{}
+
+	_, front := get(t, client, ts.URL+"/roadmaps/frontend")
+	if !strings.Contains(front, `data-roadmap="frontend"`) || !strings.Contains(front, `href="/cases/frontend"`) {
+		t.Fatal("roadmap Frontend: нужен data-roadmap и ссылка на кейс")
+	}
+	_, back := get(t, client, ts.URL+"/roadmaps/backend")
+	if strings.Contains(back, `href="/cases/`) {
+		t.Fatal("roadmap Backend не должен вести на кейс, которого нет")
+	}
+}
+
+func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	correct := map[string]string{"q1": "q1_b", "q2": "q2_b", "q3": "q3_b", "q4": "q4_b"}
+	_, body := get(t, client, ts.URL+"/cases/frontend")
+	for step := 0; step < 4; step++ {
+		if !strings.Contains(body, `role="progressbar"`) || !strings.Contains(body, `<span class="letter"`) {
+			t.Fatalf("шаг %d: нет прогресса или букв вариантов", step+1)
+		}
+		csrf := find(t, body, `name="csrf_token" value="([^"]+)"`)
+		q := find(t, body, `name="question" value="([^"]+)"`)
+		res, err := client.PostForm(ts.URL+"/cases/frontend/answer", url.Values{"csrf_token": {csrf}, "question": {q}, "option": {correct[q]}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		body = string(mustRead(res))
+		res.Body.Close()
+	}
+	for _, want := range []string{"4 из 4", "По темам", "Доступность форм", "Пройти заново", `href="/roadmaps/frontend"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("на странице результата нет %q", want)
+		}
+	}
+}

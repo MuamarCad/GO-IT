@@ -1,0 +1,19 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="/mentors">Менторы</a><span aria-hidden="true">/</span><span aria-current="page">{{.Data.Mentor.DisplayName}}</span></nav>
+  </header>
+  <div class="split">
+    <article class="prose" style="padding:0">
+      <div class="person">
+        <div class="avatar" aria-hidden="true">{{initials .Data.Mentor.DisplayName}}</div>
+        <div><p class="eyebrow" style="margin:0">Наставник</p><h1 style="margin:0;font-size:1.8rem">{{.Data.Mentor.DisplayName}}</h1></div>
+      </div>
+      <p><span class="tag">{{.Data.Mentor.Specialization}}</span> <span class="tag">{{.Data.Mentor.Level}}</span> <span class="tag">{{.Data.Mentor.Format}}</span></p>
+      <p><strong>Темы:</strong> {{.Data.Mentor.Topics}}</p>
+      <p>{{.Data.Mentor.Description}}</p>
+    </article>
+    {{template "application_form" dict "Action" (printf "/mentors/%s/applications" .Data.Mentor.Slug) "Title" "Заявка на консультацию" "Submit" "Отправить заявку" "SentText" "Заявка сохранена." "Form" .Data.Form "CSRF" .CSRF}}
+  </div>
+</div>
+{{end}}

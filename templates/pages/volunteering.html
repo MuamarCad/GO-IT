@@ -1,0 +1,23 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Цифровой волонтёр</p>
+    <h1 class="h1">Небольшие задачи от организаций</h1>
+    <p class="lead">Демонстрационный каталог. Отклик сохраняется в PostgreSQL.</p>
+  </header>
+  {{if .Data}}
+  <div class="grid-2" style="padding-bottom:80px">
+    {{range .Data}}
+    <article class="card">
+      <span class="tag">{{.Organization}}</span>
+      <h2>{{.Title}}</h2>
+      <p>Навыки: {{.Skills}} · {{.Scale}}</p>
+      <a class="more" href="/volunteering/{{.Slug}}">Смотреть задачу →</a>
+    </article>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="empty"><h2>Задач пока нет</h2><p>Загляните позже или найдите <a href="/mentors">наставника</a>.</p></div>
+  {{end}}
+</div>
+{{end}}

@@ -1,0 +1,24 @@
+{{define "content"}}
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Первый кейс</p>
+    <h1 class="h1">Попробуй профессию за несколько минут</h1>
+    <p class="lead">Короткая рабочая ситуация и несколько вопросов. Ответы проверяет сервер, в конце — баллы, пояснения и ссылка на дорожную карту.</p>
+  </header>
+  {{if .Data}}
+  <div class="grid-2" style="padding-bottom:80px">
+    {{range .Data}}
+    <article class="card">
+      <span class="tag">{{capfirst .Profession}}</span>
+      <h2>{{.Title}}</h2>
+      <p>{{.Intro}}</p>
+      <p class="hint" style="margin-top:0">Вопросов: {{len .Questions}} · около 3 минут</p>
+      <a class="btn btn--cta" href="/cases/{{.Slug}}">Начать</a>
+    </article>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="empty"><h2>Кейсы скоро появятся</h2><p>Пока загляните в <a href="/roadmaps">дорожные карты</a>.</p></div>
+  {{end}}
+</div>
+{{end}}

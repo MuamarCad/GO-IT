@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -50,15 +51,28 @@ func (l *Loader) Roadmaps() ([]domain.Roadmap, error) {
 	return items, nil
 }
 
+const (
+	maxSummaryRunes = 400
+	maxNodeLinks    = 5
+)
+
+var nodeID = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
+
 type diagramFile struct {
 	Stages []struct {
 		Title  string `json:"title"`
 		Note   string `json:"note"`
 		Choose bool   `json:"choose"`
 		Nodes  []struct {
-			Title string `json:"title"`
-			Kind  string `json:"kind"`
-			Href  string `json:"href"`
+			ID      string `json:"id"`
+			Title   string `json:"title"`
+			Kind    string `json:"kind"`
+			Href    string `json:"href"`
+			Summary string `json:"summary"`
+			Links   []struct {
+				Title string `json:"title"`
+				URL   string `json:"url"`
+			} `json:"links"`
 		} `json:"nodes"`
 	} `json:"stages"`
 }
@@ -83,6 +97,7 @@ func (l *Loader) loadDiagram(slug string) (*domain.Diagram, error) {
 		return nil, fmt.Errorf("нет этапов")
 	}
 	d := &domain.Diagram{}
+	seen := map[string]bool{}
 	for si, s := range f.Stages {
 		if strings.TrimSpace(s.Title) == "" {
 			return nil, fmt.Errorf("этап %d: пустое название", si+1)
@@ -105,7 +120,30 @@ func (l *Loader) loadDiagram(slug string) (*domain.Diagram, error) {
 			if n.Href != "" && !strings.HasPrefix(n.Href, "/") && !strings.HasPrefix(n.Href, "https://") {
 				return nil, fmt.Errorf("узел %q: ссылка должна начинаться с / или https://", n.Title)
 			}
-			stage.Nodes = append(stage.Nodes, domain.DiagramNode{Title: n.Title, Kind: kind, Href: n.Href})
+			if !nodeID.MatchString(n.ID) {
+				return nil, fmt.Errorf("узел %q: id должен состоять из латинских строчных букв, цифр и дефисов", n.Title)
+			}
+			if seen[n.ID] {
+				return nil, fmt.Errorf("узел %q: id %q повторяется", n.Title, n.ID)
+			}
+			seen[n.ID] = true
+			if n.Href != "" && n.Summary != "" {
+				return nil, fmt.Errorf("узел %q: нельзя задавать и href, и summary", n.Title)
+			}
+			if len([]rune(n.Summary)) > maxSummaryRunes {
+				return nil, fmt.Errorf("узел %q: summary длиннее %d символов", n.Title, maxSummaryRunes)
+			}
+			if len(n.Links) > maxNodeLinks {
+				return nil, fmt.Errorf("узел %q: больше %d ссылок", n.Title, maxNodeLinks)
+			}
+			node := domain.DiagramNode{ID: n.ID, Title: n.Title, Kind: kind, Href: n.Href, Summary: strings.TrimSpace(n.Summary)}
+			for _, lk := range n.Links {
+				if strings.TrimSpace(lk.Title) == "" || !strings.HasPrefix(lk.URL, "https://") {
+					return nil, fmt.Errorf("узел %q: у ссылки нужны название и адрес на https://", n.Title)
+				}
+				node.Links = append(node.Links, domain.Link{Title: lk.Title, URL: lk.URL})
+			}
+			stage.Nodes = append(stage.Nodes, node)
 		}
 		d.Stages = append(d.Stages, stage)
 	}

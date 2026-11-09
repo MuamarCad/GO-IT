@@ -361,3 +361,37 @@ func TestRoadmapDiagramRendered(t *testing.T) {
 		}
 	}
 }
+
+func TestRoadmapTopicPanel(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	_, body := get(t, &http.Client{}, ts.URL+"/roadmaps/frontend")
+
+	for _, want := range []string{
+		`<dialog class="rm-panel" id="rm-panel"`,    // панель
+		`data-topic="t-html-semantic"`,              // узел открывает панель
+		`href="#t-html-semantic"`,                   // запасной якорь без JS
+		`id="t-html-semantic"`,                      // справочник тем
+		`target="_blank" rel="noopener noreferrer"`, // внешние ссылки безопасны
+		"developer.mozilla.org",                     // домен показывается
+		"(откроется в новой вкладке)",               // подсказка для скринридера
+		`data-panel-close`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("нет %q", want)
+		}
+	}
+	// Узел-ссылка (волонтёрство) остаётся обычной ссылкой, а не открывает панель.
+	if strings.Contains(body, `data-topic="t-volunteering"`) || !strings.Contains(body, `href="/volunteering"`) {
+		t.Error("узел волонтёрства должен быть обычной ссылкой")
+	}
+	if strings.Contains(body, "javascript:") {
+		t.Error("javascript: в ссылках недопустим")
+	}
+	// Для каждого узла с панелью есть и якорь, и статья справочника.
+	anchors := strings.Count(body, `data-topic="t-`)
+	articles := strings.Count(body, `class="rm-topic"`)
+	if anchors == 0 || anchors != articles {
+		t.Errorf("узлов с панелью %d, статей справочника %d", anchors, articles)
+	}
+}

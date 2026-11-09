@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
@@ -100,6 +101,7 @@ func funcs() template.FuncMap {
 		"ruDate":   ruDate,
 		"dict":     dict,
 		"kindName": kindName,
+		"host":     host,
 	}
 }
 
@@ -186,4 +188,13 @@ func kindName(kind string) string {
 		return "По желанию"
 	}
 	return ""
+}
+
+// host возвращает домен ссылки для подписи («developer.mozilla.org»); при ошибке разбора — пустую строку.
+func host(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimPrefix(u.Hostname(), "www.")
 }

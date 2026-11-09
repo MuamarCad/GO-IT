@@ -431,3 +431,35 @@ a.rm-node-body:hover { background: var(--primary); color: var(--primary-ink); bo
 @media (max-width: 860px) {
   .rm-stage { grid-template-columns: 1fr; padding: 20px; }
 }
+
+/* ---------- Боковая панель темы ---------- */
+a.rm-node-body[data-topic] { cursor: pointer; }
+.rm-topics { margin-top: 56px; }
+.rm-topic { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px 24px; margin-top: 16px; max-width: 46rem; }
+.rm-topic h3 { font-size: 1.1rem; margin: 0 0 8px; }
+.rm-topic-summary { margin: 0 0 12px; }
+.rm.rm-enhanced .rm-topics { display: none; }
+
+.rm-links-title { font-weight: 700; margin: 0 0 8px; }
+.rm-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rm-links a { display: grid; gap: 2px; padding: 10px 14px; border: 2px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); text-decoration: none; color: var(--text); }
+.rm-links a:hover { background: var(--accent-bg); border-color: var(--primary); }
+.rm-link-title { font-weight: 600; color: var(--primary); }
+.rm-links small { color: var(--muted); font-size: 0.85rem; }
+
+dialog.rm-panel {
+  position: fixed; inset: 0 0 0 auto; margin: 0; padding: 0;
+  width: min(30rem, 100%); max-width: 100%; height: 100%; max-height: none;
+  border: 0; border-left: 2px solid var(--border-strong);
+  background: var(--surface); color: var(--text);
+  box-shadow: -16px 0 40px rgba(0, 0, 0, 0.25); overflow-y: auto;
+}
+dialog.rm-panel[open] { animation: rm-slide 0.2s ease-out; }
+dialog.rm-panel::backdrop { background: rgba(7, 11, 24, 0.6); }
+@keyframes rm-slide { from { transform: translateX(32px); opacity: 0; } to { transform: none; opacity: 1; } }
+:root:has(dialog.rm-panel[open]) { overflow: hidden; }
+.rm-panel-head { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.rm-panel-inner { padding: 20px 24px 40px; }
+.rm-panel-title { font-size: 1.4rem; margin: 0 0 14px; }
+.rm-panel-title:focus { outline: none; }
+.rm-panel .rm-topic-summary { font-size: 1.02rem; }

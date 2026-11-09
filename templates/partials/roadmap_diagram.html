@@ -1,7 +1,7 @@
 {{define "roadmap_diagram"}}
 <section class="rm" aria-labelledby="rm-title">
   <h2 class="h2" id="rm-title">Схема маршрута</h2>
-  <p class="rm-lead">Идите по этапам сверху вниз. Узлы — темы, которые стоит освоить на этом этапе.</p>
+  <p class="rm-lead">Идите по этапам сверху вниз. Нажмите на тему, чтобы увидеть краткое описание и ссылки на материалы.</p>
   <ul class="rm-legend" aria-label="Обозначения">
     <li><span class="rm-swatch rm-swatch--core" aria-hidden="true"></span>Основа</li>
     <li><span class="rm-swatch rm-swatch--also" aria-hidden="true"></span>На выбор</li>
@@ -20,6 +20,7 @@
         {{range $s.Nodes}}
         <li class="rm-node rm-node--{{.Kind}}">
           {{if .Href}}<a class="rm-node-body" href="{{.Href}}"><span class="visually-hidden">{{kindName .Kind}}: </span>{{.Title}} <span aria-hidden="true">→</span></a>
+          {{else if .Summary}}<a class="rm-node-body" href="#t-{{.ID}}" data-topic="t-{{.ID}}" aria-haspopup="dialog"><span class="visually-hidden">{{kindName .Kind}}: </span>{{.Title}}</a>
           {{else}}<span class="rm-node-body"><span class="visually-hidden">{{kindName .Kind}}: </span>{{.Title}}</span>{{end}}
         </li>
         {{end}}
@@ -27,5 +28,39 @@
     </li>
     {{end}}
   </ol>
+
+  {{/* Справочник тем: без JS это обычный текст под схемой (узлы ведут сюда по якорям),
+       с JS блок скрыт, а его содержимое показывается в боковой панели. */}}
+  <div class="rm-topics" id="rm-topics">
+    <h2 class="h2" id="rm-topics-title">Справочник тем</h2>
+    {{range $s := .Stages}}{{range $s.Nodes}}{{if .Summary}}
+    <article class="rm-topic" id="t-{{.ID}}" data-stage="{{$s.Title}}" data-kind="{{kindName .Kind}}" aria-labelledby="t-{{.ID}}-h">
+      <h3 id="t-{{.ID}}-h">{{.Title}}</h3>
+      <p class="rm-topic-summary">{{.Summary}}</p>
+      {{if .Links}}
+      <div class="rm-topic-links">
+        <p class="rm-links-title">Материалы</p>
+        <ul class="rm-links">
+          {{range .Links}}<li><a href="{{.URL}}" target="_blank" rel="noopener noreferrer"><span class="rm-link-title">{{.Title}}</span><small>{{host .URL}}</small><span class="visually-hidden"> (откроется в новой вкладке)</span></a></li>{{end}}
+        </ul>
+      </div>
+      {{end}}
+    </article>
+    {{end}}{{end}}{{end}}
+  </div>
+
+  <dialog class="rm-panel" id="rm-panel" aria-labelledby="rm-panel-title">
+    <div class="rm-panel-head">
+      <span class="tag" data-panel-kind></span>
+      <button type="button" class="icon-btn" data-panel-close aria-label="Закрыть панель">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="rm-panel-inner">
+      <p class="eyebrow" data-panel-stage></p>
+      <h2 class="h3 rm-panel-title" id="rm-panel-title" tabindex="-1"></h2>
+      <div data-panel-body></div>
+    </div>
+  </dialog>
 </section>
 {{end}}

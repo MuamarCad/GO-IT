@@ -148,10 +148,21 @@ type DiagramStage struct {
 	Nodes  []DiagramNode
 }
 
+// DiagramNode — тема на схеме. Если задан Summary, по клику открывается боковая панель
+// с кратким описанием и ссылками на материалы. Если задан Href, узел просто ведёт по ссылке.
 type DiagramNode struct {
+	ID      string // стабильный идентификатор, используется в адресе #t-<id>
+	Title   string
+	Kind    string
+	Href    string
+	Summary string
+	Links   []Link
+}
+
+// Link — ссылка на внешний материал по теме.
+type Link struct {
 	Title string
-	Kind  string
-	Href  string // если задан, узел показывается ссылкой (потом — переход к материалам)
+	URL   string
 }
 
 type Article struct {

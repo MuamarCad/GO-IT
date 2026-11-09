@@ -20,6 +20,7 @@
 - Дизайн-токены (палитра, шрифты) — в начале `static/css/app.css`. Источник: макет лендинга `draft/Main.dc.html`. Темы: светлая, тёмная, высокая контрастность (атрибуты `data-theme` и `data-contrast` на `<html>`).
 - Шрифты Unbounded и Onest, а также HTMX лежат в `static/` (лицензии рядом), внешних CDN нет.
 - `static/js/theme-init.js` подключается в `<head>` синхронно (применяет тему до отрисовки), `static/js/theme.js` — с `defer`.
+- Схема roadmap — данные в `content/roadmaps/<slug>.diagram.json` (этапы → узлы; вид узла `core`/`also`/`optional`; `choose: true` для этапа «выберите один»). Рендерится обычным HTML (`templates/partials/roadmap_diagram.html`), поэтому работает со всеми темами и клавиатурой. Чтобы узел стал ссылкой на материал, задайте ему `"href"`. Формат проверяется при загрузке и в `internal/content/loader_test.go`.
 - Кейс есть только у направления Frontend; у остальных направлений кнопка кейса скрыта (`CaseSlug: ""` в `internal/catalog`).
 
 ## Запуск через Docker Compose

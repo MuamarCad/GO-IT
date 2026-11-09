@@ -1,0 +1,213 @@
+{
+ "stages": [
+  {
+   "title": "Как устроен веб",
+   "note": "Без этой картины дальше всё кажется магией.",
+   "nodes": [
+    {
+     "title": "Браузер и запрос страницы",
+     "kind": "core"
+    },
+    {
+     "title": "URL, HTTP и коды ответа",
+     "kind": "core"
+    },
+    {
+     "title": "Клиент и сервер",
+     "kind": "core"
+    },
+    {
+     "title": "DevTools: Elements, Network, Console",
+     "kind": "core"
+    }
+   ]
+  },
+  {
+   "title": "HTML",
+   "note": "Разметка — основа любой страницы.",
+   "nodes": [
+    {
+     "title": "Семантические теги",
+     "kind": "core"
+    },
+    {
+     "title": "Ссылки, списки, таблицы",
+     "kind": "core"
+    },
+    {
+     "title": "Формы и поля ввода",
+     "kind": "core"
+    },
+    {
+     "title": "Доступность: подписи, alt, порядок заголовков",
+     "kind": "core"
+    },
+    {
+     "title": "Метаданные и SEO-основы",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "CSS",
+   "note": "От «поехало» к управляемой вёрстке.",
+   "nodes": [
+    {
+     "title": "Каскад и специфичность",
+     "kind": "core"
+    },
+    {
+     "title": "Блочная модель",
+     "kind": "core"
+    },
+    {
+     "title": "Flexbox",
+     "kind": "core"
+    },
+    {
+     "title": "Grid",
+     "kind": "core"
+    },
+    {
+     "title": "Адаптивность и медиазапросы",
+     "kind": "core"
+    },
+    {
+     "title": "Переменные и темы оформления",
+     "kind": "core"
+    },
+    {
+     "title": "Анимации и переходы",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "JavaScript",
+   "note": "Сначала язык, потом библиотеки.",
+   "nodes": [
+    {
+     "title": "Переменные, типы, функции",
+     "kind": "core"
+    },
+    {
+     "title": "Массивы и объекты",
+     "kind": "core"
+    },
+    {
+     "title": "DOM и события",
+     "kind": "core"
+    },
+    {
+     "title": "fetch и асинхронность",
+     "kind": "core"
+    },
+    {
+     "title": "Модули",
+     "kind": "core"
+    },
+    {
+     "title": "Работа с ошибками и отладка",
+     "kind": "core"
+    }
+   ]
+  },
+  {
+   "title": "Инструменты",
+   "nodes": [
+    {
+     "title": "Терминал",
+     "kind": "core"
+    },
+    {
+     "title": "Git и GitHub",
+     "kind": "core"
+    },
+    {
+     "title": "npm и менеджеры пакетов",
+     "kind": "core"
+    },
+    {
+     "title": "Линтер и форматтер",
+     "kind": "also"
+    },
+    {
+     "title": "Сборщик (Vite и аналоги)",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "Фреймворк",
+   "note": "Фреймворк — следующий шаг, а не начало. Выберите один.",
+   "choose": true,
+   "nodes": [
+    {
+     "title": "React",
+     "kind": "also"
+    },
+    {
+     "title": "Vue",
+     "kind": "also"
+    },
+    {
+     "title": "Svelte",
+     "kind": "also"
+    },
+    {
+     "title": "Без фреймворка: HTML с сервера + HTMX",
+     "kind": "also"
+    }
+   ]
+  },
+  {
+   "title": "Качество",
+   "nodes": [
+    {
+     "title": "Проверка клавиатурой и скринридером",
+     "kind": "core"
+    },
+    {
+     "title": "Контраст и тёмная тема",
+     "kind": "core"
+    },
+    {
+     "title": "Базовая безопасность: XSS, CSP",
+     "kind": "core"
+    },
+    {
+     "title": "Производительность загрузки",
+     "kind": "core"
+    },
+    {
+     "title": "Автотесты интерфейса",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "Практика",
+   "note": "Знания закрепляются в деле.",
+   "nodes": [
+    {
+     "title": "Мини-проект: страница с формой",
+     "kind": "core"
+    },
+    {
+     "title": "Портфолио на GitHub",
+     "kind": "core"
+    },
+    {
+     "title": "Волонтёрская задача",
+     "kind": "core",
+     "href": "/volunteering"
+    },
+    {
+     "title": "Консультация наставника",
+     "kind": "core",
+     "href": "/mentors"
+    }
+   ]
+  }
+ ]
+}

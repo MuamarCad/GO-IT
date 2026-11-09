@@ -41,3 +41,4 @@
 - [Go Tour](https://go.dev/tour/)
 - [Go net/http](https://pkg.go.dev/net/http)
 - [PostgreSQL tutorial](https://www.postgresql.org/docs/current/tutorial.html)
+- [roadmap.sh — большие интерактивные карты по профессиям](https://roadmap.sh/) (на английском; для сравнения и дальнейшего чтения)

@@ -99,6 +99,7 @@ func funcs() template.FuncMap {
 		"capfirst": capfirst,
 		"ruDate":   ruDate,
 		"dict":     dict,
+		"kindName": kindName,
 	}
 }
 
@@ -172,4 +173,17 @@ func dict(pairs ...any) (map[string]any, error) {
 		m[k] = pairs[i+1]
 	}
 	return m, nil
+}
+
+// kindName — подпись вида узла схемы. Нужна и в легенде, и для скринридеров (вид не должен передаваться только цветом).
+func kindName(kind string) string {
+	switch kind {
+	case "core":
+		return "Основа"
+	case "also":
+		return "На выбор"
+	case "optional":
+		return "По желанию"
+	}
+	return ""
 }

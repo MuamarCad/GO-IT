@@ -120,10 +120,38 @@ type Application struct {
 }
 
 type Roadmap struct {
-	Slug    string
-	Title   string
-	Summary string
-	HTML    string
+	Slug      string
+	Title     string
+	Summary   string
+	HTML      string
+	IntroHTML string   // заголовок и вводный текст до первого <h2>
+	BodyHTML  string   // остальные разделы
+	Diagram   *Diagram // nil, если схемы нет
+}
+
+// Узлы схемы.
+const (
+	NodeCore     = "core"     // основа, без неё дальше трудно
+	NodeAlso     = "also"     // вариант на выбор
+	NodeOptional = "optional" // по желанию
+)
+
+// Diagram — визуальная схема маршрута: последовательные этапы, в каждом несколько тем.
+type Diagram struct {
+	Stages []DiagramStage
+}
+
+type DiagramStage struct {
+	Title  string
+	Note   string
+	Choose bool // из узлов этапа достаточно выбрать один
+	Nodes  []DiagramNode
+}
+
+type DiagramNode struct {
+	Title string
+	Kind  string
+	Href  string // если задан, узел показывается ссылкой (потом — переход к материалам)
 }
 
 type Article struct {

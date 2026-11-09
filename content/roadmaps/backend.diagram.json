@@ -1,0 +1,228 @@
+{
+ "stages": [
+  {
+   "title": "Основы",
+   "note": "Сервер — это программа, которая отвечает на запросы.",
+   "nodes": [
+    {
+     "title": "Как устроен интернет и HTTP",
+     "kind": "core"
+    },
+    {
+     "title": "Клиент-сервер, запрос-ответ",
+     "kind": "core"
+    },
+    {
+     "title": "Командная строка",
+     "kind": "core"
+    },
+    {
+     "title": "Git и GitHub",
+     "kind": "core"
+    },
+    {
+     "title": "Текстовый редактор или IDE",
+     "kind": "core"
+    }
+   ]
+  },
+  {
+   "title": "Язык программирования",
+   "note": "Главное — довести один язык до рабочего приложения.",
+   "choose": true,
+   "nodes": [
+    {
+     "title": "Go (пример GO-IT)",
+     "kind": "also"
+    },
+    {
+     "title": "Python",
+     "kind": "also"
+    },
+    {
+     "title": "Java / Kotlin",
+     "kind": "also"
+    },
+    {
+     "title": "C#",
+     "kind": "also"
+    },
+    {
+     "title": "JavaScript / Node.js",
+     "kind": "also"
+    }
+   ]
+  },
+  {
+   "title": "Веб-сервер",
+   "note": "Запрос пришёл, данные проверили, ответ ушёл.",
+   "nodes": [
+    {
+     "title": "Маршрутизация",
+     "kind": "core"
+    },
+    {
+     "title": "Обработка форм и валидация",
+     "kind": "core"
+    },
+    {
+     "title": "Шаблоны страниц",
+     "kind": "core"
+    },
+    {
+     "title": "Сессии и cookies",
+     "kind": "core"
+    },
+    {
+     "title": "Middleware: логи, лимиты, защита",
+     "kind": "core"
+    }
+   ]
+  },
+  {
+   "title": "Данные",
+   "nodes": [
+    {
+     "title": "Реляционная модель и SQL",
+     "kind": "core"
+    },
+    {
+     "title": "PostgreSQL",
+     "kind": "core"
+    },
+    {
+     "title": "Миграции схемы",
+     "kind": "core"
+    },
+    {
+     "title": "Транзакции и индексы",
+     "kind": "core"
+    },
+    {
+     "title": "Кэш и NoSQL",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "API",
+   "nodes": [
+    {
+     "title": "REST: ресурсы и методы",
+     "kind": "core"
+    },
+    {
+     "title": "JSON и версионирование",
+     "kind": "core"
+    },
+    {
+     "title": "Аутентификация и авторизация",
+     "kind": "core"
+    },
+    {
+     "title": "Документация OpenAPI",
+     "kind": "optional"
+    },
+    {
+     "title": "gRPC / GraphQL",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "Надёжность",
+   "note": "Сервер не должен доверять браузеру.",
+   "nodes": [
+    {
+     "title": "Обработка ошибок",
+     "kind": "core"
+    },
+    {
+     "title": "Unit-тесты",
+     "kind": "core"
+    },
+    {
+     "title": "Логи без персональных данных",
+     "kind": "core"
+    },
+    {
+     "title": "Конфигурация и секреты",
+     "kind": "core"
+    },
+    {
+     "title": "Интеграционные тесты",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "Безопасность",
+   "nodes": [
+    {
+     "title": "Параметризованные запросы против SQL-инъекций",
+     "kind": "core"
+    },
+    {
+     "title": "CSRF-защита форм",
+     "kind": "core"
+    },
+    {
+     "title": "Экранирование вывода (XSS)",
+     "kind": "core"
+    },
+    {
+     "title": "Безопасное хранение паролей",
+     "kind": "core"
+    },
+    {
+     "title": "Лимиты на размер запроса",
+     "kind": "core"
+    }
+   ]
+  },
+  {
+   "title": "Поставка",
+   "nodes": [
+    {
+     "title": "Docker",
+     "kind": "core"
+    },
+    {
+     "title": "Docker Compose",
+     "kind": "core"
+    },
+    {
+     "title": "CI: автозапуск тестов",
+     "kind": "core"
+    },
+    {
+     "title": "Развёртывание на сервере",
+     "kind": "optional"
+    }
+   ]
+  },
+  {
+   "title": "Практика",
+   "nodes": [
+    {
+     "title": "Мини-проект: сохранение заявки в БД",
+     "kind": "core"
+    },
+    {
+     "title": "Тесты ключевой логики",
+     "kind": "core"
+    },
+    {
+     "title": "Волонтёрская задача",
+     "kind": "core",
+     "href": "/volunteering"
+    },
+    {
+     "title": "Консультация наставника",
+     "kind": "core",
+     "href": "/mentors"
+    }
+   ]
+  }
+ ]
+}

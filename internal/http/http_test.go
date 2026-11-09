@@ -336,3 +336,28 @@ func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
 		}
 	}
 }
+
+func TestRoadmapDiagramRendered(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	client := &http.Client{}
+
+	for _, slug := range []string{"frontend", "backend", "project-manager"} {
+		_, body := get(t, client, ts.URL+"/roadmaps/"+slug)
+		if n := strings.Count(body, `class="rm-stage"`); n < 6 {
+			t.Errorf("%s: этапов схемы %d, ожидали не меньше 6", slug, n)
+		}
+		for _, want := range []string{`class="rm-flow"`, "rm-node--core", "Выберите один", `href="/volunteering"`, `href="/mentors"`, "Основа: "} {
+			if !strings.Contains(body, want) {
+				t.Errorf("%s: в схеме нет %q", slug, want)
+			}
+		}
+		// схема стоит между введением и разделами, а чек-лист и оглавление остаются в основной части
+		if strings.Index(body, `class="rm-flow"`) < strings.Index(body, "<h1") || strings.Index(body, `class="rm-flow"`) > strings.Index(body, `data-roadmap="`+slug+`"`) {
+			t.Errorf("%s: схема стоит не на своём месте", slug)
+		}
+		if strings.Count(body, "<h1") != 1 {
+			t.Errorf("%s: на странице должен быть ровно один h1", slug)
+		}
+	}
+}

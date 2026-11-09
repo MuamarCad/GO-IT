@@ -1,0 +1,31 @@
+{{define "roadmap_diagram"}}
+<section class="rm" aria-labelledby="rm-title">
+  <h2 class="h2" id="rm-title">Схема маршрута</h2>
+  <p class="rm-lead">Идите по этапам сверху вниз. Узлы — темы, которые стоит освоить на этом этапе.</p>
+  <ul class="rm-legend" aria-label="Обозначения">
+    <li><span class="rm-swatch rm-swatch--core" aria-hidden="true"></span>Основа</li>
+    <li><span class="rm-swatch rm-swatch--also" aria-hidden="true"></span>На выбор</li>
+    <li><span class="rm-swatch rm-swatch--optional" aria-hidden="true"></span>По желанию</li>
+  </ul>
+  <ol class="rm-flow">
+    {{range $i, $s := .Stages}}
+    <li class="rm-stage">
+      <div class="rm-stage-head">
+        <span class="rm-num" aria-hidden="true">{{add $i 1}}</span>
+        <h3>{{$s.Title}}</h3>
+        {{if $s.Choose}}<span class="tag">Выберите один</span>{{end}}
+        {{if $s.Note}}<p>{{$s.Note}}</p>{{end}}
+      </div>
+      <ul class="rm-nodes">
+        {{range $s.Nodes}}
+        <li class="rm-node rm-node--{{.Kind}}">
+          {{if .Href}}<a class="rm-node-body" href="{{.Href}}"><span class="visually-hidden">{{kindName .Kind}}: </span>{{.Title}} <span aria-hidden="true">→</span></a>
+          {{else}}<span class="rm-node-body"><span class="visually-hidden">{{kindName .Kind}}: </span>{{.Title}}</span>{{end}}
+        </li>
+        {{end}}
+      </ul>
+    </li>
+    {{end}}
+  </ol>
+</section>
+{{end}}

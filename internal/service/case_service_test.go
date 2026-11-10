@@ -180,15 +180,15 @@ func TestResultTopicBreakdown(t *testing.T) {
 	}
 	// Проходим все 20 вопросов: q1, q3, q5, q7 — верно; остальные — неверно
 	picks := []struct{ q, o string }{
-		{"q1", "q1_b"},  // верно
-		{"q2", "q2_a"},  // неверно
-		{"q3", "q3_a"},  // верно
-		{"q4", "q4_b"},  // неверно
-		{"q5", "q5_a"},  // верно
-		{"q6", "q6_a"},  // неверно
-		{"q7", "q7_a"},  // верно
-		{"q8", "q8_b"},  // неверно
-		{"q9", "q9_b"},  // неверно
+		{"q1", "q1_b"},   // верно
+		{"q2", "q2_a"},   // неверно
+		{"q3", "q3_a"},   // верно
+		{"q4", "q4_b"},   // неверно
+		{"q5", "q5_a"},   // верно
+		{"q6", "q6_a"},   // неверно
+		{"q7", "q7_a"},   // верно
+		{"q8", "q8_b"},   // неверно
+		{"q9", "q9_b"},   // неверно
 		{"q10", "q10_b"}, // неверно
 		{"q11", "q11_b"}, // неверно
 		{"q12", "q12_a"}, // неверно
@@ -233,8 +233,8 @@ func TestResultTopicBreakdown(t *testing.T) {
 func TestCaseListIncludesBoth(t *testing.T) {
 	s := NewCaseService(cases.All())
 	list := s.List()
-	if len(list) != 2 {
-		t.Fatalf("ожидали 2 кейса, получили %d", len(list))
+	if len(list) != 4 {
+		t.Fatalf("ожидали 4 кейса, получили %d", len(list))
 	}
 	slugSet := make(map[string]bool)
 	for _, c := range list {

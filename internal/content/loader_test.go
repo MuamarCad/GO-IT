@@ -14,8 +14,8 @@ func TestRealRoadmapDiagrams(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(items) != 3 {
-		t.Fatalf("ожидали 3 roadmap, получили %d", len(items))
+	if len(items) != 4 {
+		t.Fatalf("ожидали 4 roadmap, получили %d", len(items))
 	}
 	for _, r := range items {
 		if r.Diagram == nil || len(r.Diagram.Stages) < 6 {

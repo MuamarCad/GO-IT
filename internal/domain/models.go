@@ -178,7 +178,7 @@ type Diagram struct {
 type DiagramStage struct {
 	Title  string
 	Note   string
-	Choose bool   // when true, selecting one node in the stage is sufficient
+	Choose bool // when true, selecting one node in the stage is sufficient
 	Nodes  []DiagramNode
 }
 

@@ -1,0 +1,395 @@
+{
+ "stages": [
+  {
+   "title": "Foundation",
+   "note": "Базовые навыки без которых невозможно принять осознанное решение.",
+   "nodes": [
+    {
+     "id": "product-thinking",
+     "title": "Product Thinking",
+     "kind": "core",
+     "summary": "Различие между Output и Outcome; ориентация на ценность пользователя, а не на количество фич.",
+     "links": [
+      {
+       "title": "SVPG: What Product Management Is",
+       "url": "https://www.svpg.com/what-product-management-is/"
+      }
+     ]
+    },
+    {
+     "id": "user-research",
+     "title": "User Research",
+     "kind": "core",
+     "summary": "Как проводить интервью, формировать персоны и переводить инсайты в гипотезы.",
+     "links": [
+      {
+       "title": "NN/g: User Research",
+       "url": "https://www.nngroup.com/articles/user-research/"
+      }
+     ]
+    },
+    {
+     "id": "problem-framing",
+     "title": "Формулировка проблемы",
+     "kind": "core",
+     "summary": "Проблема важнее решения; правильно сформулированная задача содержит ответ.",
+     "links": [
+      {
+       "title": "HBR: Defining the Real Problem",
+       "url": "https://hbr.org/2011/01/defining-the-real-problem"
+      }
+     ]
+    },
+    {
+     "id": "basic-metrics",
+     "title": "Базовые метрики: DAU, MAU, Retention",
+     "kind": "core",
+     "summary": "Понимание жизненного цикла пользователя и как измерить, возвращается ли он.",
+     "links": [
+      {
+       "title": "MetricsFun: A Dictionary of Metrics",
+       "url": "https://metricsfun.bike/"
+      }
+     ]
+    },
+    {
+     "id": "pm-vs-pm",
+     "title": "Product vs Project Manager",
+     "kind": "core",
+     "summary": "Product — «что» строить (vision, discovery, метрики); Project — «как» доставить (сроки, ресурсы, риски).",
+     "links": [
+      {
+       "title": "SVPG: Product Manager vs Project Manager",
+       "url": "https://www.svpg.com/articles/can-product-managers-be-project-managers/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Discovery",
+   "note": "Проверка гипотез до написания кода — дешевле, чем исправление после.",
+   "choose": true,
+   "nodes": [
+    {
+     "id": "hypotheses",
+     "title": "Гипотезы и валидация",
+     "kind": "also",
+     "summary": "Пишем гипотезу, определяем критерий успеха, проводим эксперимент.",
+     "links": [
+      {
+       "title": "Lean Product Playbook",
+       "url": "https://www.svpg.com/books/"
+      }
+     ]
+    },
+    {
+     "id": "user-stories",
+     "title": "User Stories и Acceptance Criteria",
+     "kind": "also",
+     "summary": "Формат «Как <роль>, я хочу <действие>, чтобы <ценность>» с проверяемыми критериями.",
+     "links": [
+      {
+       "title": "Atlassian: User Stories",
+       "url": "https://www.atlassian.com/agile/project-management/user-stories"
+      }
+     ]
+    },
+    {
+     "id": "prototyping",
+     "title": "Прототипирование",
+     "kind": "also",
+     "summary": "От скетчей на бумаге до интерактивных макетов — проверка идей до разработки.",
+     "links": [
+      {
+       "title": "NN/g: Prototyping",
+       "url": "https://www.nngroup.com/articles/prototyping/"
+      }
+     ]
+    },
+    {
+     "id": "interviews",
+     "title": "Глубинные интервью",
+     "kind": "also",
+     "summary": "Как задать правильные вопросы, не наводя пользователя, и извлечь инсайты.",
+     "links": [
+      {
+       "title": "Interviewing Users — Steve Portigal",
+       "url": "https://portigal.com/blog/interviewing-users/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Requirements",
+   "note": "Переводим инсайты в конкретные требования для команды.",
+   "nodes": [
+    {
+     "id": "user-story-mapping",
+     "title": "User Story Mapping",
+     "kind": "core",
+     "summary": "Сквозной путь пользователя, разбитый на горизонт (user journey) и вертикали (приоритеты).",
+     "links": [
+      {
+       "title": "Jeff Patton: User Story Mapping",
+       "url": "https://www.jpattonassociates.com/user-story-mapping/"
+      }
+     ]
+    },
+    {
+     "id": "acceptance-criteria",
+     "title": "Критерии приёмки",
+     "kind": "core",
+     "summary": "Чёткий чек-лист: что считается готовой задачей. Gherkin формат для ясности.",
+     "links": [
+      {
+       "title": "Gherkin: язык спецификаций",
+       "url": "https://cucumber.io/docs/gherkin/"
+      }
+     ]
+    },
+    {
+     "id": "mvp-scoping",
+     "title": "Определение MVP",
+     "kind": "core",
+     "summary": "Must / Should / Could / Won't — честно называем границы первого релиза.",
+     "links": [
+      {
+       "title": "ProductPlan: MoSCoW Prioritization",
+       "url": "https://www.productplan.com/glossary/moscow-prioritization/"
+      }
+     ]
+    },
+    {
+     "id": "nfr-requirements",
+     "title": "Нефункциональные требования",
+     "kind": "core",
+     "summary": "Скорость, доступность, безопасность — невидимые требования, которые решают продукт или убивают его.",
+     "links": [
+      {
+       "title": "Web.dev: Accessibility",
+       "url": "https://web.dev/learn/accessibility"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Delivery",
+   "note": "От идеи до рабочего продукта: приоритизация, спринты, команда.",
+   "nodes": [
+    {
+     "id": "prioritization",
+     "title": "Приоритизация: RICE, MoSCoW",
+     "kind": "core",
+     "summary": "RICE (Reach, Impact, Confidence, Effort) и MoSCoW для принятия прозрачных решений.",
+     "links": [
+      {
+       "title": "ProductPlan: RICE Framework",
+       "url": "https://www.productplan.com/glossary/rice-prioritization/"
+      }
+     ]
+    },
+    {
+     "id": "agile-sprint",
+     "title": "Agile и Sprint Planning",
+     "kind": "core",
+     "summary": "Как Product Manager участвует в планировании, декомпозиции и приёмке задач.",
+     "links": [
+      {
+       "title": "Scrum Guide",
+       "url": "https://scrumguides.org/scrum-guide.html"
+      }
+     ]
+    },
+    {
+     "id": "ci-cd",
+     "title": "CI/CD Basics",
+     "kind": "optional",
+     "summary": "Понимание процесса доставки: как код из репозитория попадает в продакшен.",
+     "links": [
+      {
+       "title": "What is CI/CD?",
+       "url": "https://www.redhat.com/en/topics/devops/what-is-ci-cd"
+      }
+     ]
+    },
+    {
+     "id": "stakeholder-management",
+     "title": "Работа со стейкхолдерами",
+     "kind": "core",
+     "summary": "Как коммуницировать roadmap, управлять ожиданиями и говорить «нет» без потери доверия.",
+     "links": [
+      {
+       "title": "Making Products: Stakeholder Management",
+       "url": "https://makingproducts.com/blog/2014/12/15/stakeholder-management/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Metrics",
+   "note": "Продукт запущен — начинаем измерять.",
+   "nodes": [
+    {
+     "id": "funnel-analysis",
+     "title": "Воронки конверсии",
+     "kind": "core",
+     "summary": "От регистрации до key-action: где теряем пользователей и почему.",
+     "links": [
+      {
+       "title": "Analytics Edge: Funnels",
+       "url": "https://www.analytics-edge.com/funnel-analysis/"
+      }
+     ]
+    },
+    {
+     "id": "cohort-analysis",
+     "title": "Cohort Analysis",
+     "kind": "core",
+     "summary": "Сравниваем группы пользователей по датам регистрации: растёт ли retention со временем?",
+     "links": [
+      {
+       "title": "Amplitude: Cohort Analysis",
+       "url": "https://help.amplitude.com/hc/en-us/articles/115002323627-Cohort-Analysis"
+      }
+     ]
+    },
+    {
+     "id": "nps-voice",
+     "title": "NPS и Voice of Customer",
+     "kind": "core",
+     "summary": "Опросы удовлетворённости + качественные интервью = полная картина.",
+     "links": [
+      {
+       "title": "Intercom: What is NPS",
+       "url": "https://www.intercom.com/articles/233334-what-is-net-promoter-score-a-guide-to-nps/"
+      }
+     ]
+    },
+    {
+     "id": "a-b-testing",
+     "title": "A/B тестирование",
+     "kind": "core",
+     "summary": "Научный подход к изменениям: гипотеза → вариант → статистика → решение.",
+     "links": [
+      {
+       "title": "Google Optimize: A/B Testing Guide",
+       "url": "https://support.google.com/optimize/answer/2862265"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Growth",
+   "note": "Продукт работает — теперь масштабируем.",
+   "nodes": [
+    {
+     "id": "competitive-analysis",
+     "title": "Конкурентный анализ",
+     "kind": "core",
+     "summary": "Сравниваем с 3–5 конкурентами; ищем white space и дифференциацию.",
+     "links": [
+      {
+       "title": "Portio: Competitive Analysis",
+       "url": "https://portio.io/blog/competitive-analysis/"
+      }
+     ]
+    },
+    {
+     "id": "scaling-products",
+     "title": "Масштабирование продуктов",
+     "kind": "optional",
+     "summary": "Как продукт растёт: новые рынки, новые сегменты, монетизация.",
+     "links": [
+      {
+       "title": "Scaling Products — SVPG",
+       "url": "https://www.svpg.com/"
+      }
+     ]
+    },
+    {
+     "id": "monetization",
+     "title": "Модели монетизации",
+     "kind": "optional",
+     "summary": "Freemium, subscription, pay-per-use — как выбрать модель и когда внедрять.",
+     "links": [
+      {
+       "title": "SaaS Metrics Guide",
+       "url": "https://www.baremetrics.com/learn/saas-metrics"
+      }
+     ]
+    },
+    {
+     "id": "growth-hacking",
+     "title": "Growth loops",
+     "kind": "optional",
+     "summary": "Самоподдерживающиеся циклы роста: пользователь → контент → привлечение новых пользователей.",
+     "links": [
+      {
+       "title": "Reforge: Growth Loops",
+       "url": "https://www.reforge.com/blog/growth-loops"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Практика",
+   "note": "Знания закрепляются в деле.",
+   "nodes": [
+    {
+     "id": "practice-hypothesis-canvas",
+     "title": "Hypothesis Canvas для новой фичи",
+     "kind": "core",
+     "summary": "Заполнить canvas: проблема, гипотеза, эксперимент, метрика успеха.",
+     "links": [
+      {
+       "title": "Lean Canvas Template",
+       "url": "https://www.leanstack.com/lean-canvas"
+      }
+     ]
+    },
+    {
+     "id": "practice-user-study",
+     "title": "Провести 3 пользовательских интервью",
+     "kind": "core",
+     "summary": "Найти 3 респондентов, подготовить гайд, записать выводы и переложить в user stories.",
+     "links": [
+      {
+       "title": "NN/g: How to Conduct User Interviews",
+       "url": "https://www.nngroup.com/articles/user-interviews/"
+      }
+     ]
+    },
+    {
+     "id": "practice-vo",
+     "title": "Voice of Customer: анализ отзывов",
+     "kind": "core",
+     "summary": "Собрать отзывы пользователей, категоризировать, найти топ-3 боли для приоритизации.",
+     "links": [
+      {
+       "title": "Crazy Egg: VOC Program",
+       "url": "https://www.crazyegg.com/blog/voice-of-customer/"
+      }
+     ]
+    },
+    {
+     "id": "volunteering",
+     "title": "Волонтёрская задача",
+     "kind": "core",
+     "href": "/volunteering"
+    },
+    {
+     "id": "mentors",
+     "title": "Консультация наставника",
+     "kind": "core",
+     "href": "/mentors"
+    }
+   ]
+  }
+ ]
+}

@@ -321,9 +321,9 @@ func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
 	client := &http.Client{Jar: jar}
 
 	correct := map[string]string{
-		"q1":  "q1_b", "q2":  "q2_b", "q3":  "q3_a", "q4":  "q4_a",
-		"q5":  "q5_a", "q6":  "q6_b", "q7":  "q7_a", "q8":  "q8_a",
-		"q9":  "q9_a", "q10": "q10_a", "q11": "q11_a", "q12": "q12_b",
+		"q1": "q1_b", "q2": "q2_b", "q3": "q3_a", "q4": "q4_a",
+		"q5": "q5_a", "q6": "q6_b", "q7": "q7_a", "q8": "q8_a",
+		"q9": "q9_a", "q10": "q10_a", "q11": "q11_a", "q12": "q12_b",
 		"q13": "q13_a", "q14": "q14_a", "q15": "q15_a", "q16": "q16_a",
 		"q17": "q17_a", "q18": "q18_a", "q19": "q19_a", "q20": "q20_a",
 	}

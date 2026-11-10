@@ -1,11 +1,37 @@
 # Спецификация проекта GO-IT
 
-**Версия:** 1.7
+**Версия:** 1.8
 **Дата:** 11 ноября 2026
 **Проект:** GO-IT — социальная образовательная платформа
 **Статус:** Действующий
 
 > Связанные документы: [План развития v1.5](PLAN.md) · [Контекст для AI](GIGACODE.md) · [DOC-STYLE](DOC-STYLE.md) · [Технический аудит](AUDIT-REPORT.md)
+
+---
+
+## Изменения в версии 1.8
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | REQ-002 | ✅ Все 16 задач выполнены (корректировки v2) |
+| 2 | login.html | **TD-A1:** Удалён `data-once` (HTMX) — причина поломки кнопки «Войти» |
+| 3 | login.html | **TD-A2:** `autocomplete="off"` + `new-password` — поля пусты для демо |
+| 4 | login.html | **TD-A4/A5:** Кнопки «Войти как Ментор/Партнёр» — форма отправляется через JS |
+| 5 | login.html | **TD-A6:** Эмодзи 📋🗺️⭐ → inline SVG из дизайн-системы |
+| 6 | lk_student.html | **TD-B5:** Демо-данные: 145 баллов, 2 кейса, 6-осевой радар-чарт |
+| 7 | lk_student.html | **TD-B4:** SVG radar chart (6 осей: Frontend, Backend, PM, Soft Skills, Tools, Design) |
+| 8 | lk_student.html | **TD-B6:** Иконка выхода — дверь вместо стрелки |
+| 9 | app.css | **TD-B3:** Убрано белое пятно — `lk-sidebar top: 0`, `lk-layout min-height: 100vh` |
+| 10 | Все LK | **TD-B2:** `writing-mode: horizontal-tb` — текст горизонтальный |
+| 11 | project_manager.go | **TD-C1:** Новый кейс — 20 вопросов по 8 темам (Agile, Scrum, risk, stakeholders) |
+| 12 | product_manager.go | **TD-C2:** Новый кейс — 20 вопросов по 8 темам (metrics, A/B, personas, RICE) |
+| 13 | product-manager.md + .json | **TD-C3:** Roadmap Product Manager — 7 стадий, 36 узлов |
+| 14 | frontend.go | `All()` — 2 → 4 кейса (Frontend, Backend, PM, Product Manager) |
+| 15 | Тесты | Обновлены под 4 roadmaps и 4 кейса |
+
+**Корневая причина REQ-001:** `data-once` (HTMX) на форме входа ломал form submit. Без этого все правки REQ-001 были бесполезны — кнопка «Войти» не работала в принципе.
+
+**Связь с документацией:** `TECH-TASKS-REQ-002.md`, `client-requirements/REQ-002.md`
 
 ---
 
@@ -723,8 +749,8 @@ schema_migrations (
 | Тип | Количество | Источники |
 |-----|-----------|-----------|
 | Направления | 3 | `internal/catalog/catalog.go` |
-| Кейсы | 2 | `internal/cases/frontend.go` (20 вопросов), `internal/cases/backend.go` (18 вопросов) |
-| Roadmaps | 3 | `content/roadmaps/*.md` + `*.diagram.json` |
+| Кейсы | 4 | `internal/cases/frontend.go`, `backend.go`, `project_manager.go`, `product_manager.go` |
+| Roadmaps | 4 | `content/roadmaps/*.md` + `*.diagram.json` |
 | Блог-статьи | 4 | `content/blog/*.md` (2 расширены 5×) |
 | Менторы | 4 (seed) | `internal/catalog/catalog.go` |
 | Волонтёрские задачи | 4 (seed) | `internal/catalog/catalog.go` |
@@ -946,3 +972,4 @@ schema_migrations (
 | 1.5 | 11 ноября 2026 | AUD-006…AUD-008 закрыты (email/phone ошибки, useless Save, mentors filter); NFR-19 (RequestLogger) закрыт; TD-1 (пустые директории), T-09…T-18 закрыты; SEC-06…SEC-08 активны; метрики качества обновлены |
 | 1.6 | 11 ноября 2026 | Версия обновлена. Package Structure: добавлен middleware/ (logging.go). Go-файлов 19→21. handlers.go 719→1021 строк, 59 методов. §8.4/8.5: GET→POST для accept/decline. §6.4: 53 PASS теста в 6 файлах, покрытие 24.9%. §7.1: Handlers (30+→59 методов). Исправлен дубликат §13.1. Зафиксирован рассинхрон GIGACODE→SPEC |
 | 1.7 | 11 ноября 2026 | REQ-001 закрыт: все 16 задач выполнены. FR-30 закрыто (Backend кейс). Frontend кейс: 4→20 вопросов. Backend кейс: новый, 18 вопросов. login.html: удалён дублирующий блок «Быстрый вход», исправлена иконка Yandex. app.css: стили password, logout-btn. base.html: хедер скрыт в LK. lk_settings.html: новая страница настроек. 4 LK-шаблона созданы. Блог: 4 статьи. Тесты обновлены |
+| 1.8 | 11 ноября 2026 | REQ-002 закрыт: все 16 задач выполнены. КРИТИЧЕСКОЕ исправление: удалён `data-once` (HTMX) — причина поломки кнопки «Войти». Поля пусты для демо (autocomplete=off). Кнопки «Войти как Ментор/Партнёр» восстановлены. Эмодзи → SVG. Демо-данные: 145 баллов, радар-чарт. 4 новых кейса (Frontend, Backend, PM, Product Manager). Roadmap Product Manager. Убрано белое пятно в сайдбаре. Иконка выхода — дверь |

@@ -9,21 +9,21 @@
 
       <div class="auth-features">
         <div class="auth-feature">
-          <div class="auth-feature-icon" aria-hidden="true">📋</div>
+          <svg class="auth-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           <div class="auth-feature-text">
             <h3>Практические кейсы</h3>
             <p>Попробуйте профессию за несколько минут через реальные рабочие задачи</p>
           </div>
         </div>
         <div class="auth-feature">
-          <div class="auth-feature-icon" aria-hidden="true">🗺️</div>
+          <svg class="auth-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
           <div class="auth-feature-text">
             <h3>Дорожные карты</h3>
             <p>Бесплатные маршруты обучения для Frontend, Backend и IT Project Manager</p>
           </div>
         </div>
         <div class="auth-feature">
-          <div class="auth-feature-icon" aria-hidden="true">⭐</div>
+          <svg class="auth-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           <div class="auth-feature-text">
             <h3>Наставничество</h3>
             <p>Получите консультацию от студента, который уже прошёл этот путь</p>
@@ -71,25 +71,37 @@
       <div class="auth-divider">или</div>
 
       <!-- Форма: Email + Пароль -->
-      <form id="auth-form-email" method="post" data-once>
+      <form id="auth-form-email" method="post">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="role" id="auth-role" value="student">
         <div class="field">
           <label for="auth-email">Email</label>
-          <input type="text" id="auth-email" name="email" autocomplete="email" placeholder="you@example.com">
+          <input type="text" id="auth-email" name="email" value="" autocomplete="off" placeholder="you@example.com">
           {{if .EmailError}}<div class="field-error">{{.EmailError}}</div>{{end}}
         </div>
         <div class="field">
           <label for="auth-password">Пароль</label>
-          <input type="password" id="auth-password" name="password" autocomplete="current-password" placeholder="Ваш пароль">
+          <input type="password" id="auth-password" name="password" value="" autocomplete="new-password" placeholder="Ваш пароль">
         </div>
         <div class="field">
           <label for="auth-phone">Телефон</label>
-          <input type="text" id="auth-phone" name="phone" autocomplete="tel" placeholder="+7 (___) ___-__-__">
+          <input type="text" id="auth-phone" name="phone" value="" autocomplete="off" placeholder="+7 (___) ___-__-__">
           {{if .PhoneError}}<div class="field-error">{{.PhoneError}}</div>{{end}}
         </div>
         <button type="submit" class="btn btn--primary" style="margin-top: 8px;">Войти</button>
       </form>
+
+      <!-- Быстрый вход для Ментора / Партнёра -->
+      <div class="auth-role-buttons">
+        <button type="button" class="btn btn--outline btn--sm" onclick="quickLogin('mentor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
+          Войти как Ментор
+        </button>
+        <button type="button" class="btn btn--outline btn--sm" onclick="quickLogin('partner')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          Войти как Партнёр
+        </button>
+      </div>
 
       <p class="auth-footer">Нет аккаунта? <a href="/about">Узнайте о проекте GO-IT</a></p>
     </div>
@@ -106,6 +118,12 @@ function setRole(role) {
     var pressed = btn.getAttribute('data-role') === role;
     btn.setAttribute('aria-pressed', String(pressed));
   });
+}
+
+function quickLogin(role) {
+  var form = document.getElementById('auth-form-email');
+  document.getElementById('auth-role').value = role;
+  form.submit();
 }
 
 function socialAuth(provider) {

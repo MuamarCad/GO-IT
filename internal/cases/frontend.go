@@ -3,7 +3,7 @@ package cases
 import "go-it/internal/domain"
 
 func All() []domain.CareerCase {
-	return []domain.CareerCase{Frontend(), Backend()}
+	return []domain.CareerCase{Frontend(), Backend(), ProjectManager(), ProductManager()}
 }
 
 func Frontend() domain.CareerCase {

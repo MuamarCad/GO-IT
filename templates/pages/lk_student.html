@@ -19,7 +19,7 @@
       <li class="lk-logout-wrapper">
         <form method="post" action="/lk/student/logout">
           <button type="submit" class="lk-logout-btn">
-            <svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Выйти
+            <svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8l4-4V5a2 2 0 0 0-2-2h-2V3z"/></svg> Выйти
           </button>
         </form>
       </li>
@@ -48,6 +48,29 @@
         <span class="n">{{.Data.Consultations}}</span>
         <small>Консультаций</small>
       </div>
+    </div>
+
+    <!-- Радар-чарт навыков -->
+    <div class="lk-section">
+      <h3>Навыки</h3>
+      <svg viewBox="0 0 400 300" class="radar-chart" aria-label="Диаграмма навыков ученика" role="img">
+        <title>Радар навыков ученика</title>
+        <!-- Фон: сетка -->
+        <polygon points="200,30 320,100 320,200 200,270 80,200 80,100" fill="none" stroke="var(--border)" stroke-width="1"/>
+        <!-- Оси -->
+        <line x1="200" y1="30" x2="200" y2="270" stroke="var(--border)" stroke-width="1"/>
+        <line x1="80" y1="100" x2="320" y2="200" stroke="var(--border)" stroke-width="1"/>
+        <line x1="320" y1="100" x2="80" y2="200" stroke="var(--border)" stroke-width="1"/>
+        <!-- Данные -->
+        <polygon points="200,60 280,120 280,190 200,240 120,190 120,120" fill="rgba(29, 78, 216, 0.2)" stroke="var(--primary)" stroke-width="2"/>
+        <!-- Метки -->
+        <text x="200" y="18" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="600">Frontend</text>
+        <text x="334" y="95" text-anchor="start" fill="var(--text)" font-size="12" font-weight="600">Backend</text>
+        <text x="334" y="210" text-anchor="start" fill="var(--text)" font-size="12" font-weight="600">PM</text>
+        <text x="200" y="292" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="600">Soft Skills</text>
+        <text x="66" y="210" text-anchor="end" fill="var(--text)" font-size="12" font-weight="600">Tools</text>
+        <text x="66" y="95" text-anchor="end" fill="var(--text)" font-size="12" font-weight="600">Design</text>
+      </svg>
     </div>
 
     <!-- Текущий прогресс -->

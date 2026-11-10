@@ -506,9 +506,9 @@ func (s *Server) LoginPost(w http.ResponseWriter, r *http.Request) {
 		if err := validatePassword(password); err != nil {
 			s.Sessions.Save(w, id, sess)
 			s.Render.HTML(w, "login.html", render.Page{
-				Title:     "Войти — GO-IT",
-				Active:    "",
-				CSRF:      sess.CSRF,
+				Title:      "Войти — GO-IT",
+				Active:     "",
+				CSRF:       sess.CSRF,
 				AlertError: "Пароль должен содержать минимум 8 символов, буквы и цифры.",
 			}, http.StatusOK)
 			return
@@ -558,11 +558,11 @@ func (s *Server) LoginProvider(w http.ResponseWriter, r *http.Request) {
 
 // studentRecommendedCase — данные для рекомендации кейса в ЛК ученика.
 type studentRecommendedCase struct {
-	Slug       string
-	Title      string
+	Slug        string
+	Title       string
 	CurrentStep int
-	TotalSteps int
-	Topic      string
+	TotalSteps  int
+	Topic       string
 }
 
 // studentMentorRecommend — данные для рекомендации ментора в ЛК ученика.
@@ -591,129 +591,35 @@ func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current s
 	}
 	s.Sessions.Save(w, id, sess)
 
-	// Считаем прогресс из сессии.
-	attempt := sess.Attempt
-	casesCompleted := 0
-	points := 0
-	progressPercent := 0
-	activeRoadmap := "Не выбран"
-	currentLevel := 1
-	totalLevels := 5
-	nextCaseHint := "Выберите направление и пройдите первый кейс, чтобы начать обучение."
-
-	if attempt.Completed {
-		casesCompleted = 1
-		// Для MVP: если кейс пройден, начисляем бонусные баллы.
-		points = attempt.Index // кол-во отвеченных вопросов = баллы
-	} else if attempt.Slug != "" {
-		// Ищем кейс в сервисе для расчёта шага.
-		if c, err := s.CaseSvc.Get(attempt.Slug); err == nil {
-			casesCompleted = 0
-			percent := 0
-			if totalQ := len(c.Questions); totalQ > 0 {
-				percent = (attempt.Index * 100) / totalQ
-				if percent > 100 {
-					percent = 100
-				}
-			}
-			progressPercent = percent
-			// Профильная информация из кейса.
-			activeRoadmap = c.Profession
-		}
-	} else {
-		// Нет активного кейса — ищем неначатый.
-		if c, err := s.CaseSvc.Get("frontend"); err == nil {
-			_ = c
-		}
-	}
-
-	// Рекомендации: неначатые кейсы.
-	var recommendedCases []studentRecommendedCase
-	for _, d := range catalog.Directions() {
-		if d.CaseSlug != "" {
-			if c, err := s.CaseSvc.Get(d.CaseSlug); err == nil {
-				rc := studentRecommendedCase{
-					Slug:       c.Slug,
-					Title:      c.Title,
-					TotalSteps: len(c.Questions),
-					Topic:      c.Intro,
-				}
-				// Если это текущий кейс — подставляем шаг.
-				if attempt.Slug == c.Slug && !attempt.Completed {
-					rc.CurrentStep = attempt.Index + 1
-					if rc.CurrentStep > rc.TotalSteps {
-						rc.CurrentStep = rc.TotalSteps
-					}
-				}
-				recommendedCases = append(recommendedCases, rc)
-			}
-		}
-	}
-
-	// Рекомендации менторов из каталога.
-	var recommendedMentors []studentMentorRecommend
-	for _, m := range catalog.SeedMentors() {
-		recommendedMentors = append(recommendedMentors, studentMentorRecommend{
-			Slug:           m.Slug,
-			Name:           m.DisplayName,
-			Specialization: m.Specialization,
-			Location:       m.Format,
-		})
-	}
-
-	// Завершённые кейсы: показываем из сессии.
-	var completedCases []studentCompletedCase
-	if attempt.Completed && attempt.Slug != "" {
-		if c, err := s.CaseSvc.Get(attempt.Slug); err == nil {
-			correct := 0
-			for _, q := range c.Questions {
-				if chosenID, ok := attempt.Answers[q.ID]; ok {
-					for _, o := range q.Options {
-						if o.ID == chosenID && o.Correct {
-							correct++
-						}
-					}
-				}
-			}
-			total := len(c.Questions)
-			percent := 0
-			if total > 0 {
-				percent = (correct * 100) / total
-			}
-			capProf := c.Profession
-			// capitalize first letter
-			if len(capProf) > 0 {
-				r := []rune(capProf)
-				r[0] = unicode.ToUpper(r[0])
-				capProf = string(r)
-			}
-			completedCases = append(completedCases, studentCompletedCase{
-				Direction: capProf,
-				Title:     c.Title,
-				Correct:   correct,
-				Total:     total,
-				Percent:   percent,
-				Passed:    percent >= 60,
-			})
-		}
-	}
-
 	data := map[string]any{
-		"UserName":          "Алексей С.",
-		"Initials":          "АС",
-		"CasesCompleted":    casesCompleted,
-		"Points":            points,
-		"RoadmapsOpened":    casesCompleted,
-		"Consultations":     0,
-		"ActiveRoadmap":     activeRoadmap,
-		"CurrentLevel":      currentLevel,
-		"TotalLevels":       totalLevels,
-		"ProgressPercent":   progressPercent,
-		"NextCaseHint":      nextCaseHint,
-		"RecommendedCases":  recommendedCases,
-		"AvailableMentors":  recommendedMentors,
-		"CompletedCases":    completedCases,
-		"NextConsultation":  nil, // будет при интеграции с расписанием
+		"UserName":        "Алексей Иванов",
+		"Initials":        "АИ",
+		"CasesCompleted":  2,
+		"Points":          145,
+		"RoadmapsOpened":  1,
+		"Consultations":   3,
+		"ActiveRoadmap":   "Frontend",
+		"CurrentLevel":    3,
+		"TotalLevels":     5,
+		"ProgressPercent": 60,
+		"NextCaseHint":    "Рекомендуем продолжить кейс «Первый день Backend-разработчика»",
+		"RecommendedCases": []studentRecommendedCase{
+			{"backend", "Первый день Backend-разработчика", 0, 18, "Backend"},
+		},
+		"AvailableMentors": []studentMentorRecommend{
+			{"anna-k", "Анна К.", "Frontend", "Москва"},
+			{"dmitry-p", "Дмитрий П.", "Backend", "Санкт-Петербург"},
+		},
+		"CompletedCases": []studentCompletedCase{
+			{"Frontend", "Первый день Frontend-разработчика", 3, 4, 75, true},
+			{"Backend", "Первый день Backend-разработчика", 5, 5, 100, true},
+		},
+		"NextConsultation": map[string]any{
+			"MentorName": "Анна К.",
+			"Date":       "12 ноя",
+			"Time":       "15:00",
+			"Topic":      "CSS Grid и Flexbox",
+		},
 	}
 
 	templateName := "lk_student.html"
@@ -738,12 +644,24 @@ func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current s
 	}, http.StatusOK)
 }
 
-func (s *Server) LKStudent(w http.ResponseWriter, r *http.Request) { s.lkStudentPage(w, r, "student-overview") }
-func (s *Server) LKStudentCases(w http.ResponseWriter, r *http.Request) { s.lkStudentPage(w, r, "student-cases") }
-func (s *Server) LKStudentRoadmap(w http.ResponseWriter, r *http.Request) { s.lkStudentPage(w, r, "student-roadmap") }
-func (s *Server) LKStudentMentors(w http.ResponseWriter, r *http.Request) { s.lkStudentPage(w, r, "student-mentors") }
-func (s *Server) LKStudentVolunteering(w http.ResponseWriter, r *http.Request) { s.lkStudentPage(w, r, "student-volunteering") }
-func (s *Server) LKStudentSettings(w http.ResponseWriter, r *http.Request) { s.lkStudentPage(w, r, "student-settings") }
+func (s *Server) LKStudent(w http.ResponseWriter, r *http.Request) {
+	s.lkStudentPage(w, r, "student-overview")
+}
+func (s *Server) LKStudentCases(w http.ResponseWriter, r *http.Request) {
+	s.lkStudentPage(w, r, "student-cases")
+}
+func (s *Server) LKStudentRoadmap(w http.ResponseWriter, r *http.Request) {
+	s.lkStudentPage(w, r, "student-roadmap")
+}
+func (s *Server) LKStudentMentors(w http.ResponseWriter, r *http.Request) {
+	s.lkStudentPage(w, r, "student-mentors")
+}
+func (s *Server) LKStudentVolunteering(w http.ResponseWriter, r *http.Request) {
+	s.lkStudentPage(w, r, "student-volunteering")
+}
+func (s *Server) LKStudentSettings(w http.ResponseWriter, r *http.Request) {
+	s.lkStudentPage(w, r, "student-settings")
+}
 
 // ---------- ЛК: Ментор ----------
 
@@ -764,11 +682,11 @@ type mentorSession struct {
 }
 
 type mentorStudent struct {
-	Initials        string
-	Name            string
-	Direction       string
-	RoadmapsOpened  int
-	Progress        int
+	Initials       string
+	Name           string
+	Direction      string
+	RoadmapsOpened int
+	Progress       int
 }
 
 func (s *Server) lkMentorPage(w http.ResponseWriter, r *http.Request, current string) {
@@ -783,13 +701,13 @@ func (s *Server) lkMentorPage(w http.ResponseWriter, r *http.Request, current st
 		Active: current,
 		CSRF:   sess.CSRF,
 		Data: map[string]any{
-			"UserName":         "Анна К.",
-			"Initials":         "АК",
-			"Specialization":   "Frontend",
-			"NewApplications":  2,
-			"TotalStudents":    5,
-			"TotalSessions":    18,
-			"Rating":           "4.9",
+			"UserName":        "Анна К.",
+			"Initials":        "АК",
+			"Specialization":  "Frontend",
+			"NewApplications": 2,
+			"TotalStudents":   5,
+			"TotalSessions":   18,
+			"Rating":          "4.9",
 			"Applications": []mentorApplication{
 				{ID: 1, StudentName: "Дмитрий П.", Contact: "dmitry@mail.ru", Date: "12 ноя", Time: "15:00", Message: "Хотел бы обсудить работу с React Hooks"},
 				{ID: 2, StudentName: "Мария Л.", Contact: "@maria_tg", Date: "14 ноя", Time: "12:00", Message: "Нужна помощь с TypeScript типами"},
@@ -807,11 +725,21 @@ func (s *Server) lkMentorPage(w http.ResponseWriter, r *http.Request, current st
 	}, http.StatusOK)
 }
 
-func (s *Server) LKMentor(w http.ResponseWriter, r *http.Request)          { s.lkMentorPage(w, r, "mentor-overview") }
-func (s *Server) LKMentorApplications(w http.ResponseWriter, r *http.Request) { s.lkMentorPage(w, r, "mentor-applications") }
-func (s *Server) LKMentorSchedule(w http.ResponseWriter, r *http.Request)  { s.lkMentorPage(w, r, "mentor-schedule") }
-func (s *Server) LKMentorStudents(w http.ResponseWriter, r *http.Request)  { s.lkMentorPage(w, r, "mentor-students") }
-func (s *Server) LKMentorProfile(w http.ResponseWriter, r *http.Request)   { s.lkMentorPage(w, r, "mentor-profile") }
+func (s *Server) LKMentor(w http.ResponseWriter, r *http.Request) {
+	s.lkMentorPage(w, r, "mentor-overview")
+}
+func (s *Server) LKMentorApplications(w http.ResponseWriter, r *http.Request) {
+	s.lkMentorPage(w, r, "mentor-applications")
+}
+func (s *Server) LKMentorSchedule(w http.ResponseWriter, r *http.Request) {
+	s.lkMentorPage(w, r, "mentor-schedule")
+}
+func (s *Server) LKMentorStudents(w http.ResponseWriter, r *http.Request) {
+	s.lkMentorPage(w, r, "mentor-students")
+}
+func (s *Server) LKMentorProfile(w http.ResponseWriter, r *http.Request) {
+	s.lkMentorPage(w, r, "mentor-profile")
+}
 
 func (s *Server) LKMentorAccept(w http.ResponseWriter, r *http.Request) {
 	s.lkMentorAction(w, r, "accepted")
@@ -841,20 +769,20 @@ func (s *Server) lkMentorAction(w http.ResponseWriter, r *http.Request, action s
 // ---------- ЛК: Партнёр ----------
 
 type partnerApplication struct {
-	ID         int
+	ID            int
 	VolunteerName string
-	TaskTitle  string
-	Skills     string
-	Contact    string
-	Message    string
+	TaskTitle     string
+	Skills        string
+	Contact       string
+	Message       string
 }
 
 type partnerTask struct {
-	Title              string
-	Skills             string
-	Scale              string
-	Status             string
-	ApplicationsCount  int
+	Title             string
+	Skills            string
+	Scale             string
+	Status            string
+	ApplicationsCount int
 }
 
 func (s *Server) lkPartnerPage(w http.ResponseWriter, r *http.Request, current string) {
@@ -869,16 +797,16 @@ func (s *Server) lkPartnerPage(w http.ResponseWriter, r *http.Request, current s
 		Active: current,
 		CSRF:   sess.CSRF,
 		Data: map[string]any{
-			"OrganizationName": "Фонд «Открытый код»",
-			"Role":             "Координатор",
-			"Initials":         "ОК",
-			"NewApplications":  3,
-			"ActiveTasks":      4,
+			"OrganizationName":  "Фонд «Открытый код»",
+			"Role":              "Координатор",
+			"Initials":          "ОК",
+			"NewApplications":   3,
+			"ActiveTasks":       4,
 			"TotalApplications": 17,
-			"Accepted":         9,
-			"PublishedTasks":   6,
+			"Accepted":          9,
+			"PublishedTasks":    6,
 			"CompletedProjects": 3,
-			"TotalVolunteers":  24,
+			"TotalVolunteers":   24,
 			"Applications": []partnerApplication{
 				{ID: 1, VolunteerName: "Елена В.", TaskTitle: "Вёрстка лендинга для акции", Skills: "HTML, CSS", Contact: "elena@google.com", Message: "Есть опыт вёрстки, могу помочь на этой неделе"},
 				{ID: 2, VolunteerName: "Сергей К.", TaskTitle: "Телеграм-бот для регистрации", Skills: "Python", Contact: "@sergey_tg"},
@@ -894,11 +822,21 @@ func (s *Server) lkPartnerPage(w http.ResponseWriter, r *http.Request, current s
 	}, http.StatusOK)
 }
 
-func (s *Server) LKPartner(w http.ResponseWriter, r *http.Request)               { s.lkPartnerPage(w, r, "partner-overview") }
-func (s *Server) LKPartnerTasks(w http.ResponseWriter, r *http.Request)          { s.lkPartnerPage(w, r, "partner-tasks") }
-func (s *Server) LKPartnerApplications(w http.ResponseWriter, r *http.Request)  { s.lkPartnerPage(w, r, "partner-applications") }
-func (s *Server) LKPartnerAnalytics(w http.ResponseWriter, r *http.Request)     { s.lkPartnerPage(w, r, "partner-analytics") }
-func (s *Server) LKPartnerSettings(w http.ResponseWriter, r *http.Request)      { s.lkPartnerPage(w, r, "partner-settings") }
+func (s *Server) LKPartner(w http.ResponseWriter, r *http.Request) {
+	s.lkPartnerPage(w, r, "partner-overview")
+}
+func (s *Server) LKPartnerTasks(w http.ResponseWriter, r *http.Request) {
+	s.lkPartnerPage(w, r, "partner-tasks")
+}
+func (s *Server) LKPartnerApplications(w http.ResponseWriter, r *http.Request) {
+	s.lkPartnerPage(w, r, "partner-applications")
+}
+func (s *Server) LKPartnerAnalytics(w http.ResponseWriter, r *http.Request) {
+	s.lkPartnerPage(w, r, "partner-analytics")
+}
+func (s *Server) LKPartnerSettings(w http.ResponseWriter, r *http.Request) {
+	s.lkPartnerPage(w, r, "partner-settings")
+}
 
 func (s *Server) LKPartnerAccept(w http.ResponseWriter, r *http.Request) {
 	s.lkPartnerAction(w, r, "accepted")
@@ -981,7 +919,7 @@ func RequestID(next http.Handler) http.Handler {
 // ---------- Валидация ----------
 
 var (
-	emailRe     = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$`)
+	emailRe      = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$`)
 	phoneCleanRe = regexp.MustCompile(`[^0-9+]`)
 )
 

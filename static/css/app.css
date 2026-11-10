@@ -294,8 +294,11 @@ a { color: var(--primary); }
   display: grid;
   place-items: center;
   flex: none;
-  font-size: 1.1rem;
   line-height: 1;
+}
+.auth-feature-icon svg {
+  width: 22px;
+  height: 22px;
 }
 .auth-feature-text h3 {
   font-family: var(--font-head);
@@ -435,20 +438,30 @@ a { color: var(--primary); }
   text-decoration: underline;
 }
 
+/* Кнопки быстрого входа (Ментор/Партнёр) */
+.auth-role-buttons {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+.auth-role-buttons .btn--sm {
+  width: 100%;
+}
+
 /* ---------- LK Layout ---------- */
 .lk-layout {
   display: grid;
   grid-template-columns: minmax(0, 280px) 1fr;
   gap: 0;
-  min-height: calc(100vh - 72px);
+  min-height: 100vh;
 }
 .lk-sidebar {
   background: var(--hero-bg);
   color: var(--hero-text);
   padding: 32px 0 0;
   position: sticky;
-  top: 72px;
-  height: calc(100vh - 72px);
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
 }
 .lk-user {
@@ -569,6 +582,11 @@ a { color: var(--primary); }
   font-size: 1.1rem;
   margin: 0 0 16px;
 }
+.radar-chart {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+}
 .lk-card-row {
   display: grid;
   gap: 14px;
@@ -582,8 +600,8 @@ a { color: var(--primary); }
   background: var(--bg);
 }
 .lk-item:hover { border-color: var(--primary); }
-.lk-item-body { flex: 1; min-width: 0; }
-.lk-item-title { font-weight: 600; margin: 0 0 4px; }
+.lk-item-body { flex: 1; min-width: 0; text-orientation: mixed; writing-mode: horizontal-tb; }
+.lk-item-title { writing-mode: horizontal-tb; font-weight: 600; margin: 0 0 4px; }
 .lk-item-meta { color: var(--muted); font-size: 0.88rem; margin: 0; }
 .lk-item-message { margin-top: 6px; }
 .lk-item-actions {

@@ -310,7 +310,7 @@ a { color: var(--primary); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 36px;
+  padding: 28px;
   box-shadow: var(--shadow);
 }
 .auth-form-title {
@@ -460,8 +460,8 @@ a { color: var(--primary); }
   align-items: center;
 }
 .lk-avatar {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--cta-bg);
   color: var(--cta-ink);

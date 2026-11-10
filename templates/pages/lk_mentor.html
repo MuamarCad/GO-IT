@@ -1,0 +1,129 @@
+{{define "content"}}
+<div class="lk-layout">
+  <!-- Боковая панель -->
+  <aside class="lk-sidebar">
+    <div class="lk-user">
+      <div class="lk-avatar" aria-hidden="true">{{.Initials}}</div>
+      <div>
+        <div class="lk-user-name">{{.UserName}}</div>
+        <div class="lk-user-role">Ментор · {{.Specialization}}</div>
+      </div>
+    </div>
+    <ul class="lk-nav">
+      <li><a href="/lk/mentor" aria-current="page"><span class="lk-nav-icon" aria-hidden="true">🏠</span> Обзор</a></li>
+      <li><a href="/lk/mentor/applications"><span class="lk-nav-icon" aria-hidden="true">📩</span> Заявки <span class="lk-badge lk-badge--primary" style="margin-left:auto;">{{.NewApplications}}</span></a></li>
+      <li><a href="/lk/mentor/schedule"><span class="lk-nav-icon" aria-hidden="true">📅</span> Расписание</a></li>
+      <li><a href="/lk/mentor/students"><span class="lk-nav-icon" aria-hidden="true">👥</span> Мои ученики</a></li>
+      <li><a href="/lk/mentor/profile"><span class="lk-nav-icon" aria-hidden="true">✏️</span> Мой профиль</a></li>
+      <li>
+        <form method="post" action="/lk/mentor/logout" style="display:block;">
+          <button type="submit" style="background:none;border:none;padding:0;color:var(--link, #2563eb);cursor:pointer;font:inherit;width:100%;text-align:left;">
+            <span class="lk-nav-icon" aria-hidden="true">🚪</span> Выйти
+          </button>
+        </form>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Основной контент -->
+  <div class="lk-main">
+    <h1 class="lk-heading">Кабинет ментора, {{.UserName}}!</h1>
+
+    <!-- Статистика -->
+    <div class="lk-stats">
+      <div class="lk-stat">
+        <span class="n">{{.NewApplications}}</span>
+        <small>Новых заявок</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.TotalStudents}}</span>
+        <small>Учеников</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.TotalSessions}}</span>
+        <small>Консультаций проведено</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.Rating}}</span>
+        <small>Средний рейтинг</small>
+      </div>
+    </div>
+
+    <!-- Вкладки -->
+    <div class="lk-tabs">
+      <a href="/lk/mentor" aria-current="page">Заявки</a>
+      <a href="/lk/mentor/schedule">Расписание</a>
+      <a href="/lk/mentor/reviews">Отзывы</a>
+    </div>
+
+    <!-- Новые заявки -->
+    <div class="lk-section">
+      <h3>Новые заявки на консультацию</h3>
+      {{if .Applications}}
+      <div class="lk-card-row">
+        {{range .Applications}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--primary">Новая</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.StudentName}}</div>
+            <p class="lk-item-meta">Контакт: {{.Contact}} · {{.Date}} в {{.Time}}</p>
+            <p class="lk-item-meta" style="margin-top: 6px;">{{.Message}}</p>
+          </div>
+          <div style="display:flex; gap:8px; flex:none; flex-wrap:wrap;">
+            <a class="btn btn--primary btn--sm" href="/lk/mentor/applications/{{.ID}}/accept">Принять</a>
+            <a class="btn btn--outline btn--sm" href="/lk/mentor/applications/{{.ID}}/decline">Отклонить</a>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">Новых заявок пока нет. Ученики начнут отправлять заявки, когда увидят ваш профиль.</p>
+      {{end}}
+    </div>
+
+    <!-- Ближайшее расписание -->
+    <div class="lk-section">
+      <h3>Ближайшие консультации</h3>
+      {{if .UpcomingSessions}}
+      <div class="lk-schedule">
+        {{range .UpcomingSessions}}
+        <div class="lk-schedule-item">
+          <div class="lk-schedule-time">{{.Date}} · {{.Time}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.StudentName}}</div>
+            <p class="lk-item-meta">{{.Topic}}</p>
+          </div>
+          <div style="display:flex; gap:8px; flex:none;">
+            <a class="btn btn--primary btn--sm" href="#">Подключиться</a>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">Ближайших консультаций нет.</p>
+      {{end}}
+    </div>
+
+    <!-- Мои ученики -->
+    <div class="lk-section">
+      <h3>Активные ученики</h3>
+      {{if .ActiveStudents}}
+      <div class="lk-card-row">
+        {{range .ActiveStudents}}
+        <div class="lk-item">
+          <div class="lk-avatar" style="width:40px;height:40px;font-size:0.85rem;flex:none;" aria-hidden="true">{{.Initials}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Name}}</div>
+            <p class="lk-item-meta">{{.Direction}} · Направлений: {{.RoadmapsOpened}}</p>
+          </div>
+          <div class="lk-badge lk-badge--ok">{{.Progress}}%</p>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">У вас пока нет активных учеников.</p>
+      {{end}}
+    </div>
+  </div>
+</div>
+{{end}}

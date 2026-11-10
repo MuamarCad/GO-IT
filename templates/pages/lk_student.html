@@ -1,0 +1,118 @@
+{{define "content"}}
+<div class="lk-layout">
+  <!-- Боковая панель -->
+  <aside class="lk-sidebar">
+    <div class="lk-user">
+      <div class="lk-avatar" aria-hidden="true">{{.Initials}}</div>
+      <div>
+        <div class="lk-user-name">{{.UserName}}</div>
+        <div class="lk-user-role">Ученик</div>
+      </div>
+    </div>
+    <ul class="lk-nav">
+      <li><a href="/lk/student" aria-current="page"><span class="lk-nav-icon" aria-hidden="true">🏠</span> Обзор</a></li>
+      <li><a href="/lk/student/cases"><span class="lk-nav-icon" aria-hidden="true">📋</span> Мои кейсы</a></li>
+      <li><a href="/lk/student/roadmap"><span class="lk-nav-icon" aria-hidden="true">🗺️</span> Roadmap</a></li>
+      <li><a href="/lk/student/mentors"><span class="lk-nav-icon" aria-hidden="true">⭐</span> Менторы</a></li>
+      <li><a href="/lk/student/volunteering"><span class="lk-nav-icon" aria-hidden="true">💚</span> Волонтёрство</a></li>
+      <li><a href="/lk/student/settings"><span class="lk-nav-icon" aria-hidden="true">⚙️</span> Настройки</a></li>
+      <li>
+        <form method="post" action="/lk/student/logout" style="display:block;">
+          <button type="submit" style="background:none;border:none;padding:0;color:var(--link, #2563eb);cursor:pointer;font:inherit;width:100%;text-align:left;">
+            <span class="lk-nav-icon" aria-hidden="true">🚪</span> Выйти
+          </button>
+        </form>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Основной контент -->
+  <div class="lk-main">
+    <h1 class="lk-heading">Добро пожаловать, {{.UserName}}!</h1>
+
+    <!-- Статистика -->
+    <div class="lk-stats">
+      <div class="lk-stat">
+        <span class="n">3</span>
+        <small>Кейса пройдено</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">12</span>
+        <small>Баллов набрано</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">1</span>
+        <small>Roadmap открыт</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">0</span>
+        <small>Консультаций</small>
+      </div>
+    </div>
+
+    <!-- Текущий прогресс -->
+    <div class="lk-section">
+      <h3>Текущий прогресс · Frontend</h3>
+      <div style="margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 0.92rem;">
+        <span style="color: var(--muted);">Уровень 2 из 5</span>
+        <span style="font-weight: 600; color: var(--primary);">40%</span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+        <span style="width: 40%"></span>
+      </div>
+      <p class="hint">Пройдите кейс «Backend» чтобы открыть новое направление</p>
+    </div>
+
+    <!-- Рекомендации -->
+    <div class="lk-section">
+      <h3>Рекомендуем продолжить</h3>
+      <div class="lk-card-row">
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--primary">Кейс</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">Backend · Шаг 3 из 6</div>
+            <p class="lk-item-meta">Тема: маршрутизация и middleware</p>
+          </div>
+          <a class="btn btn--primary btn--sm" href="/cases/backend" style="flex:none;">Продолжить</a>
+        </div>
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--ok">Ментор</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">Анна К. — свободна для консультации</div>
+            <p class="lk-item-meta">Frontend · React, TypeScript · Онлайн</p>
+          </div>
+          <a class="btn btn--outline btn--sm" href="/mentors/anna-k" style="flex:none;">Записаться</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Недавно пройденные -->
+    <div class="lk-section">
+      <h3>Недавно пройденные кейсы</h3>
+      <div class="lk-card-row">
+        <div class="lk-item">
+          <div class="lk-item-body">
+            <div class="lk-item-title">Frontend · Кейс «Управление формами»</div>
+            <p class="lk-item-meta">Ответов: 4 из 4 · 85%</p>
+          </div>
+          <div class="lk-badge lk-badge--ok">✓ Сдано</div>
+        </div>
+        <div class="lk-item">
+          <div class="lk-item-body">
+            <div class="lk-item-title">IT Project Manager · Кейс «Оценка сроков»</div>
+            <p class="lk-item-meta">Ответов: 3 из 5 · 60%</p>
+          </div>
+          <div class="lk-badge lk-badge--primary">Попробовать ещё</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ближайшая консультация -->
+    <div class="lk-section">
+      <h3>Ближайшая консультация</h3>
+      <p class="hint" style="margin-bottom: 16px;">У вас пока нет записей. Выберите ментора из каталога.</p>
+      <a class="btn btn--primary" href="/mentors">Найти ментора</a>
+    </div>
+  </div>
+</div>
+{{end}}

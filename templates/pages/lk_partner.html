@@ -1,0 +1,134 @@
+{{define "content"}}
+<div class="lk-layout">
+  <!-- Боковая панель -->
+  <aside class="lk-sidebar">
+    <div class="lk-user">
+      <div class="lk-avatar" aria-hidden="true">{{.Initials}}</div>
+      <div>
+        <div class="lk-user-name">{{.OrganizationName}}</div>
+        <div class="lk-user-role">{{.Role}} · Социальный партнёр</div>
+      </div>
+    </div>
+    <ul class="lk-nav">
+      <li><a href="/lk/partner" aria-current="page"><span class="lk-nav-icon" aria-hidden="true">🏠</span> Обзор</a></li>
+      <li><a href="/lk/partner/tasks"><span class="lk-nav-icon" aria-hidden="true">📌</span> Мои задачи</a></li>
+      <li><a href="/lk/partner/applications"><span class="lk-nav-icon" aria-hidden="true">📩</span> Отклики <span class="lk-badge lk-badge--primary" style="margin-left:auto;">{{.NewApplications}}</span></a></li>
+      <li><a href="/lk/partner/analytics"><span class="lk-nav-icon" aria-hidden="true">📊</span> Аналитика</a></li>
+      <li><a href="/lk/partner/settings"><span class="lk-nav-icon" aria-hidden="true">⚙️</span> Настройки организации</a></li>
+      <li>
+        <form method="post" action="/lk/partner/logout" style="display:block;">
+          <button type="submit" style="background:none;border:none;padding:0;color:var(--link, #2563eb);cursor:pointer;font:inherit;width:100%;text-align:left;">
+            <span class="lk-nav-icon" aria-hidden="true">🚪</span> Выйти
+          </button>
+        </form>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Основной контент -->
+  <div class="lk-main">
+    <h1 class="lk-heading">Панель партнёра · {{.OrganizationName}}</h1>
+
+    <!-- Статистика -->
+    <div class="lk-stats">
+      <div class="lk-stat">
+        <span class="n">{{.ActiveTasks}}</span>
+        <small>Активных задач</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.TotalApplications}}</span>
+        <small>Всего откликов</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.Accepted}}</span>
+        <small>Принято волонтёров</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.NewApplications}}</span>
+        <small>Новых откликов</small>
+      </div>
+    </div>
+
+    <!-- Вкладки -->
+    <div class="lk-tabs">
+      <a href="/lk/partner" aria-current="page">Отклики</a>
+      <a href="/lk/partner/tasks">Мои задачи</a>
+      <a href="/lk/partner/analytics">Аналитика</a>
+    </div>
+
+    <!-- Новые отклики -->
+    <div class="lk-section">
+      <h3>Новые отклики на задачи</h3>
+      {{if .Applications}}
+      <div class="lk-card-row">
+        {{range .Applications}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--ok">Новый</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.VolunteerName}}</div>
+            <p class="lk-item-meta">Откликнулся на: <strong>{{.TaskTitle}}</strong></p>
+            <p class="lk-item-meta">Навыки: {{.Skills}} · Контакт: {{.Contact}}</p>
+            {{if .Message}}<p class="lk-item-meta" style="margin-top: 4px;">«{{.Message}}»</p>{{end}}
+          </div>
+          <div style="display:flex; gap:8px; flex:none; flex-wrap:wrap;">
+            <a class="btn btn--primary btn--sm" href="/lk/partner/applications/{{.ID}}/accept">Принять</a>
+            <a class="btn btn--outline btn--sm" href="/lk/partner/applications/{{.ID}}/decline">Отклонить</a>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">Новых откликов пока нет.</p>
+      {{end}}
+    </div>
+
+    <!-- Активные задачи -->
+    <div class="lk-section">
+      <h3>Активные задачи</h3>
+      {{if .Tasks}}
+      <div class="lk-card-row">
+        {{range .Tasks}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--primary">{{.Scale}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Title}}</div>
+            <p class="lk-item-meta">Навыки: {{.Skills}} · Откликов: {{.ApplicationsCount}}</p>
+          </div>
+          <div class="lk-badge lk-badge--ok">{{.Status}}</div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">У вас нет активных задач. Создайте новую в разделе «Мои задачи».</p>
+      {{end}}
+    </div>
+
+    <!-- Сводка по проектам -->
+    <div class="lk-section">
+      <h3>Сводка по волонтёрству</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.93rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border);">
+            <th style="text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600;">Показатель</th>
+            <th style="text-align: right; padding: 8px 12px; color: var(--muted); font-weight: 600;">Значение</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;">Задача опубликовано</td>
+            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--primary);">{{.PublishedTasks}}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;">Завершено проектов</td>
+            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--ok);">{{.CompletedProjects}}</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px;">Волонтёров привлечено</td>
+            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--primary);">{{.TotalVolunteers}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{{end}}

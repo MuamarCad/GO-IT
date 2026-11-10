@@ -64,6 +64,8 @@ type Page struct {
 	CSRF        string
 	Flash       string
 	FlashError  string
+	Alert       string
+	AlertError  string
 	Data        any
 }
 

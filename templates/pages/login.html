@@ -1,0 +1,133 @@
+{{define "content"}}
+<section class="auth-page">
+  <div class="auth-container">
+    <!-- Левая колонка: герой -->
+    <div class="auth-hero">
+      <p class="eyebrow">Социальная образовательная платформа</p>
+      <h1>Войдите, чтобы продолжить <span class="accent">обучение</span></h1>
+      <p>GO-IT помогает найти путь в IT через практические кейсы, бесплатные учебные маршруты, наставничество от студентов и цифровое волонтёрство.</p>
+
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon" aria-hidden="true">📋</div>
+          <div class="auth-feature-text">
+            <h3>Практические кейсы</h3>
+            <p>Попробуйте профессию за несколько минут через реальные рабочие задачи</p>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" aria-hidden="true">🗺️</div>
+          <div class="auth-feature-text">
+            <h3>Дорожные карты</h3>
+            <p>Бесплатные маршруты обучения для Frontend, Backend и IT Project Manager</p>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" aria-hidden="true">⭐</div>
+          <div class="auth-feature-text">
+            <h3>Наставничество</h3>
+            <p>Получите консультацию от студента, который уже прошёл этот путь</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая колонка: форма -->
+    <div class="auth-form-card">
+      <h2 class="auth-form-title">Вход в аккаунт</h2>
+      <p class="auth-form-subtitle">Выберите роль и способ входа</p>
+
+      {{if .Alert}}<div class="alert alert--ok" role="status"><strong>{{.Alert}}</strong></div>{{end}}
+      {{if .AlertError}}<div class="alert alert--error" role="alert"><strong>{{.AlertError}}</strong></div>{{end}}
+
+      <!-- Табы ролей -->
+      <div class="auth-role-tabs" role="radiogroup" aria-label="Выбор роли">
+        <button type="button" class="auth-role-tab" role="radio" aria-pressed="true" data-role="student" onclick="setRole('student')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+          Ученик
+        </button>
+        <button type="button" class="auth-role-tab" role="radio" aria-pressed="false" data-role="mentor" onclick="setRole('mentor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
+          Ментор
+        </button>
+        <button type="button" class="auth-role-tab" role="radio" aria-pressed="false" data-role="partner" onclick="setRole('partner')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          Партнёр
+        </button>
+      </div>
+
+      <!-- Авторизация через соцсети -->
+      <div class="auth-social">
+        <button type="button" class="btn btn--vk" onclick="socialAuth('vk')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.785 16.241s.288-.032.436-.194c.136-.148.132-.427.132-.427s-.02-1.304.587-1.496c.598-.19 1.365 1.26 2.179 1.816.615.42 1.083.328 1.083.328l2.175-.03s1.138-.07.598-.964c-.044-.073-.313-.661-1.612-1.869-1.36-1.263-1.176-1.059.46-3.245.997-1.33 1.394-2.142 1.27-2.489-.12-.331-.853-.244-.853-.244l-2.453.015s-.182-.025-.317.056c-.132.079-.216.263-.216.263s-.387 1.03-.903 1.906c-1.089 1.85-1.524 1.948-1.702 1.834-.414-.265-.31-1.065-.31-1.634 0-1.777.27-2.517-.525-2.709-.264-.064-.458-.106-1.133-.113-.866-.009-1.601.003-2.016.207-.277.136-.49.439-.36.456.161.021.525.098.718.36.249.338.24 1.096.24 1.096s.143 2.093-.334 2.352c-.327.178-.775-.185-1.735-1.847-.492-.85-.863-1.79-.863-1.79s-.072-.176-.2-.271c-.155-.115-.372-.151-.372-.151l-2.332.015s-.35.01-.478.163c-.114.135-.009.414-.009.414s1.82 4.258 3.879 6.404c1.887 1.966 4.032 1.836 4.032 1.836h.972z"/></svg>
+          Войти через VK
+        </button>
+        <button type="button" class="btn btn--ya" onclick="socialAuth('yandex')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.02 22.001a10.75 10.75 0 0 1-4.84-1.14l-.28-.16a1.38 1.38 0 0 0-.69.2l-.13.07-3.68 2.06a1.43 1.43 0 0 1-1.43.06 1.39 1.39 0 0 1-.7-1.2V10.94c0-.53.32-1.02.81-1.23l.16-.07 7.26-3.22a1.38 1.38 0 0 0 .76-1.25V1.39c0-.56.35-1.06.88-1.23A10.75 10.75 0 0 1 13.02 22.001Zm-1.2-12.42h3.05c.61 0 .91.23.91.82v.35c0 .59-.32.84-.92.84h-3.04v2.27c0 .57-.29.82-.85.82h-.37c-.57 0-.85-.25-.85-.82V7.72c0-.57.28-.82.85-.82h3.22Z"/></svg>
+          Войти через Yandex ID
+        </button>
+      </div>
+
+      <div class="auth-divider">или</div>
+
+      <!-- Форма: Email + Пароль -->
+      <form id="auth-form-email" method="post" data-once>
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="role" id="auth-role" value="student">
+        <div class="field">
+          <label for="auth-email">Email</label>
+          <input type="text" id="auth-email" name="email" required autocomplete="email" placeholder="you@example.com"
+            style="font: inherit; font-weight: 400; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--border-strong); background: var(--bg); color: var(--text); width: 100%;">
+        </div>
+        <div class="field">
+          <label for="auth-password">Пароль</label>
+          <input type="password" id="auth-password" name="password" required autocomplete="current-password" placeholder="Ваш пароль"
+            style="font: inherit; font-weight: 400; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--border-strong); background: var(--bg); color: var(--text); width: 100%;">
+        </div>
+        <button type="submit" class="btn btn--primary" style="margin-top: 8px; width: 100%;">Войти</button>
+      </form>
+
+      <div class="auth-divider">быстрый вход</div>
+
+      <!-- Кнопки быстрого входа по ролям -->
+      <div class="auth-social auth-quick">
+        <button type="button" class="btn btn--outline" onclick="roleAuth('student')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+          Войти как ученик
+        </button>
+        <button type="button" class="btn btn--outline" onclick="roleAuth('mentor')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
+          Войти как ментор
+        </button>
+        <button type="button" class="btn btn--outline" onclick="roleAuth('partner')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          Войти как социальный партнёр
+        </button>
+      </div>
+
+      <p class="auth-footer">Нет аккаунта? <a href="/about">Узнайте о проекте GO-IT</a></p>
+    </div>
+  </div>
+</section>
+
+<script>
+let currentRole = 'student';
+
+function setRole(role) {
+  currentRole = role;
+  document.getElementById('auth-role').value = role;
+  document.querySelectorAll('.auth-role-tab').forEach(function(btn) {
+    var pressed = btn.getAttribute('data-role') === role;
+    btn.setAttribute('aria-pressed', String(pressed));
+  });
+}
+
+function socialAuth(provider) {
+  window.location.href = '/auth/' + provider + '?role=' + currentRole;
+}
+
+function roleAuth(role) {
+  window.location.href = '/auth/' + role + '?demo=1';
+}
+</script>
+{{end}}

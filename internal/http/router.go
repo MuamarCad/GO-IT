@@ -40,6 +40,44 @@ func NewRouter(h *handlers.Server, staticDir string) http.Handler {
 	r.Get("/roadmaps/{slug}", h.Roadmap)
 	r.Get("/blog", h.Blog)
 	r.Get("/blog/{slug}", h.Article)
+
+	/* Авторизация и ЛК */
+	r.Get("/auth", h.Login)
+	r.Get("/auth/{provider}", h.LoginProvider)
+	r.Post("/auth", h.LoginPost)
+
+	/* Student LK */
+	r.Get("/lk/student", h.LKStudent)
+	r.Get("/lk/student/cases", h.LKStudentCases)
+	r.Get("/lk/student/roadmap", h.LKStudentRoadmap)
+	r.Get("/lk/student/mentors", h.LKStudentMentors)
+	r.Get("/lk/student/volunteering", h.LKStudentVolunteering)
+	r.Get("/lk/student/settings", h.LKStudentSettings)
+	r.Get("/lk/student/logout", h.LKStudentLogout)
+	r.Post("/lk/student/logout", h.LKStudentLogout)
+
+	/* Mentor LK */
+	r.Get("/lk/mentor", h.LKMentor)
+	r.Get("/lk/mentor/applications", h.LKMentorApplications)
+	r.Get("/lk/mentor/schedule", h.LKMentorSchedule)
+	r.Get("/lk/mentor/students", h.LKMentorStudents)
+	r.Get("/lk/mentor/profile", h.LKMentorProfile)
+	r.Get("/lk/mentor/applications/{id}/accept", h.LKMentorAccept)
+	r.Get("/lk/mentor/applications/{id}/decline", h.LKMentorDecline)
+	r.Get("/lk/mentor/logout", h.LKMentorLogout)
+	r.Post("/lk/mentor/logout", h.LKMentorLogout)
+
+	/* Partner LK */
+	r.Get("/lk/partner", h.LKPartner)
+	r.Get("/lk/partner/tasks", h.LKPartnerTasks)
+	r.Get("/lk/partner/applications", h.LKPartnerApplications)
+	r.Get("/lk/partner/analytics", h.LKPartnerAnalytics)
+	r.Get("/lk/partner/settings", h.LKPartnerSettings)
+	r.Get("/lk/partner/applications/{id}/accept", h.LKPartnerAccept)
+	r.Get("/lk/partner/applications/{id}/decline", h.LKPartnerDecline)
+	r.Get("/lk/partner/logout", h.LKPartnerLogout)
+	r.Post("/lk/partner/logout", h.LKPartnerLogout)
+
 	r.NotFound(h.NotFound)
 	return r
 }

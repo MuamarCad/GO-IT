@@ -3,16 +3,16 @@
   <!-- Боковая панель -->
   <aside class="lk-sidebar">
     <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Initials}}</div>
+      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
       <div>
-        <div class="lk-user-name">{{.OrganizationName}}</div>
-        <div class="lk-user-role">{{.Role}} · Социальный партнёр</div>
+        <div class="lk-user-name">{{.Data.OrganizationName}}</div>
+        <div class="lk-user-role">{{.Data.Role}} · Социальный партнёр</div>
       </div>
     </div>
     <ul class="lk-nav">
       <li><a href="/lk/partner" aria-current="page"><span class="lk-nav-icon" aria-hidden="true">🏠</span> Обзор</a></li>
       <li><a href="/lk/partner/tasks"><span class="lk-nav-icon" aria-hidden="true">📌</span> Мои задачи</a></li>
-      <li><a href="/lk/partner/applications"><span class="lk-nav-icon" aria-hidden="true">📩</span> Отклики <span class="lk-badge lk-badge--primary" style="margin-left:auto;">{{.NewApplications}}</span></a></li>
+      <li><a href="/lk/partner/applications"><span class="lk-nav-icon" aria-hidden="true">📩</span> Отклики <span class="lk-badge lk-badge--primary" style="margin-left:auto;">{{.Data.NewApplications}}</span></a></li>
       <li><a href="/lk/partner/analytics"><span class="lk-nav-icon" aria-hidden="true">📊</span> Аналитика</a></li>
       <li><a href="/lk/partner/settings"><span class="lk-nav-icon" aria-hidden="true">⚙️</span> Настройки организации</a></li>
       <li>
@@ -27,24 +27,24 @@
 
   <!-- Основной контент -->
   <div class="lk-main">
-    <h1 class="lk-heading">Панель партнёра · {{.OrganizationName}}</h1>
+    <h1 class="lk-heading">Панель партнёра · {{.Data.OrganizationName}}</h1>
 
     <!-- Статистика -->
     <div class="lk-stats">
       <div class="lk-stat">
-        <span class="n">{{.ActiveTasks}}</span>
+        <span class="n">{{.Data.ActiveTasks}}</span>
         <small>Активных задач</small>
       </div>
       <div class="lk-stat">
-        <span class="n">{{.TotalApplications}}</span>
+        <span class="n">{{.Data.TotalApplications}}</span>
         <small>Всего откликов</small>
       </div>
       <div class="lk-stat">
-        <span class="n">{{.Accepted}}</span>
+        <span class="n">{{.Data.Accepted}}</span>
         <small>Принято волонтёров</small>
       </div>
       <div class="lk-stat">
-        <span class="n">{{.NewApplications}}</span>
+        <span class="n">{{.Data.NewApplications}}</span>
         <small>Новых откликов</small>
       </div>
     </div>
@@ -59,9 +59,9 @@
     <!-- Новые отклики -->
     <div class="lk-section">
       <h3>Новые отклики на задачи</h3>
-      {{if .Applications}}
+      {{if .Data.Applications}}
       <div class="lk-card-row">
-        {{range .Applications}}
+        {{range .Data.Applications}}
         <div class="lk-item">
           <div class="lk-badge lk-badge--ok">Новый</div>
           <div class="lk-item-body">
@@ -85,9 +85,9 @@
     <!-- Активные задачи -->
     <div class="lk-section">
       <h3>Активные задачи</h3>
-      {{if .Tasks}}
+      {{if .Data.Tasks}}
       <div class="lk-card-row">
-        {{range .Tasks}}
+        {{range .Data.Tasks}}
         <div class="lk-item">
           <div class="lk-badge lk-badge--primary">{{.Scale}}</div>
           <div class="lk-item-body">
@@ -116,15 +116,15 @@
         <tbody>
           <tr style="border-bottom: 1px solid var(--border);">
             <td style="padding: 12px;">Задача опубликовано</td>
-            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--primary);">{{.PublishedTasks}}</td>
+            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--primary);">{{.Data.PublishedTasks}}</td>
           </tr>
           <tr style="border-bottom: 1px solid var(--border);">
             <td style="padding: 12px;">Завершено проектов</td>
-            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--ok);">{{.CompletedProjects}}</td>
+            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--ok);">{{.Data.CompletedProjects}}</td>
           </tr>
           <tr>
             <td style="padding: 12px;">Волонтёров привлечено</td>
-            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--primary);">{{.TotalVolunteers}}</td>
+            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--primary);">{{.Data.TotalVolunteers}}</td>
           </tr>
         </tbody>
       </table>

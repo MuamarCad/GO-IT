@@ -504,6 +504,7 @@ func (s *Server) LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Валидация пароля (мин. 8 символов, хотя бы 1 буква и 1 цифра).
+	// Если пароль не заполнен — пропускаем валидацию (демо-режим).
 	if password := r.FormValue("password"); password != "" {
 		if err := validatePassword(password); err != nil {
 			s.Sessions.Save(w, id, sess)

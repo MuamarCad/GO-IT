@@ -3,9 +3,9 @@
   <!-- Боковая панель -->
   <aside class="lk-sidebar">
     <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Initials}}</div>
+      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
       <div>
-        <div class="lk-user-name">{{.UserName}}</div>
+        <div class="lk-user-name">{{.Data.UserName}}</div>
         <div class="lk-user-role">Ученик</div>
       </div>
     </div>
@@ -28,7 +28,7 @@
 
   <!-- Основной контент -->
   <div class="lk-main">
-    <h1 class="lk-heading">Добро пожаловать, {{.UserName}}!</h1>
+    <h1 class="lk-heading">Добро пожаловать, {{.Data.UserName}}!</h1>
 
     <!-- Статистика -->
     <div class="lk-stats">

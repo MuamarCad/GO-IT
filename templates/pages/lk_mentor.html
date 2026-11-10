@@ -3,15 +3,15 @@
   <!-- Боковая панель -->
   <aside class="lk-sidebar">
     <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Initials}}</div>
+      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
       <div>
-        <div class="lk-user-name">{{.UserName}}</div>
-        <div class="lk-user-role">Ментор · {{.Specialization}}</div>
+        <div class="lk-user-name">{{.Data.UserName}}</div>
+        <div class="lk-user-role">Ментор · {{.Data.Specialization}}</div>
       </div>
     </div>
     <ul class="lk-nav">
       <li><a href="/lk/mentor" aria-current="page"><span class="lk-nav-icon" aria-hidden="true">🏠</span> Обзор</a></li>
-      <li><a href="/lk/mentor/applications"><span class="lk-nav-icon" aria-hidden="true">📩</span> Заявки <span class="lk-badge lk-badge--primary" style="margin-left:auto;">{{.NewApplications}}</span></a></li>
+      <li><a href="/lk/mentor/applications"><span class="lk-nav-icon" aria-hidden="true">📩</span> Заявки <span class="lk-badge lk-badge--primary" style="margin-left:auto;">{{.Data.NewApplications}}</span></a></li>
       <li><a href="/lk/mentor/schedule"><span class="lk-nav-icon" aria-hidden="true">📅</span> Расписание</a></li>
       <li><a href="/lk/mentor/students"><span class="lk-nav-icon" aria-hidden="true">👥</span> Мои ученики</a></li>
       <li><a href="/lk/mentor/profile"><span class="lk-nav-icon" aria-hidden="true">✏️</span> Мой профиль</a></li>
@@ -27,24 +27,24 @@
 
   <!-- Основной контент -->
   <div class="lk-main">
-    <h1 class="lk-heading">Кабинет ментора, {{.UserName}}!</h1>
+    <h1 class="lk-heading">Кабинет ментора, {{.Data.UserName}}!</h1>
 
     <!-- Статистика -->
     <div class="lk-stats">
       <div class="lk-stat">
-        <span class="n">{{.NewApplications}}</span>
+        <span class="n">{{.Data.NewApplications}}</span>
         <small>Новых заявок</small>
       </div>
       <div class="lk-stat">
-        <span class="n">{{.TotalStudents}}</span>
+        <span class="n">{{.Data.TotalStudents}}</span>
         <small>Учеников</small>
       </div>
       <div class="lk-stat">
-        <span class="n">{{.TotalSessions}}</span>
+        <span class="n">{{.Data.TotalSessions}}</span>
         <small>Консультаций проведено</small>
       </div>
       <div class="lk-stat">
-        <span class="n">{{.Rating}}</span>
+        <span class="n">{{.Data.Rating}}</span>
         <small>Средний рейтинг</small>
       </div>
     </div>
@@ -59,9 +59,9 @@
     <!-- Новые заявки -->
     <div class="lk-section">
       <h3>Новые заявки на консультацию</h3>
-      {{if .Applications}}
+      {{if .Data.Applications}}
       <div class="lk-card-row">
-        {{range .Applications}}
+        {{range .Data.Applications}}
         <div class="lk-item">
           <div class="lk-badge lk-badge--primary">Новая</div>
           <div class="lk-item-body">
@@ -84,9 +84,9 @@
     <!-- Ближайшее расписание -->
     <div class="lk-section">
       <h3>Ближайшие консультации</h3>
-      {{if .UpcomingSessions}}
+      {{if .Data.UpcomingSessions}}
       <div class="lk-schedule">
-        {{range .UpcomingSessions}}
+        {{range .Data.UpcomingSessions}}
         <div class="lk-schedule-item">
           <div class="lk-schedule-time">{{.Date}} · {{.Time}}</div>
           <div class="lk-item-body">
@@ -107,9 +107,9 @@
     <!-- Мои ученики -->
     <div class="lk-section">
       <h3>Активные ученики</h3>
-      {{if .ActiveStudents}}
+      {{if .Data.ActiveStudents}}
       <div class="lk-card-row">
-        {{range .ActiveStudents}}
+        {{range .Data.ActiveStudents}}
         <div class="lk-item">
           <div class="lk-avatar" style="width:40px;height:40px;font-size:0.85rem;flex:none;" aria-hidden="true">{{.Initials}}</div>
           <div class="lk-item-body">

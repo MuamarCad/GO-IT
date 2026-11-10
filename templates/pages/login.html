@@ -76,12 +76,12 @@
         <input type="hidden" name="role" id="auth-role" value="student">
         <div class="field">
           <label for="auth-email">Email</label>
-          <input type="text" id="auth-email" name="email" required autocomplete="email" placeholder="you@example.com"
+          <input type="text" id="auth-email" name="email" autocomplete="email" placeholder="you@example.com"
             style="font: inherit; font-weight: 400; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--border-strong); background: var(--bg); color: var(--text); width: 100%;">
         </div>
         <div class="field">
           <label for="auth-password">Пароль</label>
-          <input type="password" id="auth-password" name="password" required autocomplete="current-password" placeholder="Ваш пароль"
+          <input type="password" id="auth-password" name="password" autocomplete="current-password" placeholder="Ваш пароль"
             style="font: inherit; font-weight: 400; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--border-strong); background: var(--bg); color: var(--text); width: 100%;">
         </div>
         <button type="submit" class="btn btn--primary" style="margin-top: 8px; width: 100%;">Войти</button>
@@ -127,7 +127,11 @@ function socialAuth(provider) {
 }
 
 function roleAuth(role) {
-  window.location.href = '/auth/' + role + '?demo=1';
+  var form = document.getElementById('auth-form-email');
+  var hiddenInput = document.getElementById('auth-role');
+  hiddenInput.value = role;
+  form.method = 'POST';
+  form.submit();
 }
 </script>
 {{end}}

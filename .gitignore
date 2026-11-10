@@ -8,3 +8,6 @@ tmp/
 .idea/
 .vscode/
 .gigacode/
+
+# Client requirements — исходные требования от заказчиков/клиентов
+client-requirements/

@@ -20,7 +20,7 @@ func Directions() []domain.Direction {
 			Icon:        "Go",
 			Summary:     "Обработка ошибок, данные и правила, которые проверяет сервер.",
 			RoadmapSlug: "backend",
-			CaseSlug:    "", // кейс для Backend ещё не написан
+			CaseSlug:    "backend",
 		},
 		{
 			Slug:        "project-manager",

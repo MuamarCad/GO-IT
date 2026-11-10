@@ -63,7 +63,7 @@
           Войти через VK
         </button>
         <button type="button" class="btn btn--ya" onclick="socialAuth('yandex')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.02 22.001a10.75 10.75 0 0 1-4.84-1.14l-.28-.16a1.38 1.38 0 0 0-.69.2l-.13.07-3.68 2.06a1.43 1.43 0 0 1-1.43.06 1.39 1.39 0 0 1-.7-1.2V10.94c0-.53.32-1.02.81-1.23l.16-.07 7.26-3.22a1.38 1.38 0 0 0 .76-1.25V1.39c0-.56.35-1.06.88-1.23A10.75 10.75 0 0 1 13.02 22.001Zm-1.2-12.42h3.05c.61 0 .91.23.91.82v.35c0 .59-.32.84-.92.84h-3.04v2.27c0 .57-.29.82-.85.82h-.37c-.57 0-.85-.25-.85-.82V7.72c0-.57.28-.82.85-.82h3.22Z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true"><text x="12" y="17" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Я</text></svg>
           Войти через Yandex ID
         </button>
       </div>
@@ -91,24 +91,6 @@
         <button type="submit" class="btn btn--primary" style="margin-top: 8px;">Войти</button>
       </form>
 
-      <div class="auth-divider">быстрый вход</div>
-
-      <!-- Кнопки быстрого входа по ролям -->
-      <div class="auth-social auth-quick">
-        <button type="button" class="btn btn--outline" onclick="roleAuth('student')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
-          Войти как ученик
-        </button>
-        <button type="button" class="btn btn--outline" onclick="roleAuth('mentor')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
-          Войти как ментор
-        </button>
-        <button type="button" class="btn btn--outline" onclick="roleAuth('partner')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-          Войти как социальный партнёр
-        </button>
-      </div>
-
       <p class="auth-footer">Нет аккаунта? <a href="/about">Узнайте о проекте GO-IT</a></p>
     </div>
   </div>
@@ -128,14 +110,6 @@ function setRole(role) {
 
 function socialAuth(provider) {
   window.location.href = '/auth/' + provider + '?role=' + currentRole;
-}
-
-function roleAuth(role) {
-  var form = document.getElementById('auth-form-email');
-  var hiddenInput = document.getElementById('auth-role');
-  hiddenInput.value = role;
-  form.method = 'POST';
-  form.submit();
 }
 </script>
 {{end}}

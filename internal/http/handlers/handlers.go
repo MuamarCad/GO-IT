@@ -716,7 +716,21 @@ func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current s
 		"NextConsultation":  nil, // будет при интеграции с расписанием
 	}
 
-	s.Render.HTML(w, "lk_student.html", render.Page{
+	templateName := "lk_student.html"
+	switch current {
+	case "student-cases":
+		templateName = "lk_student_cases.html"
+	case "student-roadmap":
+		templateName = "lk_student_roadmap.html"
+	case "student-mentors":
+		templateName = "lk_student_mentors.html"
+	case "student-volunteering":
+		templateName = "lk_student_volunteering.html"
+	case "student-settings":
+		templateName = "lk_settings.html"
+	}
+
+	s.Render.HTML(w, templateName, render.Page{
 		Title:  "Личный кабинет · Ученик — GO-IT",
 		Active: current,
 		CSRF:   sess.CSRF,

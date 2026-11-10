@@ -1,0 +1,305 @@
+# Технические задачи: REQ-001 Аудит и доработка UI/UX
+
+## Источник
+`client-requirements/REQ-001.md` — Клиентское требование от 2026-11-11
+
+## Статус
+✅ Все задачи выполнены, валидация пройдена, тесты зелёные
+
+---
+
+## Статус задач
+
+| Задача | Статус | Примечание |
+|--------|--------|-----------|
+| TD-A1 | ✅ Завершена | Добавлены стили `.field input[type="password"]` |
+| TD-A2 | ✅ Завершена | Удалён блок `auth-quick` и `roleAuth()` JS |
+| TD-A3 | ✅ Завершена | autocomplete корректен, HTMX не конфликтует |
+| TD-A4 | ✅ Завершена | LoginProvider уже сохраняет роль |
+| TD-A5 | ✅ Завершена | LoginPost уже валидирует role |
+| TD-A6 | ✅ Завершена | Yandex-иконка заменена на «Я» |
+| TD-B1 | ✅ Завершена | CSS `.lk-item`/`.lk-badge` корректен |
+| TD-B2 | ✅ Завершена | `.lk-page` класс скрывает хедер |
+| TD-B3 | ✅ Завершена | Иконка настроек — корректная шестерёнка |
+| TD-B4 | ✅ Завершена | `.lk-logout-btn` стилизован |
+| TD-B5 | ✅ Завершена | `lk_settings.html` создан |
+| TD-B6 | ✅ Завершена | 4 шаблона: cases, roadmap, mentors, volunteering |
+| TD-C1 | ✅ Завершена | Frontend: 20 вопросов |
+| TD-C2 | ✅ Завершена | Backend: 18 вопросов, backend.go |
+| TD-C3 | ✅ Завершена | 2 новые статьи в `content/blog/` |
+| TD-C4 | ✅ Завершена | 2 статьи расширены до 5× |
+
+## Сводка
+
+REQ-001 содержит 16 пунктов в 4 областях. Задачи разбиты на 3 группы по исполнителям:
+
+| Группа | Область | Кол-во задач | Агент |
+|--------|---------|-------------|-------|
+| A | Auth — вход и авторизация | 6 задач (п.1–6) | `frontend-engineer` |
+| B | ЛК — личный кабинет и навигация | 6 задач (п.7–12) | `frontend-engineer` |
+| C | Контент — кейсы и блог | 4 задачи (п.13–16) | `backend-engineer` |
+
+---
+
+## Группа A: Страница входа (Auth)
+
+### TD-A1 [BUG] Поле «Пароль» не имеет стилистического оформления
+**Требование REQ-001:** п.1
+**Файлы:** `templates/pages/login.html` (строки ~88–93), `static/css/app.css`
+**Проблема:** Поле `<input type="password">` не наследует стили из дизайн-системы: нет borders, padding, focus-ring.
+**Решение:**
+- Добавить стили для `.field input[type="password"]` в `app.css` с учётом токенов (`--border`, `--border-strong`, `--focus`)
+- Focus-ring должен быть видимым (ring 2px solid `--focus`)
+- Отступы: padding 12px 16px, border-radius 12px
+**Валидация:** WCAG 1.4.11 — contrast >= 3:1, visible focus indicator
+**Дизайн-система:** `DESIGN-REVIEW.md`, `BRAND-BOOK.docx`
+
+### TD-A2 [BUG] Блок «Быстрый вход» лишний — удалить
+**Требование REQ-001:** п.2
+**Файлы:** `templates/pages/login.html` (строки ~103–127)
+**Проблема:** Блок `<div class="auth-social auth-quick">` дублирует функциональность табов ролей выше
+**Решение:**
+- Удалить блок `auth-quick` и весь соответствующий HTML (строки ~103–127)
+- Удалить JS-функцию `roleAuth()` из скрипта в конце файла
+**Валидация:** После удаления форма входа остаётся рабочей: tab ролей → social auth или email+password
+
+### TD-A3 [BUG] Автозаполнение: поля предзаполнены, кнопка не работает
+**Требование REQ-001:** п.3
+**Файлы:** `templates/pages/login.html`, `internal/http/handlers/handlers.go` (LoginPost, строки ~454–532)
+**Проблема:** Браузер предзаполняет поля email/password из сохранённых учётных данных, но форма не отправляется (скорее всего, проблема с hx-boost или preventDefault)
+**Решение:**
+- Проверить, что `hx-boost="true"` не конфликтует с автозаполнением браузера
+- Убедиться, что HTMX не подавляет submission при автозаполнении
+- Добавить `autocomplete` атрибуты корректно: `autocomplete="email"`, `autocomplete="current-password"`
+- Протестировать: заполнить форму → сохранить пароль → перезагрузить → автозаполнить → отправить
+**Валидация:** После автозаполнения кнопка «Войти» отправляет форму корректно
+
+### TD-A4 [BUG] «Войти через ВК» работает только для роли «Ученик»
+**Требование REQ-001:** п.4
+**Файлы:** `templates/pages/login.html` (строки ~66–79), `internal/http/handlers/handlers.go` (LoginProvider, строки ~533–585)
+**Проблема:** `socialAuth('vk')` отправляет `?role=` параметр, но бэкенд, вероятно, игнорирует роль для VK-авторизации
+**Решение:**
+- Проверить `LoginProvider` handler: роль должна определяться из `?role=` и сохраняться в сессию
+- Убедиться, что OAuth callback (VK, Yandex, GitHub) сохраняет роль в сессию и рендерит соответствующий ЛК
+- Протестировать все 3 роли + все 3 провайдера (VK, Yandex, GitHub)
+**Валидация:** Вход через VK с ролью «Ментор» → попадание в `/lk/mentor`, не `/lk/student`
+
+### TD-A5 [BUG] «Войти как Ментор» и «Войти как Партнёр» не работают
+**Требование REQ-001:** п.5
+**Файлы:** `templates/pages/login.html`, `internal/http/handlers/handlers.go` (LoginPost)
+**Проблема:** Форма отправляется POST с `role=mentor` или `role=partner`, но бэкенд не создаёт соответствующую сессию
+**Решение:**
+- Проверить `LoginPost`: валидация роли из `role` поля формы
+- Поддерживаемые значения: `student`, `mentor`, `partner`
+- При валидном role — создать сессию, перенаправить в соответствующий `/lk/{role}`
+- При невалидном — ошибка, не default к student
+**Валидация:** `POST /login` с `role=mentor` → 302 → `/lk/mentor`; `role=partner` → 302 → `/lk/partner`
+
+### TD-A6 [BUG] Неправильная иконка Яндекс
+**Требование REQ-001:** п.6
+**Файлы:** `templates/pages/login.html` (строки ~80–91)
+**Проблема:** SVG-иконка Yandex ID не соответствует официальным гайдлайнам Яндекса
+**Решение:**
+- Заменить SVG на корректный логотип Yandex ID (круглая иконка с буквой «Я» или official Yandex ID logo)
+- Использовать inline SVG с viewBox="0 0 24 24"
+**Валидация:** Иконка визуально соответствует Yandex ID branding (красный круг, белая «Я»)
+
+---
+
+## Группа B: Личный кабинет и навигация
+
+### TD-B1 [DESIGN] Элементы «Рекомендуем продолжить»: ментор — овальный, кейс — круглый, текст вверх ногами
+**Требование REQ-001:** п.7
+**Файлы:** `templates/pages/lk_student.html` (строки ~64–86), `static/css/app.css`
+**Проблема:** `lk-item` и `lk-badge` стилизованы некорректно: менторские карточки — овальные, кейсовые — круглые, текст перевернут
+**Решение:**
+- Проверить CSS-классы `.lk-item`, `.lk-badge`, `.lk-item-title` в `app.css`
+- Исправить `border-radius`: карточки должны быть прямоугольными (`--radius: 20px`), не овальными/круглыми
+- Проверить `text-orientation` и `writing-mode` — не должно быть перевёрнутого текста
+- Протестировать во всех 3 темах (light, dark, high-contrast)
+**Валидация:** Карточки ментора и кейса выглядят одинаково, текст читаем, border-radius consistent
+
+### TD-B2 [DESIGN] Хедер в ЛК избыточен — дублирует сайдбар
+**Требование REQ-001:** п.8
+**Файлы:** `templates/layouts/base.html`, `templates/partials/header.html`, `templates/pages/lk_student.html`
+**Проблема:** На страницах ЛК отображается общий хедер с навигацией, которая дублирует боковое меню
+**Решение:**
+- В `base.html` добавить условное скрытие хедера для страниц ЛК
+- Критерий: если страница начинается с `/lk/` — скрыть хедер, показать только контент
+- Либо: в `lk_student.html` и других LK-шаблонах явно скрывать хедер
+**Валидация:** На страницах `/lk/student`, `/lk/mentor`, `/lk/partner` хедер не виден
+
+### TD-B3 [BUG] Иконка «Настройки» в сайдбаре — неправильная
+**Требование REQ-001:** п.9
+**Файлы:** `templates/pages/lk_student.html` (строки ~23–26)
+**Проблема:** SVG-иконка настроек отображает не шестерёнку, а другой символ
+**Решение:**
+- Проверить SVG в `lk_student.html` для настройки
+- Убедиться, что это шестерёнка (gear/cog icon)
+- Если нет — заменить на корректный SVG
+**Валидация:** Иконка настроек — шестерёнка, соответствует иконографии проекта
+
+### TD-B4 [BUG] Кнопка «Выйти» не имеет стилистического оформления
+**Требование REQ-001:** п.10
+**Файлы:** `templates/pages/lk_student.html` (строки ~27–32), `static/css/app.css`
+**Проблема:** `.lk-logout-btn` не стилизован: нет цвета, hover-состояния, иконки
+**Решение:**
+- Добавить стили для `.lk-logout-btn`: красный текст/фон при hover, consistent padding
+- Иконка выхода (arrow left) должна быть видна и иконка должна корректно отображаться
+- Стили: `color: var(--error); border: 1px solid var(--error); border-radius: var(--radius-sm); padding: 8px 12px;`
+- Hover: `background: var(--error-bg); color: var(--error);`
+**Валидация:** Кнопка «Выйти» стилизована, hover-эффект видим, иконка отображается
+
+### TD-B5 [FEATURE] Добавить страницу «Настройки»
+**Требование REQ-001:** п.11
+**Файлы:** Новый файл `templates/pages/lk_settings.html` (или расширение `lk_student.html`)
+**Проблема:** Ссылка `/lk/student/settings` в сайдбаре ведёт на пустую страницу
+**Решение:**
+- Создать шаблон настроек с полями:
+  - ФИО пользователя (read-only или editable)
+  - Email (editable)
+  - Телефон (editable)
+  - Аватар (upload preview)
+  - Смена пароля (старый → новый → подтвердить)
+- Использовать существующие стили `.field`, `.btn`, `.progress`
+- Связать с `LKStudentSettings` handler (уже существует в `handlers.go:732`)
+**Валидация:** `/lk/student/settings` отображает форму настроек, данные подставляются из сессии
+
+### TD-B6 [FEATURE] Заполнить остальные страницы сайдбара рабочим контентом
+**Требование REQ-001:** п.12
+**Файлы:** `templates/pages/lk_student.html`, `templates/pages/*.html`
+**Проблема:** Пункты навигации ведут на пустые страницы:
+- `/lk/student/cases` — Мои кейсы
+- `/lk/student/roadmap` — Roadmap
+- `/lk/student/mentors` — Менторы
+- `/lk/student/volunteering` — Волонтёрство
+**Решение:**
+- Проверить, существуют ли соответствующие шаблоны для каждого URL
+- Если нет — создать простые шаблоны с content из сессии/статических данных
+- Каждый шаблон должен использовать тот же `lk-layout` (sidebar + main)
+- Контент:
+  - Cases: список пройденных кейсов с результатами
+  - Roadmap: прогресс-бар по roadmap
+  - Mentors: список менторов
+  - Volunteering: волонтёрские задачи
+**Валидация:** Все 5 пунктов навигации работают и показывают релевантный контент
+
+---
+
+## Группа C: Контент — кейсы и блог
+
+### TD-C1 [CONTENT] Расширить кейс «Первый день Frontend» до ~20 вопросов
+**Требование REQ-001:** п.13
+**Файлы:** `internal/cases/frontend.go`
+**Проблема:** Текущий кейс содержит 4 вопроса. Требуется ~20.
+**Решение:**
+- Добавить 16 новых вопросов по темам:
+  - CSS: cascade, specificity, media queries, flexbox, grid
+  - JavaScript: DOM events, fetch API, closures, promises
+  - Accessibility: ARIA, semantic HTML, keyboard nav
+  - Performance: lazy loading, code splitting
+  - Tools: Git, npm, build tools
+  - Testing: unit tests, integration tests
+- Каждый вопрос: 3 варианта, 1 правильный, explanation
+- Следовать существующей структуре `domain.CaseQuestion`
+**Валидация:** 20 вопросов, все варианты имеют explanation, один правильный на вопрос
+**Контекст:** `internal/domain/models.go` — определение `CaseQuestion`
+
+### TD-C2 [FEATURE] Добавить кейс «Первый день Backend»
+**Требование REQ-001:** п.14
+**Файлы:** Новый файл `internal/cases/backend.go`
+**Решение:**
+- Создать новый кейс в формате `frontend.go`:
+  - Slug: `backend`
+  - Title: «Первый день Backend-разработчика»
+  - ~15–20 вопросов по Backend:
+    - REST API design
+    - SQL vs NoSQL
+    - Authentication (JWT, sessions)
+    - Database migrations
+    - HTTP methods, status codes
+    - Middleware, CORS
+    - Error handling
+    - Testing
+- Обновить `internal/cases/all.go` (или `frontend.go`): добавить Backend в `All()`
+- Добавить маршрут в `router.go`: `/cases/backend`
+- Добавить roadmap для Backend (если не существует)
+**Валидация:** `/cases/backend` доступен, проходит все 20 шагов, показывается результат
+**Контекст:** `internal/domain/models.go` — определение `CareerCase`
+
+### TD-C3 [CONTENT] Написать 2 новые статьи для блога
+**Требование REQ-001:** п.15
+**Файлы:** Новые файлы в `content/blog/`
+**Решение:**
+- Создать 2 новые статьи:
+  - `why-go-for-it-education.md` — почему Go актуален в образовательных технологиях
+  - `career-path-in-tech.md` — как выбрать путь в IT (frontend/backend/PM)
+- Каждая статья: 1500–2500 слов, структура с заголовками h2/h3, примеры кода, иллюстрации
+- Формат: Markdown (как существующие статьи)
+- Добавить в шапку: title, date, excerpt
+- Структура ссылок: `/blog/{slug}`
+**Валидация:** Статьи парсятся `content.Loader`, отображаются на странице `/blog`
+
+### TD-C4 [CONTENT] Расширить существующие статьи
+**Требование REQ-001:** п.16
+**Файлы:** `content/blog/first-steps-in-it.md`, `content/blog/how-to-build-a-pet-project.md`
+**Решение:**
+- Увеличить объём каждой статьи в 1.5–2 раза
+- Добавить подразделы, примеры, практические советы
+- first-steps-in-it.md: добавить секции про язык Go, Git, базовые инструменты
+- how-to-build-a-pet-project.md: добавить секции про деплой, CI/CD basics, best practices
+**Валидация:** Статьи читаемы, структура не сломана, парсятся корректно
+
+---
+
+## Приоритеты
+
+| Задача | Приоритет | Зависимости |
+|--------|-----------|-------------|
+| TD-A3 | MustHave | Нет |
+| TD-A5 | MustHave | Нет |
+| TD-B4 | MustHave | Нет |
+| TD-B6 | MustHave | Нет |
+| TD-A1 | ShouldHave | Нет |
+| TD-A2 | ShouldHave | Нет |
+| TD-A4 | ShouldHave | Нет |
+| TD-A6 | ShouldHave | Нет |
+| TD-B1 | ShouldHave | Нет |
+| TD-B2 | ShouldHave | Нет |
+| TD-B5 | ShouldHave | Нет |
+| TD-C1 | ShouldHave | Нет |
+| TD-C2 | ShouldHave | Нет |
+| TD-C3 | ShouldHave | Нет |
+| TD-C4 | ShouldHave | Нет |
+
+---
+
+## Дизайн-система валидация
+
+Все визуальные изменения должны соответствовать:
+- `BRAND-BOOK.docx` — бренд-книга, цветовые токены, типографика
+- `DESIGN-REVIEW.md` — рекомендации по UI/UX, оценка 21 экрана
+- `static/css/app.css` — существующие CSS Custom Properties: `--primary`, `--border`, `--focus`, `--radius`, `--radius-sm`
+- 3 темы: light, dark, high-contrast
+
+## Тестирование
+
+После каждой группы изменений:
+1. `make test` — прогнать unit-тесты
+2. Ручная проверка в браузере:
+   - Авторизация с 3 ролями × 3 провайдера
+   - Все страницы ЛК работают
+   - Все 3 темы
+3. `make fmt` — форматирование Go-кода
+
+---
+
+## Распределение по агентам
+
+### `frontend-engineer` (Группы A + B)
+**Область:** шаблоны, CSS, HTMX, SSR, доступность
+**Задачи:** TD-A1, TD-A2, TD-A3, TD-A4, TD-A5, TD-A6, TD-B1, TD-B2, TD-B3, TD-B4, TD-B5, TD-B6
+
+### `backend-engineer` (Группа C)
+**Область:** Go-код, сервисы, кейсы, блог, миграции
+**Задачи:** TD-C1, TD-C2, TD-C3, TD-C4

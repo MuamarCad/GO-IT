@@ -230,13 +230,17 @@ func TestDirectionWithoutCaseHidesCTA(t *testing.T) {
 	defer ts.Close()
 	client := &http.Client{}
 
-	_, backend := get(t, client, ts.URL+"/directions/backend")
-	if strings.Contains(backend, `href="/cases/`) || !strings.Contains(backend, "в разработке") {
-		t.Fatal("у Backend нет кейса: кнопка «Пройти кейс» не должна вести на чужой кейс")
+	_, pm := get(t, client, ts.URL+"/directions/project-manager")
+	if strings.Contains(pm, `href="/cases/`) || !strings.Contains(pm, "в разработке") {
+		t.Fatal("у PM нет кейса: кнопка «Пройти кейс» не должна вести на чужой кейс")
 	}
 	_, front := get(t, client, ts.URL+"/directions/frontend")
 	if !strings.Contains(front, `href="/cases/frontend"`) {
 		t.Fatal("у Frontend кнопка кейса должна быть")
+	}
+	_, back := get(t, client, ts.URL+"/directions/backend")
+	if !strings.Contains(back, `href="/cases/backend"`) {
+		t.Fatal("у Backend кнопка кейса должна быть")
 	}
 }
 
@@ -305,8 +309,8 @@ func TestRoadmapLinksToCaseOnlyWhenItExists(t *testing.T) {
 		t.Fatal("roadmap Frontend: нужен data-roadmap и ссылка на кейс")
 	}
 	_, back := get(t, client, ts.URL+"/roadmaps/backend")
-	if strings.Contains(back, `href="/cases/`) {
-		t.Fatal("roadmap Backend не должен вести на кейс, которого нет")
+	if !strings.Contains(back, `data-roadmap="backend"`) || !strings.Contains(back, `href="/cases/backend"`) {
+		t.Fatal("roadmap Backend: нужен data-roadmap и ссылка на кейс")
 	}
 }
 
@@ -316,9 +320,15 @@ func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{Jar: jar}
 
-	correct := map[string]string{"q1": "q1_b", "q2": "q2_b", "q3": "q3_b", "q4": "q4_b"}
+	correct := map[string]string{
+		"q1":  "q1_b", "q2":  "q2_b", "q3":  "q3_a", "q4":  "q4_a",
+		"q5":  "q5_a", "q6":  "q6_b", "q7":  "q7_a", "q8":  "q8_a",
+		"q9":  "q9_a", "q10": "q10_a", "q11": "q11_a", "q12": "q12_b",
+		"q13": "q13_a", "q14": "q14_a", "q15": "q15_a", "q16": "q16_a",
+		"q17": "q17_a", "q18": "q18_a", "q19": "q19_a", "q20": "q20_a",
+	}
 	_, body := get(t, client, ts.URL+"/cases/frontend")
-	for step := 0; step < 4; step++ {
+	for step := 0; step < 20; step++ {
 		if !strings.Contains(body, `role="progressbar"`) || !strings.Contains(body, `<span class="letter"`) {
 			t.Fatalf("шаг %d: нет прогресса или букв вариантов", step+1)
 		}
@@ -331,7 +341,7 @@ func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
 		body = string(mustRead(res))
 		res.Body.Close()
 	}
-	for _, want := range []string{"4 из 4", "По темам", "Доступность форм", "Пройти заново", `href="/roadmaps/frontend"`} {
+	for _, want := range []string{"20 из 20", "По темам", "Состояния форм", "Пройти заново", `href="/roadmaps/frontend"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("на странице результата нет %q", want)
 		}

@@ -71,7 +71,7 @@ func main() {
 
 	httpSrv := &http.Server{
 		Addr:              cfg.HTTPAddr,
-		Handler:           web.NewRouter(srv, "static"),
+		Handler:           web.NewRouter(log, srv, "static"),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,
@@ -90,6 +90,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
+	srv.Sessions.Stop()
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 	_ = httpSrv.Shutdown(shutdownCtx)

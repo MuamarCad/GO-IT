@@ -1,20 +1,26 @@
+// Package web provides the HTTP layer: router, handlers and request lifecycle.
 package web
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"go-it/internal/http/handlers"
+	"go-it/internal/http/middleware"
 )
 
-func NewRouter(h *handlers.Server, staticDir string) http.Handler {
+// NewRouter creates the Chi HTTP router with the full middleware chain.
+// Middleware order: RequestID → RealIP → Recoverer → LimitBody → RequestLogger
+func NewRouter(log *slog.Logger, h *handlers.Server, staticDir string) http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
+	r.Use(chiMiddleware.RequestID)
+	r.Use(chiMiddleware.RealIP)
+	r.Use(chiMiddleware.Recoverer)
 	r.Use(handlers.LimitBody)
+	r.Use(middleware.RequestLogger(log))
 
 	r.Get("/health/live", h.Live)
 	r.Get("/health/ready", h.Ready)
@@ -62,8 +68,8 @@ func NewRouter(h *handlers.Server, staticDir string) http.Handler {
 	r.Get("/lk/mentor/schedule", h.LKMentorSchedule)
 	r.Get("/lk/mentor/students", h.LKMentorStudents)
 	r.Get("/lk/mentor/profile", h.LKMentorProfile)
-	r.Get("/lk/mentor/applications/{id}/accept", h.LKMentorAccept)
-	r.Get("/lk/mentor/applications/{id}/decline", h.LKMentorDecline)
+	r.Post("/lk/mentor/applications/{id}/accept", h.LKMentorAccept)
+	r.Post("/lk/mentor/applications/{id}/decline", h.LKMentorDecline)
 	r.Get("/lk/mentor/logout", h.LKMentorLogout)
 	r.Post("/lk/mentor/logout", h.LKMentorLogout)
 
@@ -73,8 +79,8 @@ func NewRouter(h *handlers.Server, staticDir string) http.Handler {
 	r.Get("/lk/partner/applications", h.LKPartnerApplications)
 	r.Get("/lk/partner/analytics", h.LKPartnerAnalytics)
 	r.Get("/lk/partner/settings", h.LKPartnerSettings)
-	r.Get("/lk/partner/applications/{id}/accept", h.LKPartnerAccept)
-	r.Get("/lk/partner/applications/{id}/decline", h.LKPartnerDecline)
+	r.Post("/lk/partner/applications/{id}/accept", h.LKPartnerAccept)
+	r.Post("/lk/partner/applications/{id}/decline", h.LKPartnerDecline)
 	r.Get("/lk/partner/logout", h.LKPartnerLogout)
 	r.Post("/lk/partner/logout", h.LKPartnerLogout)
 

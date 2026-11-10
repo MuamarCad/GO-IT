@@ -1,11 +1,99 @@
 # Спецификация проекта GO-IT
 
-**Версия:** 1.2
-**Дата:** 10 ноября 2026
+**Версия:** 1.6
+**Дата:** 11 ноября 2026
 **Проект:** GO-IT — социальная образовательная платформа
 **Статус:** Действующий
 
-> Связанные документы: [План развития](PLAN.md) · [Контекст для AI](GIGACODE.md) · [DOC-STYLE](DOC-STYLE.md)
+> Связанные документы: [План развития v1.5](PLAN.md) · [Контекст для AI](GIGACODE.md) · [DOC-STYLE](DOC-STYLE.md) · [Технический аудит](AUDIT-REPORT.md)
+
+---
+
+## Изменения в версии 1.6
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | Package Structure | Добавлен пакет `internal/http/middleware` (1 файл `logging.go`) — ранее пустая директория |
+| 2 | Go-файлов | 19 → 21 (добавлены `middleware/logging.go` и `auth_test.go`) |
+| 3 | handlers.go | 719 строк → 1021 строка; методов Server 30+ → 59 |
+| 4 | Middleware | 0 файлов → 1 файл (`middleware.RequestLogger` на slog) |
+| 5 | Пакеты | 14 → 15 (добавлен `middleware`) |
+| 6 | §8.4/8.5 Accept/Decline | GET → POST (в соответствии с SEC-01, закрытым в v1.4) |
+| 7 | §6.4 Testing | Обновлены фактические данные: 53 PASS теста в 6 файлах |
+| 8 | §7.1 Architecture Diagram | "Handlers (30+ методов)" → "Handlers (59 методов)" |
+| 9 | TD-1, TD-8, T-09…T-18 | Подтверждены как закрытые (из v1.5) |
+| 10 | NFR-19 | ✅ Закрыто — RequestLogger реализован и в chain |
+| 11 | Duplicates | Исправлен дубликат заголовка §13.1 (теперь §13.2) |
+| 12 | SEC-06…SEC-08 | ⚠️ Активно — Phase 2+ (без изменений) |
+
+**Рассинхрон GIGACODE → SPECIFICATION.md (зафиксирован в v1.6):**
+- Package Structure не обновлён после добавления `middleware/`
+- Go-файлов 19 → 21
+- handlers 30+ → 59 методов, 1021 строка
+- Пакеты: 14 → 15 (не добавлен `middleware` в таблицу)
+- "Single handler file" — верно, 1021 строка
+
+---
+
+## Изменения в версии 1.5
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | AUD-006 | ✅ Закрыто — ошибки email/phone отображаются в `login.html` |
+| 2 | AUD-007 | ✅ Закрыто — бесполезный `Save()` удалён из ветки «кейс уже идёт» в `CaseStart` |
+| 3 | AUD-008 | ✅ Закрыто — фильтрация менторов `?dir=Backend` работает корректно |
+| 4 | NFR-19 | ✅ Закрыто — middleware `RequestLogger` на slog: `[timestamp] GET /path 200 45ms` с request_id |
+| 5 | FR-05 | ✅ Подтверждено — фильтрация менторов работает корректно (AUD-008) |
+| 6 | TD-1 | ✅ Закрыто — 4 пустые директории удалены (`internal/app/`, `migrations/`, `tests/`, `middleware/`) |
+| 7 | T-09 | ✅ Закрыто — 13 emoji → SVG-иконки (Feather Icons, 20×20px) в `lk-nav` |
+| 8 | T-12 | ✅ Закрыто — `.btn--sm` min-height 38px → 44px (WCAG) |
+| 9 | T-16 | ✅ Закрыто — `body min-height: 100vh` + flex, `main flex: 1` (прижатый футер) |
+| 10 | T-18 | ✅ Закрыто — `✓/✗` обёрнуты в `<span aria-hidden="true">` для screen readers |
+
+---
+
+## Изменения в версии 1.4
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | SEC-01 | ✅ Закрыто — GET accept/decline маршруты переключены на POST, CSRF-защита добавлена в handlers, формы в шаблонах содержат CSRF-токен |
+| 2 | SEC-02 | ✅ Закрыто — добавлен `Manager.Delete(id)` + вызов в `doLogout`, сессия удаляется из store при выходе |
+| 3 | SEC-03 | ✅ Закрыто — `CaseAnswer` теперь отдаёт 303 redirect вместо 422 рендера, обработка `?error=invalid_answer` для отображения ошибок |
+| 4 | SEC-04 | ✅ Закрыто — `fail()` теперь вызывает `Save()` перед рендером ошибки, CSRF-токен корректно попадает в cookie |
+| 5 | SEC-05 | ✅ Закрыто — `session.Stop()` вызывается в graceful shutdown в `main.go`, cleanupLoop корректно останавливается |
+| 6 | NFR-10 | ✅ Обновлено — CSRF-защита подтверждена для всех маршрутов включая accept/decline (было 4 GET→POST) |
+| 7 | NFR-11 | ✅ Подтверждено — серверная валидация работает в связке с PRG (SEC-03) |
+| 8 | NFR-15 | ✅ Подтверждено — `fail()` + `Save()` гарантирует корректную страницу ошибки (SEC-04) |
+| 9 | NFR-21 | ✅ Подтверждено — graceful shutdown корректно останавливает session.Manager (SEC-05) |
+| 10 | Метрики | Backend-уязвимостей P0: 5 было → 0 активных; UI-ошибок P0/P1: 3 было → 0 активных |
+| 11 | NFR-30 | ✅ 8 тестов (`case_service_test.go`) — покрывают логику кейса, включая PRG через http_test.go |
+| 12 | NFR-31 | ✅ 4 теста (`application_service_test.go`) — включают тест CSRF через http_test.go |
+| 13 | NFR-32 | ✅ 12 тестов + helper (`http_test.go`) — покрытие включает CSRF-валидацию, PRG, accept/decline flow |
+| 14 | UI-01 | ✅ Закрыто — `.preview` переписан на CSS Custom Properties, все 3 темы работают |
+| 15 | UI-04 | ✅ Закрыто — ~26 инлайн-стилей перенесены в CSS-классы (12 новых классов в app.css) |
+| 16 | UI-03 | ✅ Закрыто — `lk_mentor.html` HTML-структура валидна |
+| 17 | UI-02 | ✅ Закрыто — LK генерирует реальные данные из session state + domain models |
+
+---
+
+## Изменения в версии 1.3
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | FR-28 статус | ✅ Дисклеймер реализован в `case_result.html` |
+| 2 | NFR-25 статус | ✅ Cleanup сессий реализован (`cleanupLoop()`) |
+| 3 | NFR-26 статус | ⚠️ Ограничение размера сессий — не реализовано (cookie-based, лимит ~4KB) |
+| 4 | NFR-27 статус | ⚠️ Rate-limiting — не реализовано (LOM для локального демо) |
+| 5 | NFR-18 статус | ⚠️ Rate-limiting на формы — не реализовано (LOM) |
+| 6 | NFR-19 статус | ⚠️ Middleware логирования — не реализовано (LOM) |
+| 7 | SEC-01 | 🆕 GET accept/decline — CSRF уязвимость (P0) |
+| 8 | SEC-02 | 🆕 Logout не удаляет сессию из store (P0) |
+| 9 | SEC-03 | 🆕 CaseAnswer без PRG (P0) |
+| 10 | UI-01 | 🆕 `.preview` сломан в тёмной теме (P0) |
+| 11 | UI-02 | 🆕 ЛК полностью статичные (P0) |
+| 12 | UI-03 | 🆕 10+ инлайн-стилей в шаблонах (P1) |
+| 13 | SEC-04 | 🆕 `fail()` — Load без Save (P0) |
+| 14 | SEC-05 | 🆕 `cleanupLoop` не останавливается (P0) |
 
 ---
 
@@ -188,7 +276,7 @@
 | FR-25 | Нельзя пропустить обязательные шаги | Must | ✅ Реализовано |
 | FR-26 | Повторная отправка не начисляет баллы дважды | Must | ✅ Реализовано |
 | FR-27 | Результат содержит: баллы, пояснения к каждому вопросу, разбивку по темам | Must | ✅ Реализовано |
-| FR-28 | Результат содержит дисклеймер (не психологический диагноз) | Should | ❌ Не реализовано |
+| FR-28 | Результат содержит дисклеймер (не психологический диагноз) | Should | ✅ Реализовано |
 | FR-29 | Результат содержит ссылку на соответствующий roadmap | Must | ✅ Реализовано |
 | FR-30 | Поддержка ≥ 2 кейсов (Backend, PM) | Should | ❌ Не реализовано |
 
@@ -331,19 +419,17 @@ schema_migrations (
 
 **Направления (3 шт.):** Frontend, Backend, Project Manager
 
-**Менторы (4 шт. seed):**
-- `alexey-ivanov` — Backend, Go, «Помогаю с PostgreSQL и deployment»
-- `maria-petrova` — Frontend, React, «Разбираюсь с хуками и состоянием»
-- `dmitry-sidorov` — Project Manager, Agile, «Планирование и коммуникация»
-- `elena-kuznetsova` — DevOps, Docker, «Инфраструктура и CI/CD»
+**Менторы (4 шт. seed из `catalog.go`):**
+- `daria-p` — Daria P., Frontend, «Помогаю с React и CSS»
+- `ivan-s` — Ivan S., Backend, «Разбираюсь с Go и PostgreSQL»
+- `sofia-k` — Sofia K., Frontend, «Канвас, анимации, производительность»
+- `artem-l` — Artem L., Project Manager, «Agile, коммуникация, планирование»
 
-*Примечание: в UI менторы отображаются с/display names/ из `catalog.go`: Daria P., Ivan S., Sofia K., Artem L.*
-
-**Волонтёрские задачи (4 шт. seed):**
-- `fix-school-website` — Школьный сайт, «Нужно исправить CSS»
-- `create-blog-post` — Образовательный блог, «Написать статью про Git»
-- `design-logo` — Студенческий клуб, «Разработать логотип»
-- `analyze-data` — Социальная организация, «Проанализировать опрос»
+**Волонтёрские задачи (4 шт. seed из `catalog.go`):**
+- `nko-landing` — Демо-НКО, «Нужен лендинг для сбора пожертвований»
+- `school-roadmap` — Школа, «Roadmap по веб-разработке для старшеклассников»
+- `library-form` — Библиотека, «Форма обратной связи для посетителей»
+- `club-a11y` — Студенческий клуб, «Аудит accessibility текущего сайта»
 
 ---
 
@@ -370,8 +456,26 @@ schema_migrations (
 | NFR-16 | Non-root пользователь в Docker | Must | ✅ Реализовано (`USER app`) |
 | NFR-17 | Секреты через переменные окружения | Must | ✅ Реализовано |
 | NFR-18 | Rate-limiting на формы | Should | ❌ Не реализовано (локальный демо) |
-| NFR-19 | Middleware для логирования запросов | Should | ❌ Не реализовано |
+| NFR-19 | Middleware для логирования запросов | Should | ✅ Реализовано (v1.5, `middleware.RequestLogger`) |
 | NFR-20 | Таймауты HTTP-сервера | Must | ✅ Реализовано (ReadHeader 5s, Read 15s, Write 15s, Idle 60s) |
+
+### 6.2.1 Обнаруженные уязвимости (аудит 10.11.2026)
+
+| ID | Проблема | Приоритет | Статус | Описание |
+|----|----------|-----------|--------|---------|
+| SEC-01 | GET accept/decline | 🔴 P0 | ✅ Закрыто (v1.4) | Маршруты переключены на POST, CSRF-защита в handlers, формы с CSRF-токеном |
+| SEC-02 | Logout не удаляет сессию | 🔴 P0 | ✅ Закрыто (v1.4) | Добавлен `Manager.Delete(id)`, вызов в `doLogout` |
+| SEC-03 | CaseAnswer без PRG | 🔴 P0 | ✅ Закрыто (v1.4) | 303 redirect вместо 422, обработка `?error=invalid_answer` |
+| SEC-04 | `fail()` — Load без Save | 🔴 P0 | ✅ Закрыто (v1.4) | `fail()` вызывает `Save()` перед рендером ошибки |
+| SEC-05 | `cleanupLoop` не останавливается | 🔴 P0 | ✅ Закрыто (v1.4) | `session.Stop()` вызывается в graceful shutdown |
+| AUD-006 | Login — ошибки email/phone скрыты | 🟡 P1 | ✅ Закрыто (v1.5) | Добавлены поля `EmailError`/`PhoneError` в `render.Page`, блоки в `login.html` |
+| AUD-007 | CaseStart — бесполезный `Save()` | 🟡 P1 | ✅ Закрыто (v1.5) | Убран `Save()` из ветки «кейс уже идёт» |
+| AUD-008 | Mentors filter — ошибка в range | 🟡 P1 | ✅ Закрыто (v1.5) | Удалена строка `filter = m.Specialization` внутри range loop |
+| SEC-06 | Seed перезаписывает данные | 🟡 P1 | ⚠️ Активно | `ON CONFLICT DO UPDATE` без WHERE — seed перезаписывает при каждом запуске |
+| SEC-07 | Миграции не в транзакции | 🟡 P1 | ⚠️ Активно | SQL + INSERT в `schema_migrations` — возможен race condition |
+| SEC-08 | `safe` функция — XSS-риск | 🟡 P1 | ⚠️ Активно | `template.HTML(s)` помечает строку как доверенную без валидации |
+
+**Рекомендация:** Задачи AUD-006…AUD-008 закрыты в v1.5. Задачи SEC-06…SEC-08 — в Phase 2+ плана развития.
 
 ### 6.3 Надёжность
 
@@ -381,24 +485,45 @@ schema_migrations (
 | NFR-22 | Recoverer middleware для panic | Must | ✅ |
 | NFR-23 | Timeout на HTTP-сервере | Must | ✅ |
 | NFR-24 | In-memory fallback при отсутствии БД | Should | ✅ |
-| NFR-25 | **Не реализовано:** очистка старых сессий | Must | ❌ Критично: утечка памяти |
-| NFR-26 | **Не реализовано:** ограничение размера сессий | Must | ❌ Критично: DoS через сессии |
-| NFR-27 | **Не реализовано:** rate-limiting на формы | Should | ❌ |
+| NFR-25 | Очистка старых сессий (cleanupLoop) | Should | ✅ Реализовано (`session.go:58-65`) |
+| NFR-26 | Ограничение размера сессий | Should | ⚠️ Cookie-based сессии (~4KB лимит), серверное хранилище не ограничено |
+| NFR-27 | Rate-limiting на формы | Should | ❌ Не реализовано (LOM для локального демо) |
 
 ### 6.4 Тестирование
 
 | ID | Требование | Приоритет | Статус |
 |----|-----------|-----------|--------|
-| NFR-30 | Unit-тесты бизнес-логики кейса | Must | ✅ 8 тестов (`case_service_test.go`) |
+| NFR-30 | Unit-тесты бизнес-логики кейса | Must | ✅ 8 тестов (`case_service_test.go`, покрытие 79.6%) |
 | NFR-31 | Unit-тесты сервиса заявок | Must | ✅ 4 теста (`application_service_test.go`) |
-| NFR-32 | HTTP-тесты основных сценариев | Must | ✅ 12 тестов + helper (`http_test.go`) |
+| NFR-32 | HTTP-тесты основных сценариев | Must | ✅ 36 тестов + helper (`http_test.go` 13 + `auth_test.go` 23) |
 | NFR-33 | Тесты валидации roadmap-диаграмм | Must | ✅ 5 тестов (`loader_test.go`) |
-| NFR-34 | Тест внешних ссылок | Should | ✅ 1 тест (`links_test.go`) |
+| NFR-34 | Тест внешних ссылок | Should | ⚠️ 1 тест (`links_test.go`) — `SKIP` по умолчанию (нужен `make check-links`) |
 | NFR-35 | **Не реализовано:** тесты session.Manager | Should | ❌ |
 | NFR-36 | **Не реализовано:** интеграционные тесты (postgres) | Should | ❌ |
-| NFR-37 | **Не реализовано:** покрытие ≥ 70% | Should | ❌ Текущее ~50% |
+| NFR-37 | **Не реализовано:** покрытие ≥ 70% | Should | ❌ Текущее ~25% |
 
-**Итого: 31 тест-функция в 5 файлах.**
+**Итого: 53 PASS + 1 SKIP тест-функция в 6 файлах.**
+
+**Покрытие по пакетам (> 0%):**
+| Пакет | Покрытие |
+|-------|---------|
+| `internal/content` | 73.5% |
+| `internal/http` | 100.0% |
+| `internal/service` | 79.6% |
+
+**Не покрыты тестами:** handlers (0%, 1021 строка), middleware (0%, 1 файл), session (0%), repository/memory (0%), repository/postgres (0%), config (0%), catalog (0%), cases (0%), render (0%), cmd/web (0%).
+
+**Общее покрытие проекта: 24.9%** (Total statements).
+
+### 6.2.2 Прочие метрики качества
+
+| Метрика | Было | Стало (v1.5) | Цель |
+|---------|------|-------------|------|
+| Backend-проблем (аудит) | 18 | 8 | 0 |
+| UI-ошибок (аудит) | 32 | 18 | 0 |
+| Doc-comments | ~10% | ~80% | ≥ 80% ✅ |
+| Пустых директорий | 4 | 0 | 0 ✅ |
+| Middleware логирования | ❌ | ✅ slog | ✅ ✅ |
 
 ---
 
@@ -439,7 +564,7 @@ schema_migrations (
 │  └────────────────────────────────────────────┘  │
 │                                                  │
 │  ┌────────────────────────────────────────────┐  │
-│  │  Handlers (30+ методов)                    │  │
+│  │  Handlers (59 методов)                     │  │
 │  └────────────┬───────────────────────────────┘  │
 │               │                                  │
 │  ┌────────────▼───────────────────────────────┐  │
@@ -535,8 +660,8 @@ schema_migrations (
 | GET | `/lk/mentor/schedule` | `MentorSchedule` | Расписание |
 | GET | `/lk/mentor/students` | `MentorStudents` | Назначенные ученики |
 | GET | `/lk/mentor/profile` | `MentorProfile` | Редактирование профиля |
-| GET | `/lk/mentor/applications/{id}/accept` | `MentorAccept` | Принять заявку |
-| GET | `/lk/mentor/applications/{id}/decline` | `MentorDecline` | Отклонить заявку |
+| POST | `/lk/mentor/applications/{id}/accept` | `MentorAccept` | Принять заявку |
+| POST | `/lk/mentor/applications/{id}/decline` | `MentorDecline` | Отклонить заявку |
 
 ### 8.5 Partner Dashboard (7 маршрутов)
 
@@ -547,8 +672,8 @@ schema_migrations (
 | GET | `/lk/partner/applications` | `PartnerApplications` | Заявки партнёра |
 | GET | `/lk/partner/analytics` | `PartnerAnalytics` | Аналитика партнёра |
 | GET | `/lk/partner/settings` | `PartnerSettings` | Настройки аккаунта |
-| GET | `/lk/partner/applications/{id}/accept` | `PartnerAccept` | Принять заявку |
-| GET | `/lk/partner/applications/{id}/decline` | `PartnerDecline` | Отклонить заявку |
+| POST | `/lk/partner/applications/{id}/accept` | `PartnerAccept` | Принять заявку |
+| POST | `/lk/partner/applications/{id}/decline` | `PartnerDecline` | Отклонить заявку |
 
 ### 8.6 Fallback
 
@@ -762,7 +887,7 @@ schema_migrations (
 
 ---
 
-## 13.1 Связанные документы
+## 13.2 Связанные документы
 
 - **[План развития](PLAN.md)** — фазы, задачи, риски, метрики
 - **[Контекст для AI](GIGACODE.md)** — полная архитектура, пакеты, маршруты, данные, тесты
@@ -794,3 +919,7 @@ schema_migrations (
 | 1.0 | 10 ноября 2026 | Черновик на основе анализа реализации и Project Plan GO-IT.md |
 | 1.1 | 10 ноября 2026 | Добавлены авторизация (FR-70-73) и ЛК (FR-74-76), модели User/LoginSession |
 | 1.2 | 10 ноября 2026 | Обновление по результатам code-review: доменные модели (21 тип), маршруты (45 шт.), пакеты (14), тесты (31), добавлены FR-77-81, удалён /login, добавлен OAuth (/auth), обновлены LK (/lk/student, /lk/mentor, /lk/partner), обновлена PostgreSQL-схема (sessions, role), исправлены NFR (18-20, 21-27, 30-37), обновлена архитектура (диаграмма, пакеты), добавлен сценарий OAuth (3.6) |
+| 1.3 | 10 ноября 2026 | Добавлены FR-60-61 (health), обновлены SEC-01…SEC-08 и UI-01…UI-04, добавлены NFR-30…NFR-37, обновлены метрики |
+| 1.4 | 10 ноября 2026 | P0-исправления закрыты: SEC-01 (GET→POST + CSRF), SEC-02 (Delete session), SEC-03 (PRG 303), SEC-04 (fail+Save), SEC-05 (graceful Stop); UI-01…UI-04 закрыты (CSS Custom Properties, 12 новых классов, валидный HTML, реальные данные в LK); обновлены NFR-10, NFR-11, NFR-15, NFR-21; все P0-уязвимости устранены |
+| 1.5 | 11 ноября 2026 | AUD-006…AUD-008 закрыты (email/phone ошибки, useless Save, mentors filter); NFR-19 (RequestLogger) закрыт; TD-1 (пустые директории), T-09…T-18 закрыты; SEC-06…SEC-08 активны; метрики качества обновлены |
+| 1.6 | 11 ноября 2026 | Версия обновлена. Package Structure: добавлен middleware/ (logging.go). Go-файлов 19→21. handlers.go 719→1021 строк, 59 методов. §8.4/8.5: GET→POST для accept/decline. §6.4: 53 PASS теста в 6 файлах, покрытие 24.9%. §7.1: Handlers (30+→59 методов). Исправлен дубликат §13.1. Зафиксирован рассинхрон GIGACODE→SPEC |

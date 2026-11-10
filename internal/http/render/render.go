@@ -67,6 +67,8 @@ type Page struct {
 	Alert       string
 	AlertError  string
 	Data        any
+	EmailError  string
+	PhoneError  string
 }
 
 // HTML сначала полностью рендерит страницу в буфер, чтобы при ошибке шаблона

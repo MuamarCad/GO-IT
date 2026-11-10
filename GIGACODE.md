@@ -1,10 +1,49 @@
 # GO-IT — GIGACODE Context
 
-**Версия:** 1.0
-**Дата:** 10 ноября 2026
+**Версия:** 1.3
+**Дата:** 11 ноября 2026
 **Статус:** Действующий
 
-> Связанные документы: [Спецификация](SPECIFICATION.md) · [План развития](PLAN.md) · [DOC-STYLE](DOC-STYLE.md)
+> Связанные документы: [Спецификация v1.5](SPECIFICATION.md) · [План развития v1.5](PLAN.md) · [DOC-STYLE](DOC-STYLE.md)
+
+## Изменения в версии 1.3 (Round 3: Spec Sync)
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | Package Structure | middleware/ больше не пустой (`logging.go`). Go-файлов: 19 → 21. Пакетов: 14 |
+| 2 | handlers.go | Методов Server: 59 (было 30+), строки: 1022 (было ~719) |
+| 3 | HTTP Routes | Все 45 маршрутов подтверждены в router.go |
+| 4 | Middleware Chain | 5 middleware: RequestID → RealIP → Recoverer → LimitBody → RequestLogger |
+| 5 | RequestLogger | slog middleware добавлен, формат: `[timestamp] method path status duration request_id` |
+| 6 | Doc-comments | ~80% coverage (domain/models.go + сервисы документированы) |
+| 7 | SEC-05 (TD-2) | cleanupLoop Stop() вызывается в graceful shutdown (main.go) |
+| 8 | Package counts | internal/content: 3, internal/http: 3, internal/service: 4, internal/http/handlers: 1 |
+
+## Изменения в версии 1.2 (Round 2 P1)
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | AUD-006 | ✅ Закрыто — ошибки email/phone отображаются в `login.html` |
+| 2 | AUD-007 | ✅ Закрыто — бесполезный `Save()` удалён из `CaseStart` |
+| 3 | AUD-008 | ✅ Закрыто — фильтрация менторов `?dir=Backend` работает |
+| 4 | TD-1 | ✅ Закрыто — 4 пустые директории удалены |
+| 5 | TD-3 | ✅ Закрыто — middleware `RequestLogger` на slog |
+| 6 | TD-8 | ✅ Закрыто — 22 doc-comments к domain models |
+| 7 | T-09 | ✅ Закрыто — emoji → SVG в `lk-nav` (13 иконок) |
+| 8 | T-12 | ✅ Закрыто — `btn--sm` min-height → 44px WCAG |
+| 9 | T-16 | ✅ Закрыто — `body min-height: 100vh`, flex-прижатый футер |
+| 10 | T-18 | ✅ Закрыто — `✓/✗` `aria-hidden` для screen readers |
+| 11 | Security Features | Добавлен RequestLogger |
+| 12 | Known Gaps | Закрыты TD-1, TD-3 |
+| 13 | Package Structure | `middleware/` — 1 файл (`logging.go`) |
+
+## Изменения в версии 1.1
+
+| # | Изменение | Описание |
+|---|-----------|---------|
+| 1 | Security Features | Обновлено — CSRF подтверждён (GET→POST accept/decline), PRG реализован (303 redirect), session cleanup корректен (graceful Stop) |
+| 2 | Known Gaps | Убраны закрытые: SEC-01…SEC-05 (P0), TD-2 (cleanupLoop Stop) |
+| 3 | Testing | Без изменений — тесты не расширялись, покрытие ~50% |
 
 ## Directory Overview
 
@@ -44,7 +83,7 @@ Browser → Chi Router → Handlers → Services → Repositories → PostgreSQL
                    CSRF          Models    (Markdown → HTML)
 ```
 
-### Package Structure (14 packages, 19 Go Files)
+### Package Structure (14 packages, 21 Go Files)
 
 | Package | Files | Purpose |
 |---------|-------|---------|
@@ -54,14 +93,14 @@ Browser → Chi Router → Handlers → Services → Repositories → PostgreSQL
 | `internal/catalog` | 1 | Seed data: 3 directions, 4 mentors, 4 volunteer tasks |
 | `internal/cases` | 1 | Career case data: 1 case (Frontend), 4 questions, 3 options each |
 | `internal/session` | 1 | Cookie-based sessions, CSRF tokens, in-memory store |
-| `internal/content` | 2 | Markdown → HTML via goldmark, XSS via bluemonday, diagram.json validation |
-| `internal/http` | 2 | Chi router: 45 routes (incl. auth + lk), http_test.go |
-| `internal/http/handlers` | 1 | 30+ HTTP handlers in single `Server` struct (~719 lines) |
+| `internal/content` | 3 | Markdown → HTML via goldmark, XSS via bluemonday, diagram.json validation (`loader.go`, `loader_test.go`, `links_test.go`) |
+| `internal/http` | 3 | Chi router: 45 routes, http_test.go, auth_test.go (`router.go`, `http_test.go`, `auth_test.go`) |
+| `internal/http/handlers` | 1 | 59 HTTP methods in single `Server` struct (~1022 lines) |
 | `internal/http/render` | 1 | `html/template` wrapper with custom functions |
-| `internal/service` | 2 | `CaseService` (quiz logic), `ApplicationService` (form validation) |
+| `internal/service` | 4 | `CaseService` (quiz logic), `ApplicationService` (form validation) + tests (`case_service.go`, `case_service_test.go`, `application_service.go`, `application_service_test.go`) |
 | `internal/repository/memory` | 1 | In-memory store with `sync.Mutex` (development mode) |
 | `internal/repository/postgres` | 1 | PostgreSQL store via `pgxpool`, embed migrations + seed |
-| `internal/http/middleware` | 0 | Empty stub — placeholder for future middleware |
+| `internal/http/middleware` | 1 | `logging.go` — `RequestLogger` middleware на slog |
 
 ### HTTP Routes (45 total)
 
@@ -258,33 +297,46 @@ schema_migrations (version PK)
 
 ## Testing
 
-**Test files:** 5 test files with 31 test functions
+**Test files:** 6 test files with 53 PASS + 1 SKIP test functions
 
 | File | Tests | Coverage |
 |------|-------|----------|
-| `internal/http/http_test.go` | 12 test functions + testServer helper | Home/404, case flow, form validation, CSRF, mentor/volunteer apply, all pages render, roadmap diagrams, topic panels |
+| `internal/http/http_test.go` | 13 test functions + testServer helper | Home/404, case flow, form validation, CSRF, mentor/volunteer apply, all pages render, roadmap diagrams, topic panels |
+| `internal/http/auth_test.go` | 23 tests | Auth pages, OAuth redirect, LK without session, logout clearing session, session cleanup |
 | `internal/service/case_service_test.go` | 8 | Happy path, unknown option, skip prevention, no double score, missing state |
 | `internal/service/application_service_test.go` | 4 | Valid application, unknown target, field validation |
 | `internal/content/loader_test.go` | 5 | Diagram JSON validation (17 negative cases), real roadmaps, no-diagram case |
-| `internal/content/links_test.go` | 1 | External link alive check (via `make check-links`) |
+| `internal/content/links_test.go` | 1 | External link alive check (via `make check-links`) — SKIP |
 
-**Not yet tested:** `session.Manager`, `config` package, integration tests with postgres
+**Overall coverage:** 24.9% (Total statements).
+
+**Покрытые пакеты (> 0%):**
+| Пакет | Покрытие |
+|-------|---------|
+| `internal/content` | 73.5% |
+| `internal/http` | 100.0% |
+| `internal/service` | 79.6% |
+
+**Не покрыты тестами:** `internal/http/handlers` (0%, 1021 строка), `internal/http/middleware` (0%, 1 файл), `internal/session` (0%), `internal/repository/memory` (0%), `internal/repository/postgres` (0%), `internal/config` (0%), `internal/catalog` (0%), `internal/cases` (0%), `internal/http/render` (0%), `cmd/web` (0%).
 
 ---
 
 ## Security Features
 
-| Feature | Implementation |
-|---------|---------------|
-| CSRF protection | Cookie-based session tokens, HMAC comparison on POST/PUT/PATCH/DELETE |
-| XSS sanitization | bluemonday UGP policy on all Markdown output |
-| SQL injection prevention | pgx parameterized queries (`$1`, `$2`) |
-| Body size limit | 1 MB via `http.MaxBytesReader` |
-| Error safety | No SQL leaks, no stack traces in 500 responses |
-| Docker | Non-root user (`USER app`) |
-| Secrets | All via ENV variables, `.env` in `.gitignore` |
-| Timeouts | ReadHeaderTimeout 5s, ReadTimeout 15s, WriteTimeout 15s, IdleTimeout 60s |
-| Graceful shutdown | SIGINT/SIGTERM handled, 8-second timeout |
+| Feature | Implementation | Статус (v1.5) |
+|---------|---------------|---------------|
+| CSRF protection | Cookie-based session tokens, HMAC comparison on POST/PUT/PATCH/DELETE | ✅ Все маршруты, включая accept/decline (SEC-01) |
+| XSS sanitization | bluemonday UGP policy on all Markdown output | ✅ |
+| SQL injection prevention | pgx parameterized queries (`$1`, `$2`) | ✅ |
+| Body size limit | 1 MB via `http.MaxBytesReader` | ✅ |
+| Error safety | No SQL leaks, no stack traces in 500 responses. `fail()` calls `Save()` before render | ✅ (SEC-04) |
+| Docker | Non-root user (`USER app`) | ✅ |
+| Secrets | All via ENV variables, `.env` in `.gitignore` | ✅ |
+| Timeouts | ReadHeaderTimeout 5s, ReadTimeout 15s, WriteTimeout 15s, IdleTimeout 60s | ✅ |
+| Graceful shutdown | SIGINT/SIGTERM handled, 8-second timeout, `session.Stop()` called | ✅ (SEC-05) |
+| PRG (Post/Redirect/Get) | `CaseAnswer` returns 303 redirect; error via `?error=invalid_answer` query | ✅ (SEC-03) |
+| Session cleanup | `cleanupLoop()` runs hourly, `Manager.Delete(id)` in `doLogout`, `Stop()` on shutdown | ✅ (SEC-02, SEC-05) |
+| Request logging | `middleware.RequestLogger` on slog: `[timestamp] method path status duration request_id` | ✅ (v1.5, TD-3) |
 
 ---
 
@@ -294,25 +346,33 @@ schema_migrations (version PK)
 - **No CI/CD:** No GitHub Actions or GitLab CI configured
 - **No linter:** No golangci-lint or staticcheck in Makefile
 - **Test co-location:** `_test.go` files next to source files (standard Go)
-- **No code comments:** Source has minimal or no doc-comments on exported identifiers
-- **Single handler file:** All 30+ handlers in `internal/http/handlers/handlers.go` (~719 lines)
+- **Doc-comments:** ~80% coverage (v1.5, TD-8) — all 22 exported types in `domain/models.go` documented; services (CaseService, ApplicationService) have doc-comments
+- **Single handler file:** All 59 handlers in `internal/http/handlers/handlers.go` (~1022 lines)
 - **Package aliasing:** `web` package is an alias for `internal/http` (imported as `web "go-it/internal/http"`)
+- **Request logging:** `middleware.RequestLogger` — logs `[timestamp] GET /path 200 45ms` with request_id, added as first middleware in chain
 
 ---
 
 ## Known Gaps & Technical Debt
 
-1. **Empty directories:** `internal/app/`, `internal/http/middleware/`, `migrations/`, `tests/` — stub directories not used (note: `migrations/` at root is a duplicate; real migrations are in `internal/repository/postgres/migrations/`)
-2. **No session cleanup:** In-memory `session.Manager` never evicts old sessions — memory leak under load
-3. **No request logging:** No middleware for logging HTTP method, path, status, duration
-4. **Single handler file:** `handlers.go` (~719 lines) — no separation by domain
-5. **Hardcoded directions:** `catalog.Directions()` called directly in handlers, bypassing `Catalog` interface
-6. **Migrations embedded in binary:** SQL files are `//go:embed`ed — can't apply migrations independently
-7. **Seed on every connect:** `ON CONFLICT DO UPDATE` runs on every app startup
-8. **No doc-comments:** Package and type documentation is minimal
-9. **No CI/CD:** No automated testing or linting pipeline
-10. **No integration tests:** No test against real postgres (testcontainers or temp container)
-11. **Session auth in-memory:** Sessions stored only in memory — lost on restart (acceptable for MVP)
+1. ~~**Empty directories:** `internal/app/`, `internal/http/middleware/`, `migrations/`, `tests/` — stub directories not used~~ ✅ Закрыто (v1.5) — все 4 удалены |
+2. ~~**No session cleanup:** In-memory `session.Manager` never evicts old sessions — memory leak under load~~ ✅ Закрыто (v1.4): `cleanupLoop()` + `Manager.Stop()` + `Manager.Delete(id)` |
+3. ~~**No request logging:** No middleware for logging HTTP method, path, status, duration~~ ✅ Закрыто (v1.5): `middleware.RequestLogger` на slog |
+4. **Single handler file:** `handlers.go` (~1022 lines, 59 methods) — no separation by domain
+5. ~~**CSRF-уязвимость на accept/decline:** GET-маршруты для мутаций без CSRF~~ ✅ Закрыто (v1.4): маршруты переключены на POST, CSRF-токен в формах |
+6. ~~**Logout не удаляет сессию из store~~ ✅ Закрыто (v1.4): `Manager.Delete(id)` в `doLogout` |
+7. ~~**CaseAnswer без PRG: F5 = повторный POST~~ ✅ Закрыто (v1.4): 303 redirect + `?error=invalid_answer` |
+8. ~~**`fail()` не вызывает Save(): CSRF-токен не попадает в cookie~~ ✅ Закрыто (v1.4): `fail()` теперь вызывает `Save()` |
+9. ~~**cleanupLoop не останавливается** ✅ Закрыто (v1.4): `session.Stop()` в graceful shutdown~~ |
+10. Hardcoded directions: `catalog.Directions()` called directly in handlers, bypassing `Catalog` interface
+11. Migrations embedded in binary: SQL files are `//go:embed`ed — can't apply migrations independently
+12. Seed on every connect: `ON CONFLICT DO UPDATE` runs on every app startup (SEC-06)
+13. ~~**No doc-comments:** Package and type documentation is minimal~~ ✅ Закрыто (v1.5): ~80% — 22 doc-comments в `domain/models.go` |
+14. No CI/CD: No automated testing or linting pipeline
+15. No integration tests: No test against real postgres (testcontainers or temp container)
+16. Session auth in-memory: Sessions stored only in memory — lost on restart (acceptable for MVP)
+17. **SEC-07:** Миграции не в транзакции — возможный race condition
+18. **SEC-08:** `safe` функция — `template.HTML(s)` без валидации
 
 ---
 
@@ -378,3 +438,13 @@ Located in `draft/`:
 | Fonts | 6 WOFF2 files + 2 license files |
 | License (htmx) | 1 (LICENSE-htmx.txt) |
 | Images | 1 (favicon.svg) |
+
+### Middleware Chain
+
+| Order | Middleware | Purpose |
+|-------|-----------|---------|
+| 1 | `RequestID` | Генерация уникального request ID для трассировки |
+| 2 | `RealIP` | Извлечение реального IP клиента (X-Forwarded-For) |
+| 3 | `Recoverer` | Graceful обработка panic |
+| 4 | `LimitBody` | Ограничение тела запроса 1 МБ |
+| 5 | `RequestLogger` | slog logging: `[timestamp] GET /path 200 45ms request_id` |

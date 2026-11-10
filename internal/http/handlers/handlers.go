@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"unicode"
@@ -109,7 +110,9 @@ func (s *Server) CaseStart(w http.ResponseWriter, r *http.Request) {
 		s.NotFound(w, r)
 		return
 	}
-	s.Sessions.Save(w, id, sess)
+	if r.URL.Query().Get("error") == "invalid_answer" {
+		view.Error = "Неверный вариант. Выберите ответ ещё раз."
+	}
 	s.Render.HTML(w, "case_question.html", render.Page{
 		Title:  view.Case.Title + " — GO-IT",
 		Active: "cases",
@@ -137,13 +140,7 @@ func (s *Server) CaseAnswer(w http.ResponseWriter, r *http.Request) {
 	sess.Attempt = state
 	s.Sessions.Save(w, id, sess)
 	if errors.Is(err, service.ErrUnknownOption) && outcome.Next != nil {
-		s.Render.HTML(w, "case_question.html", render.Page{
-			Title:      outcome.Next.Case.Title + " — GO-IT",
-			Active:     "cases",
-			CSRF:       sess.CSRF,
-			FlashError: outcome.Next.Error,
-			Data:       *outcome.Next,
-		}, http.StatusUnprocessableEntity)
+		http.Redirect(w, r, "/cases/"+slug+"?error=invalid_answer", http.StatusSeeOther)
 		return
 	}
 	if err != nil {
@@ -209,7 +206,6 @@ func (s *Server) Mentors(w http.ResponseWriter, r *http.Request) {
 		for _, m := range items {
 			if strings.EqualFold(m.Specialization, filter) {
 				shown = append(shown, m)
-				filter = m.Specialization
 			}
 		}
 	}
@@ -408,7 +404,8 @@ type errorView struct {
 
 // fail показывает оформленную страницу ошибки, не раскрывая технических деталей.
 func (s *Server) fail(w http.ResponseWriter, r *http.Request, status int, heading, message string) {
-	_, sess := s.Sessions.Load(r)
+	id, sess := s.Sessions.Load(r)
+	s.Sessions.Save(w, id, sess)
 	s.Render.HTML(w, "error.html", render.Page{
 		Title: heading + " — GO-IT",
 		CSRF:  sess.CSRF,
@@ -478,10 +475,10 @@ func (s *Server) LoginPost(w http.ResponseWriter, r *http.Request) {
 		if err := validateEmail(email); err != nil {
 			s.Sessions.Save(w, id, sess)
 			s.Render.HTML(w, "login.html", render.Page{
-				Title:     "Войти — GO-IT",
-				Active:    "",
-				CSRF:      sess.CSRF,
-				Data:      map[string]any{"EmailError": err.Error()},
+				Title:      "Войти — GO-IT",
+				Active:     "",
+				CSRF:       sess.CSRF,
+				EmailError: err.Error(),
 				AlertError: "Проверьте правильность email.",
 			}, http.StatusOK)
 			return
@@ -493,10 +490,10 @@ func (s *Server) LoginPost(w http.ResponseWriter, r *http.Request) {
 		if err := validatePhone(phone); err != nil {
 			s.Sessions.Save(w, id, sess)
 			s.Render.HTML(w, "login.html", render.Page{
-				Title:     "Войти — GO-IT",
-				Active:    "",
-				CSRF:      sess.CSRF,
-				Data:      map[string]any{"PhoneError": err.Error()},
+				Title:      "Войти — GO-IT",
+				Active:     "",
+				CSRF:       sess.CSRF,
+				PhoneError: err.Error(),
 				AlertError: "Проверьте правильность телефона.",
 			}, http.StatusOK)
 			return
@@ -559,6 +556,33 @@ func (s *Server) LoginProvider(w http.ResponseWriter, r *http.Request) {
 
 // ---------- ЛК: Ученик ----------
 
+// studentRecommendedCase — данные для рекомендации кейса в ЛК ученика.
+type studentRecommendedCase struct {
+	Slug       string
+	Title      string
+	CurrentStep int
+	TotalSteps int
+	Topic      string
+}
+
+// studentMentorRecommend — данные для рекомендации ментора в ЛК ученика.
+type studentMentorRecommend struct {
+	Slug           string
+	Name           string
+	Specialization string
+	Location       string
+}
+
+// studentCompletedCase — данные о пройденном кейсе в ЛК ученика.
+type studentCompletedCase struct {
+	Direction string
+	Title     string
+	Correct   int
+	Total     int
+	Percent   int
+	Passed    bool
+}
+
 func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current string) {
 	id, sess := s.Sessions.Load(r)
 	if !sess.LoggedIn {
@@ -566,14 +590,137 @@ func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current s
 		return
 	}
 	s.Sessions.Save(w, id, sess)
+
+	// Считаем прогресс из сессии.
+	attempt := sess.Attempt
+	casesCompleted := 0
+	points := 0
+	progressPercent := 0
+	activeRoadmap := "Не выбран"
+	currentLevel := 1
+	totalLevels := 5
+	nextCaseHint := "Выберите направление и пройдите первый кейс, чтобы начать обучение."
+
+	if attempt.Completed {
+		casesCompleted = 1
+		// Для MVP: если кейс пройден, начисляем бонусные баллы.
+		points = attempt.Index // кол-во отвеченных вопросов = баллы
+	} else if attempt.Slug != "" {
+		// Ищем кейс в сервисе для расчёта шага.
+		if c, err := s.CaseSvc.Get(attempt.Slug); err == nil {
+			casesCompleted = 0
+			percent := 0
+			if totalQ := len(c.Questions); totalQ > 0 {
+				percent = (attempt.Index * 100) / totalQ
+				if percent > 100 {
+					percent = 100
+				}
+			}
+			progressPercent = percent
+			// Профильная информация из кейса.
+			activeRoadmap = c.Profession
+		}
+	} else {
+		// Нет активного кейса — ищем неначатый.
+		if c, err := s.CaseSvc.Get("frontend"); err == nil {
+			_ = c
+		}
+	}
+
+	// Рекомендации: неначатые кейсы.
+	var recommendedCases []studentRecommendedCase
+	for _, d := range catalog.Directions() {
+		if d.CaseSlug != "" {
+			if c, err := s.CaseSvc.Get(d.CaseSlug); err == nil {
+				rc := studentRecommendedCase{
+					Slug:       c.Slug,
+					Title:      c.Title,
+					TotalSteps: len(c.Questions),
+					Topic:      c.Intro,
+				}
+				// Если это текущий кейс — подставляем шаг.
+				if attempt.Slug == c.Slug && !attempt.Completed {
+					rc.CurrentStep = attempt.Index + 1
+					if rc.CurrentStep > rc.TotalSteps {
+						rc.CurrentStep = rc.TotalSteps
+					}
+				}
+				recommendedCases = append(recommendedCases, rc)
+			}
+		}
+	}
+
+	// Рекомендации менторов из каталога.
+	var recommendedMentors []studentMentorRecommend
+	for _, m := range catalog.SeedMentors() {
+		recommendedMentors = append(recommendedMentors, studentMentorRecommend{
+			Slug:           m.Slug,
+			Name:           m.DisplayName,
+			Specialization: m.Specialization,
+			Location:       m.Format,
+		})
+	}
+
+	// Завершённые кейсы: показываем из сессии.
+	var completedCases []studentCompletedCase
+	if attempt.Completed && attempt.Slug != "" {
+		if c, err := s.CaseSvc.Get(attempt.Slug); err == nil {
+			correct := 0
+			for _, q := range c.Questions {
+				if chosenID, ok := attempt.Answers[q.ID]; ok {
+					for _, o := range q.Options {
+						if o.ID == chosenID && o.Correct {
+							correct++
+						}
+					}
+				}
+			}
+			total := len(c.Questions)
+			percent := 0
+			if total > 0 {
+				percent = (correct * 100) / total
+			}
+			capProf := c.Profession
+			// capitalize first letter
+			if len(capProf) > 0 {
+				r := []rune(capProf)
+				r[0] = unicode.ToUpper(r[0])
+				capProf = string(r)
+			}
+			completedCases = append(completedCases, studentCompletedCase{
+				Direction: capProf,
+				Title:     c.Title,
+				Correct:   correct,
+				Total:     total,
+				Percent:   percent,
+				Passed:    percent >= 60,
+			})
+		}
+	}
+
+	data := map[string]any{
+		"UserName":          "Алексей С.",
+		"Initials":          "АС",
+		"CasesCompleted":    casesCompleted,
+		"Points":            points,
+		"RoadmapsOpened":    casesCompleted,
+		"Consultations":     0,
+		"ActiveRoadmap":     activeRoadmap,
+		"CurrentLevel":      currentLevel,
+		"TotalLevels":       totalLevels,
+		"ProgressPercent":   progressPercent,
+		"NextCaseHint":      nextCaseHint,
+		"RecommendedCases":  recommendedCases,
+		"AvailableMentors":  recommendedMentors,
+		"CompletedCases":    completedCases,
+		"NextConsultation":  nil, // будет при интеграции с расписанием
+	}
+
 	s.Render.HTML(w, "lk_student.html", render.Page{
 		Title:  "Личный кабинет · Ученик — GO-IT",
 		Active: current,
 		CSRF:   sess.CSRF,
-		Data: map[string]any{
-			"UserName":  "Алексей С.",
-			"Initials":  "АС",
-		},
+		Data:   data,
 	}, http.StatusOK)
 }
 
@@ -664,12 +811,17 @@ func (s *Server) lkMentorAction(w http.ResponseWriter, r *http.Request, action s
 		http.Redirect(w, r, "/auth", http.StatusSeeOther)
 		return
 	}
+	if !s.Sessions.CheckCSRF(r, sess) {
+		http.Redirect(w, r, "/lk/mentor/applications", http.StatusSeeOther)
+		return
+	}
+	_ = chi.URLParam(r, "id")
 	s.Sessions.Save(w, id, sess)
 	msg := "Заявка принята"
 	if action == "declined" {
 		msg = "Заявка отклонена"
 	}
-	http.Redirect(w, r, "/lk/mentor/applications?msg="+msg, http.StatusSeeOther)
+	http.Redirect(w, r, "/lk/mentor/applications?msg="+url.QueryEscape(msg), http.StatusSeeOther)
 }
 
 // ---------- ЛК: Партнёр ----------
@@ -746,12 +898,17 @@ func (s *Server) lkPartnerAction(w http.ResponseWriter, r *http.Request, action 
 		http.Redirect(w, r, "/auth", http.StatusSeeOther)
 		return
 	}
+	if !s.Sessions.CheckCSRF(r, sess) {
+		http.Redirect(w, r, "/lk/partner/applications", http.StatusSeeOther)
+		return
+	}
+	_ = chi.URLParam(r, "id")
 	s.Sessions.Save(w, id, sess)
 	msg := "Отклик принят"
 	if action == "declined" {
 		msg = "Отклик отклонён"
 	}
-	http.Redirect(w, r, "/lk/partner/applications?msg="+msg, http.StatusSeeOther)
+	http.Redirect(w, r, "/lk/partner/applications?msg="+url.QueryEscape(msg), http.StatusSeeOther)
 }
 
 // ---------- Logout ----------
@@ -777,6 +934,8 @@ func (s *Server) doLogout(w http.ResponseWriter, r *http.Request, redirectOnFail
 		http.Redirect(w, r, "/auth", http.StatusSeeOther)
 		return
 	}
+	id, _ := s.Sessions.Load(r)
+	s.Sessions.Delete(id)
 	// CSRF проверка не обязательна при logout, но не помешает.
 	// Сбрасываем сессию: устанавливаем cookie с MaxAge = -0
 	http.SetCookie(w, &http.Cookie{

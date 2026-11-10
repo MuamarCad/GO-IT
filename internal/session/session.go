@@ -81,6 +81,13 @@ func (m *Manager) Cleanup() {
 	}
 }
 
+// Delete удаляет сессию с указанным ID из хранилища.
+func (m *Manager) Delete(id string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.store, id)
+}
+
 // Stop останавливает фоновый cleanup.
 func (m *Manager) Stop() {
 	if m.cancel != nil {

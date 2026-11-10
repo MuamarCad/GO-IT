@@ -2,6 +2,7 @@ package web
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -41,7 +42,7 @@ func testServer(t *testing.T) *httptest.Server {
 		Catalog:  store,
 		Content:  content.New("content"),
 	}
-	return httptest.NewServer(NewRouter(h, "static"))
+	return httptest.NewServer(NewRouter(slog.Default(), h, "static"))
 }
 
 func moduleRoot(t *testing.T) string {

@@ -2,6 +2,7 @@ package web
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -41,7 +42,7 @@ func authTestServer(t *testing.T) *httptest.Server {
 		Catalog:  store,
 		Content:  content.New("content"),
 	}
-	ts := httptest.NewServer(NewRouter(h, "static"))
+	ts := httptest.NewServer(NewRouter(slog.Default(), h, "static"))
 	t.Cleanup(func() {
 		ts.Close()
 		s.Stop()

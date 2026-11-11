@@ -1,29 +1,6 @@
 {{define "content"}}
 <div class="lk-layout">
-  <aside class="lk-sidebar">
-    <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
-      <div>
-        <div class="lk-user-name">{{.Data.UserName}}</div>
-        <div class="lk-user-role">Ученик</div>
-      </div>
-    </div>
-    <ul class="lk-nav">
-      <li><a href="/lk/student"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H8v6H4a1 1 0 0 1-1-1z"/></svg> Обзор</a></li>
-      <li><a href="/lk/student/cases" aria-current="page"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> Мои кейсы</a></li>
-      <li><a href="/lk/student/roadmap"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Roadmap</a></li>
-      <li><a href="/lk/student/mentors"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Менторы</a></li>
-      <li><a href="/lk/student/volunteering"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.37.37-.37-.37a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42Z"/></svg> Волонтёрство</a></li>
-      <li><a href="/lk/student/settings"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Настройки</a></li>
-      <li class="lk-logout-wrapper">
-        <form method="post" action="/lk/student/logout">
-          <button type="submit" class="lk-logout-btn">
-            <svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Выйти
-          </button>
-        </form>
-      </li>
-    </ul>
-  </aside>
+  {{template "lk_sidebar" .}}
 
   <div class="lk-main">
     <h1 class="lk-heading">Мои кейсы</h1>

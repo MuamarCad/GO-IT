@@ -1,30 +1,6 @@
 {{define "content"}}
 <div class="lk-layout">
-  <!-- Боковая панель -->
-  <aside class="lk-sidebar">
-    <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
-      <div>
-        <div class="lk-user-name">{{.Data.UserName}}</div>
-        <div class="lk-user-role">Ученик</div>
-      </div>
-    </div>
-    <ul class="lk-nav">
-      <li><a href="/lk/student" aria-current="page"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H8v6H4a1 1 0 0 1-1-1z"/></svg> Обзор</a></li>
-      <li><a href="/lk/student/cases"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> Мои кейсы</a></li>
-      <li><a href="/lk/student/roadmap"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Roadmap</a></li>
-      <li><a href="/lk/student/mentors"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Менторы</a></li>
-      <li><a href="/lk/student/volunteering"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.37.37-.37-.37a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42Z"/></svg> Волонтёрство</a></li>
-      <li><a href="/lk/student/settings"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Настройки</a></li>
-      <li class="lk-logout-wrapper">
-        <form method="post" action="/lk/student/logout">
-          <button type="submit" class="lk-logout-btn">
-            <svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8l4-4V5a2 2 0 0 0-2-2h-2V3z"/></svg> Выйти
-          </button>
-        </form>
-      </li>
-    </ul>
-  </aside>
+  {{template "lk_sidebar" .}}
 
   <!-- Основной контент -->
   <div class="lk-main">
@@ -53,23 +29,13 @@
     <!-- Радар-чарт навыков -->
     <div class="lk-section">
       <h3>Навыки</h3>
-      <svg viewBox="0 0 400 300" class="radar-chart" aria-label="Диаграмма навыков ученика" role="img">
-        <title>Радар навыков ученика</title>
-        <!-- Фон: сетка -->
-        <polygon points="200,30 320,100 320,200 200,270 80,200 80,100" fill="none" stroke="var(--border)" stroke-width="1"/>
-        <!-- Оси -->
-        <line x1="200" y1="30" x2="200" y2="270" stroke="var(--border)" stroke-width="1"/>
-        <line x1="80" y1="100" x2="320" y2="200" stroke="var(--border)" stroke-width="1"/>
-        <line x1="320" y1="100" x2="80" y2="200" stroke="var(--border)" stroke-width="1"/>
-        <!-- Данные -->
-        <polygon points="200,60 280,120 280,190 200,240 120,190 120,120" fill="rgba(29, 78, 216, 0.2)" stroke="var(--primary)" stroke-width="2"/>
-        <!-- Метки -->
-        <text x="200" y="18" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="600">Frontend</text>
-        <text x="334" y="95" text-anchor="start" fill="var(--text)" font-size="12" font-weight="600">Backend</text>
-        <text x="334" y="210" text-anchor="start" fill="var(--text)" font-size="12" font-weight="600">PM</text>
-        <text x="200" y="292" text-anchor="middle" fill="var(--text)" font-size="12" font-weight="600">Soft Skills</text>
-        <text x="66" y="210" text-anchor="end" fill="var(--text)" font-size="12" font-weight="600">Tools</text>
-        <text x="66" y="95" text-anchor="end" fill="var(--text)" font-size="12" font-weight="600">Design</text>
+      <svg viewBox="0 0 400 300" class="radar-chart" role="img" aria-labelledby="radar-title radar-desc">
+        <title id="radar-title">Радар навыков ученика</title>
+        <desc id="radar-desc">{{.Data.Radar.Summary}}</desc>
+        {{range .Data.Radar.Rings}}<polygon class="radar-ring" points="{{.}}"/>{{end}}
+        {{range .Data.Radar.Axes}}<line class="radar-axis" x1="200" y1="150" x2="{{.X}}" y2="{{.Y}}"/>{{end}}
+        <polygon class="radar-data" points="{{.Data.Radar.Poly}}"/>
+        {{range .Data.Radar.Axes}}<text class="radar-label" x="{{.LX}}" y="{{.LY}}" text-anchor="{{.Anchor}}">{{.Label}}</text>{{end}}
       </svg>
     </div>
 
@@ -94,18 +60,18 @@
         <div class="lk-item">
           <div class="lk-badge lk-badge--primary">Кейс</div>
           <div class="lk-item-body">
-            <div class="lk-item-title">{{.Title}} · Шаг {{.CurrentStep}} из {{.TotalSteps}}</div>
-            <p class="lk-item-meta">{{.Topic}}</p>
+            <div class="lk-item-title">{{.Title}}</div>
+            <p class="lk-item-meta">{{.Topic}} · {{if .CurrentStep}}шаг {{.CurrentStep}} из {{.TotalSteps}}{{else}}вопросов: {{.TotalSteps}}{{end}}</p>
           </div>
-          <a class="btn btn--primary btn--sm lk-item-action" href="/cases/{{.Slug}}">Продолжить</a>
+          <a class="btn btn--primary btn--sm lk-item-action" href="/cases/{{.Slug}}">{{if .CurrentStep}}Продолжить{{else}}Начать{{end}}</a>
         </div>
         {{end}}
         {{range .Data.AvailableMentors}}
         <div class="lk-item">
           <div class="lk-badge lk-badge--ok">Ментор</div>
           <div class="lk-item-body">
-            <div class="lk-item-title">{{.Name}} — свободна для консультации</div>
-            <p class="lk-item-meta">{{.Specialization}} · {{.Location}}</p>
+            <div class="lk-item-title">{{.Name}}</div>
+            <p class="lk-item-meta">{{.Specialization}} · {{.Level}} · {{.Format}}</p>
           </div>
           <a class="btn btn--outline btn--sm lk-item-action" href="/mentors/{{.Slug}}">Записаться</a>
         </div>

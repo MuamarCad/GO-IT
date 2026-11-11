@@ -29,7 +29,16 @@ func Directions() []domain.Direction {
 			Icon:        "PM",
 			Summary:     "Неполные требования, команда с разным пониманием результата.",
 			RoadmapSlug: "project-manager",
-			CaseSlug:    "", // кейс для PM ещё не написан
+			CaseSlug:    "project-manager",
+		},
+		{
+			Slug:        "product-manager",
+			Title:       "IT Product Manager",
+			ShortTitle:  "PdM",
+			Icon:        "PdM",
+			Summary:     "Метрики, гипотезы и приоритеты: что делать в первую очередь и почему.",
+			RoadmapSlug: "product-manager",
+			CaseSlug:    "product-manager",
 		},
 	}
 }

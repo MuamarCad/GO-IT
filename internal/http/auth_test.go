@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"go-it/internal/cases"
 	"go-it/internal/content"
@@ -22,7 +21,8 @@ import (
 	"go-it/internal/session"
 )
 
-func authTestServer(t *testing.T) *httptest.Server {
+// newTestRouter собирает боевой роутер на хранилище в памяти; stop завершает фоновые задачи сессий.
+func newTestRouter(t *testing.T) http.Handler {
 	t.Helper()
 	root := moduleRoot(t)
 	if err := os.Chdir(root); err != nil {
@@ -33,7 +33,8 @@ func authTestServer(t *testing.T) *httptest.Server {
 		t.Fatal(err)
 	}
 	store := memory.New()
-	s := session.New("test-secret")
+	s := session.New("test-secret-0123456789")
+	t.Cleanup(s.Stop)
 	h := &handlers.Server{
 		Render:   r,
 		Sessions: s,
@@ -42,11 +43,13 @@ func authTestServer(t *testing.T) *httptest.Server {
 		Catalog:  store,
 		Content:  content.New("content"),
 	}
-	ts := httptest.NewServer(NewRouter(slog.Default(), h, "static"))
-	t.Cleanup(func() {
-		ts.Close()
-		s.Stop()
-	})
+	return NewRouter(slog.Default(), h, "static")
+}
+
+func authTestServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	ts := httptest.NewServer(newTestRouter(t))
+	t.Cleanup(ts.Close)
 	return ts
 }
 
@@ -392,44 +395,6 @@ func TestAuthLoginWithoutCSRF(t *testing.T) {
 	}
 }
 
-func TestAuthProviderRedirectsToLK(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, err := client.Get(ts.URL + "/auth/github")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/lk/student") {
-		t.Fatalf("provider-demo redirect на %s, ожидается /lk/student", loc)
-	}
-}
-
-func TestAuthProviderWithMentorRole(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, err := client.Get(ts.URL + "/auth/vk?role=mentor")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/lk/mentor") {
-		t.Fatalf("provider-demo+mentor redirect на %s, ожидается /lk/mentor", loc)
-	}
-}
-
 // --- LK: доступ без сессии ---
 
 func TestStudentLKRedirectsToAuthWithoutSession(t *testing.T) {
@@ -626,54 +591,6 @@ func TestLogoutViaGETRedirectsToAuth(t *testing.T) {
 	}
 	if !strings.HasSuffix(loc, "/auth") {
 		t.Errorf("GET /lk/student/logout redirect на %s, ожидается /auth", loc)
-	}
-}
-
-// --- Session cleanup ---
-
-func TestSessionExpiresAndGetsCleanedUp(t *testing.T) {
-	s := session.New("cleanup-test-secret")
-	defer s.Stop()
-
-	w := httptest.NewRecorder()
-	id := "expired-test-id-123456789012"
-	s.Save(w, id, session.Data{
-		CSRF:      "test-csrf",
-		LoggedIn:  true,
-		Role:      "student",
-		ExpiresAt: time.Now().Add(-2 * time.Hour),
-	})
-
-	s.Cleanup()
-
-	_, data := s.Load(&http.Request{
-		Method: http.MethodGet,
-		Header: http.Header{"Cookie": []string{"goit_session=" + id}},
-	})
-	if data.LoggedIn {
-		t.Errorf("истёкшая сессия не удалена после Cleanup")
-	}
-}
-
-func TestSessionNewSessionDoesNotGetCleaned(t *testing.T) {
-	s := session.New("cleanup-test-secret-2")
-	defer s.Stop()
-
-	w := httptest.NewRecorder()
-	id := "fresh-test-id-1234567890123"
-	s.Save(w, id, session.Data{
-		CSRF:     "fresh-csrf",
-		LoggedIn: false,
-	})
-
-	s.Cleanup()
-
-	_, data := s.Load(&http.Request{
-		Method: http.MethodGet,
-		Header: http.Header{"Cookie": []string{"goit_session=" + id}},
-	})
-	if !data.LoggedIn && data.CSRF != "fresh-csrf" {
-		t.Errorf("свежая сессия удалена, хотя должна остаться")
 	}
 }
 

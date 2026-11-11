@@ -49,8 +49,9 @@ func NewRouter(log *slog.Logger, h *handlers.Server, staticDir string) http.Hand
 
 	/* Авторизация и ЛК */
 	r.Get("/auth", h.Login)
-	r.Get("/auth/{provider}", h.LoginProvider)
 	r.Post("/auth", h.LoginPost)
+	r.Get("/auth/{provider}", h.LoginProviderGet)
+	r.Post("/auth/{provider}", h.LoginProvider)
 
 	/* Student LK */
 	r.Get("/lk/student", h.LKStudent)
@@ -59,8 +60,9 @@ func NewRouter(log *slog.Logger, h *handlers.Server, staticDir string) http.Hand
 	r.Get("/lk/student/mentors", h.LKStudentMentors)
 	r.Get("/lk/student/volunteering", h.LKStudentVolunteering)
 	r.Get("/lk/student/settings", h.LKStudentSettings)
-	r.Get("/lk/student/logout", h.LKStudentLogout)
-	r.Post("/lk/student/logout", h.LKStudentLogout)
+	r.Post("/lk/student/settings", h.LKStudentSettingsPost)
+	r.Get("/lk/student/logout", h.Logout)
+	r.Post("/lk/student/logout", h.Logout)
 
 	/* Mentor LK */
 	r.Get("/lk/mentor", h.LKMentor)
@@ -70,8 +72,8 @@ func NewRouter(log *slog.Logger, h *handlers.Server, staticDir string) http.Hand
 	r.Get("/lk/mentor/profile", h.LKMentorProfile)
 	r.Post("/lk/mentor/applications/{id}/accept", h.LKMentorAccept)
 	r.Post("/lk/mentor/applications/{id}/decline", h.LKMentorDecline)
-	r.Get("/lk/mentor/logout", h.LKMentorLogout)
-	r.Post("/lk/mentor/logout", h.LKMentorLogout)
+	r.Get("/lk/mentor/logout", h.Logout)
+	r.Post("/lk/mentor/logout", h.Logout)
 
 	/* Partner LK */
 	r.Get("/lk/partner", h.LKPartner)
@@ -81,8 +83,8 @@ func NewRouter(log *slog.Logger, h *handlers.Server, staticDir string) http.Hand
 	r.Get("/lk/partner/settings", h.LKPartnerSettings)
 	r.Post("/lk/partner/applications/{id}/accept", h.LKPartnerAccept)
 	r.Post("/lk/partner/applications/{id}/decline", h.LKPartnerDecline)
-	r.Get("/lk/partner/logout", h.LKPartnerLogout)
-	r.Post("/lk/partner/logout", h.LKPartnerLogout)
+	r.Get("/lk/partner/logout", h.Logout)
+	r.Post("/lk/partner/logout", h.Logout)
 
 	r.NotFound(h.NotFound)
 	return r

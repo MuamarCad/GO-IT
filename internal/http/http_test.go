@@ -225,22 +225,16 @@ func TestAllPagesRender(t *testing.T) {
 	}
 }
 
-func TestDirectionWithoutCaseHidesCTA(t *testing.T) {
+func TestDirectionsHaveCases(t *testing.T) {
 	ts := testServer(t)
 	defer ts.Close()
 	client := &http.Client{}
 
-	_, pm := get(t, client, ts.URL+"/directions/project-manager")
-	if strings.Contains(pm, `href="/cases/`) || !strings.Contains(pm, "в разработке") {
-		t.Fatal("у PM нет кейса: кнопка «Пройти кейс» не должна вести на чужой кейс")
-	}
-	_, front := get(t, client, ts.URL+"/directions/frontend")
-	if !strings.Contains(front, `href="/cases/frontend"`) {
-		t.Fatal("у Frontend кнопка кейса должна быть")
-	}
-	_, back := get(t, client, ts.URL+"/directions/backend")
-	if !strings.Contains(back, `href="/cases/backend"`) {
-		t.Fatal("у Backend кнопка кейса должна быть")
+	for _, slug := range []string{"frontend", "backend", "project-manager", "product-manager"} {
+		status, body := get(t, client, ts.URL+"/directions/"+slug)
+		if status != http.StatusOK || !strings.Contains(body, `href="/cases/`+slug+`"`) {
+			t.Errorf("направление %s: нет кнопки на кейс (статус %d)", slug, status)
+		}
 	}
 }
 

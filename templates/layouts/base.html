@@ -15,7 +15,7 @@
   <script src="/static/js/htmx.min.js" defer></script>
   <script src="/static/js/theme.js" defer></script>
 </head>
-<body{{if .Active}}{{if or (eq .Active "student-overview") (eq .Active "student-cases") (eq .Active "student-roadmap") (eq .Active "student-mentors") (eq .Active "student-volunteering") (eq .Active "student-settings") (eq .Active "mentor-overview") (eq .Active "mentor-applications") (eq .Active "mentor-schedule") (eq .Active "mentor-students") (eq .Active "mentor-profile") (eq .Active "partner-overview") (eq .Active "partner-tasks") (eq .Active "partner-applications") (eq .Active "partner-analytics") (eq .Active "partner-settings")}} class="lk-page"{{end}}{{end}}>
+<body{{if .LK}} class="lk-page"{{end}}>
   <a class="skip-link" href="#main">К содержанию</a>
   {{template "header" .}}
   <main id="main">

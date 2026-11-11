@@ -578,7 +578,8 @@ a { color: var(--primary); }
   margin-bottom: 24px;
   box-shadow: var(--shadow);
 }
-.lk-section h3 {
+.lk-section h3,
+.lk-section-title {
   font-size: 1.1rem;
   margin: 0 0 16px;
 }
@@ -1100,3 +1101,22 @@ dialog.rm-panel::backdrop { background: rgba(7, 11, 24, 0.6); }
 .rm-panel-title { font-size: 1.4rem; margin: 0 0 14px; }
 .rm-panel-title:focus { outline: none; }
 .rm-panel .rm-topic-summary { font-size: 1.02rem; }
+
+/* ---------- ЛК: иконки, радар, статусы (исправления аудита 2026-11-11) ---------- */
+/* Иконки контурные: заливка и обводка задаются здесь, чтобы атрибуты в разметке не могли их сломать. */
+.lk-nav-icon { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.radar-chart { width: 100%; max-width: 460px; height: auto; display: block; }
+.radar-ring, .radar-axis { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+.radar-data { fill: var(--accent-bg); fill-opacity: 0.8; stroke: var(--primary); stroke-width: 2; }
+.radar-label { fill: var(--text); font-size: 12px; font-weight: 600; }
+.lk-badge--muted { background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border-strong); }
+
+/* ---------- Вход: роли как настоящие радиокнопки (работают без JS) ---------- */
+fieldset.auth-role-tabs { margin: 0 0 24px; min-width: 0; }
+.auth-role-tab input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.auth-role-tab { position: relative; }
+.auth-role-tab:has(input:checked) { background: var(--primary); color: var(--primary-ink); box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25); }
+.auth-role-tab:has(input:checked) svg { opacity: 1; }
+.auth-role-tab:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+.auth-demo-note { margin: 0 0 20px; }
+.auth-submit { margin-top: 8px; }

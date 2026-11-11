@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -25,12 +26,23 @@ const MaxSessionAge = 24 * time.Hour
 // CleanupInterval — интервал фоновой очистки старых сессий (1 час).
 const CleanupInterval = 1 * time.Hour
 
+// Profile — данные профиля из «Настроек» (демо: хранятся только в сессии).
+type Profile struct {
+	Name  string
+	Email string
+	Phone string
+}
+
 type Data struct {
 	CSRF      string
 	Attempt   domain.AttemptState
 	LoggedIn  bool
 	Role      string // "student", "mentor", "partner"
 	ExpiresAt time.Time
+	Profile   Profile
+	// Handled хранит решения по демо-заявкам в ЛК ментора и партнёра:
+	// ключ "mentor:1" или "partner:2", значение "accepted" или "declined".
+	Handled map[string]string
 }
 
 type Manager struct {
@@ -96,46 +108,94 @@ func (m *Manager) Stop() {
 	}
 }
 
-func (m *Manager) Load(r *http.Request) (id string, data Data) {
-	c, err := r.Cookie(cookieName)
-	if err != nil || c.Value == "" || !m.valid(c.Value) {
-		id = newID()
-		data = Data{CSRF: newID()}
-		m.mu.Lock()
-		m.store[id] = data
-		m.mu.Unlock()
-		return id, data
+// clone копирует карты внутри Data. Без этого сохранённая сессия и копия, с которой работает
+// обработчик, делят одни и те же карты, и два одновременных запроса одной сессии (двойной клик,
+// две вкладки) образуют гонку данных; запись в карту из двух горутин может завершить процесс
+// с fatal error «concurrent map writes», который Recoverer не перехватывает.
+func (d Data) clone() Data {
+	if d.Attempt.Answers != nil {
+		answers := make(map[string]string, len(d.Attempt.Answers))
+		for k, v := range d.Attempt.Answers {
+			answers[k] = v
+		}
+		d.Attempt.Answers = answers
 	}
-	id = c.Value
-	m.mu.Lock()
-	data, ok := m.store[id]
-	if !ok {
-		data = Data{CSRF: newID()}
-		m.store[id] = data
+	if d.Handled != nil {
+		handled := make(map[string]string, len(d.Handled))
+		for k, v := range d.Handled {
+			handled[k] = v
+		}
+		d.Handled = handled
 	}
-	m.mu.Unlock()
-	return id, data
+	return d
 }
 
-// SaveWithExpiry сохраняет сессию и при LoggedIn=true устанавливает ExpiresAt.
-func (m *Manager) SaveWithExpiry(w http.ResponseWriter, id string, data Data) {
-	if data.LoggedIn && data.ExpiresAt.IsZero() {
-		data.ExpiresAt = time.Now().Add(MaxSessionAge)
+// Load возвращает сессию из подписанного cookie. Если cookie нет, подпись неверна,
+// сессия неизвестна серверу или истекла, возвращается новая (пустая) сессия с новым ID.
+// В хранилище новая сессия попадает только после Save: запросы без cookie не оставляют записей.
+func (m *Manager) Load(r *http.Request) (id string, data Data) {
+	if c, err := r.Cookie(cookieName); err == nil {
+		if got, ok := m.unsign(c.Value); ok {
+			m.mu.Lock()
+			d, found := m.store[got]
+			if found && !d.ExpiresAt.IsZero() && time.Now().After(d.ExpiresAt) {
+				delete(m.store, got)
+				found = false
+			}
+			m.mu.Unlock()
+			if found {
+				return got, d.clone()
+			}
+		}
 	}
+	return newID(), Data{CSRF: newID()}
+}
+
+// SaveWithExpiry оставлена для совместимости: срок жизни теперь задаёт Save для любой сессии.
+func (m *Manager) SaveWithExpiry(w http.ResponseWriter, id string, data Data) {
 	m.Save(w, id, data)
 }
 
+// Save сохраняет сессию и выдаёт подписанный cookie. Если срок не задан, он ставится
+// на MaxSessionAge вперёд, поэтому анонимные сессии тоже очищаются фоновой задачей.
 func (m *Manager) Save(w http.ResponseWriter, id string, data Data) {
+	if data.ExpiresAt.IsZero() {
+		data.ExpiresAt = time.Now().Add(MaxSessionAge)
+	}
 	m.mu.Lock()
-	m.store[id] = data
+	m.store[id] = data.clone()
 	m.mu.Unlock()
 	http.SetCookie(w, &http.Cookie{
 		Name:     cookieName,
-		Value:    id,
+		Value:    m.sign(id),
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int((24 * time.Hour).Seconds()),
+		MaxAge:   int(MaxSessionAge.Seconds()),
+	})
+}
+
+// Rotate переводит сессию на новый идентификатор и новый CSRF-токен (вызывать при входе,
+// чтобы заранее известный идентификатор не давал доступа к вошедшему пользователю).
+func (m *Manager) Rotate(w http.ResponseWriter, oldID string, data Data) string {
+	m.Delete(oldID)
+	data.CSRF = newID()
+	data.ExpiresAt = time.Time{}
+	id := newID()
+	m.Save(w, id, data)
+	return id
+}
+
+// Clear удаляет сессию и сбрасывает cookie.
+func (m *Manager) Clear(w http.ResponseWriter, id string) {
+	m.Delete(id)
+	http.SetCookie(w, &http.Cookie{
+		Name:     cookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
 	})
 }
 
@@ -147,9 +207,28 @@ func (m *Manager) CheckCSRF(r *http.Request, data Data) bool {
 	return token != "" && hmac.Equal([]byte(token), []byte(data.CSRF))
 }
 
-func (m *Manager) valid(id string) bool {
-	_, err := base64.RawURLEncoding.DecodeString(id)
-	return err == nil && len(id) >= 16
+// sign возвращает значение cookie вида "<id>.<hmac>".
+func (m *Manager) sign(id string) string {
+	mac := hmac.New(sha256.New, m.secret)
+	mac.Write([]byte(id))
+	return id + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+}
+
+// unsign проверяет подпись и возвращает идентификатор сессии.
+func (m *Manager) unsign(value string) (string, bool) {
+	i := strings.LastIndexByte(value, '.')
+	if i <= 0 {
+		return "", false
+	}
+	id := value[:i]
+	if len(id) < 16 {
+		return "", false
+	}
+	want := m.sign(id)
+	if !hmac.Equal([]byte(want), []byte(value)) {
+		return "", false
+	}
+	return id, true
 }
 
 func newID() string {

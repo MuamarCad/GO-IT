@@ -61,6 +61,7 @@ type Page struct {
 	Title       string
 	Description string
 	Active      string
+	LK          bool // страница личного кабинета: скрывает шапку сайта (класс lk-page)
 	CSRF        string
 	Flash       string
 	FlashError  string
@@ -202,3 +203,6 @@ func host(raw string) string {
 	}
 	return strings.TrimPrefix(u.Hostname(), "www.")
 }
+
+// Initials — экспортируемая обёртка для обработчиков: «Анна К.» -> «АК».
+func Initials(name string) string { return initials(name) }

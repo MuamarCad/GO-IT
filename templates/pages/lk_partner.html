@@ -1,140 +1,113 @@
 {{define "content"}}
+{{$a := .Active}}
 <div class="lk-layout">
-  <!-- Боковая панель -->
-  <aside class="lk-sidebar">
-    <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
-      <div>
-        <div class="lk-user-name">{{.Data.OrganizationName}}</div>
-        <div class="lk-user-role">{{.Data.Role}} · Социальный партнёр</div>
-      </div>
-    </div>
-    <ul class="lk-nav">
-      <li><a href="/lk/partner" aria-current="page"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H8v6H4a1 1 0 0 1-1-1z"/></svg> Обзор</a></li>
-      <li><a href="/lk/partner/tasks"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-7 14H6v-2h6v2Zm4-4H6v-2h10v2Zm4-4H6V7h14v2Z"/></svg> Мои задачи</a></li>
-      <li><a href="/lk/partner/applications"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg> Отклики <span class="lk-badge lk-badge--primary lk-badge-sidebar">{{.Data.NewApplications}}</span></a></li>
-      <li><a href="/lk/partner/analytics"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Аналитика</a></li>
-      <li><a href="/lk/partner/settings"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Настройки организации</a></li>
-      <li class="lk-logout-wrapper">
-        <form method="post" action="/lk/partner/logout">
-          <button type="submit" class="lk-logout-btn">
-            <svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8l4-4V5a2 2 0 0 0-2-2h-2V3z"/></svg> Выйти
-          </button>
-        </form>
-      </li>
-    </ul>
-  </aside>
+  {{template "lk_sidebar" .}}
 
-  <!-- Основной контент -->
   <div class="lk-main">
-    <h1 class="lk-heading">Панель партнёра · {{.Data.OrganizationName}}</h1>
+    <h1 class="lk-heading">
+      {{if eq $a "partner-tasks"}}Задачи организации
+      {{else if eq $a "partner-applications"}}Отклики волонтёров
+      {{else if eq $a "partner-analytics"}}Аналитика
+      {{else if eq $a "partner-settings"}}Настройки организации
+      {{else}}Панель партнёра · {{.Data.OrganizationName}}{{end}}
+    </h1>
 
-    <!-- Статистика -->
+    {{if .Alert}}<div class="alert alert--ok" role="status"><strong>{{.Alert}}</strong></div>{{end}}
+
+    {{if eq $a "partner-overview"}}
     <div class="lk-stats">
-      <div class="lk-stat">
-        <span class="n">{{.Data.ActiveTasks}}</span>
-        <small>Активных задач</small>
-      </div>
-      <div class="lk-stat">
-        <span class="n">{{.Data.TotalApplications}}</span>
-        <small>Всего откликов</small>
-      </div>
-      <div class="lk-stat">
-        <span class="n">{{.Data.Accepted}}</span>
-        <small>Принято волонтёров</small>
-      </div>
-      <div class="lk-stat">
-        <span class="n">{{.Data.NewApplications}}</span>
-        <small>Новых откликов</small>
-      </div>
+      <div class="lk-stat"><span class="n">{{.Data.NewApplications}}</span><small>Новых откликов</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.ActiveTasks}}</span><small>Активных задач</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.TotalApplications}}</span><small>Всего откликов</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.Accepted}}</span><small>Принято</small></div>
     </div>
+    {{end}}
 
-    <!-- Вкладки -->
-    <div class="lk-tabs">
-      <a href="/lk/partner" aria-current="page">Отклики</a>
-      <a href="/lk/partner/tasks">Мои задачи</a>
-      <a href="/lk/partner/analytics">Аналитика</a>
-    </div>
-
-    <!-- Новые отклики -->
+    {{if or (eq $a "partner-overview") (eq $a "partner-applications")}}
     <div class="lk-section">
-      <h3>Новые отклики на задачи</h3>
+      <h2 class="lk-section-title">Отклики на задачи</h2>
       {{if .Data.Applications}}
       <div class="lk-card-row">
         {{range .Data.Applications}}
         <div class="lk-item">
-          <div class="lk-badge lk-badge--ok">Новый</div>
+          {{if eq .Status "accepted"}}<div class="lk-badge lk-badge--ok">Принят</div>
+          {{else if eq .Status "declined"}}<div class="lk-badge lk-badge--muted">Отклонён</div>
+          {{else}}<div class="lk-badge lk-badge--primary">Новый</div>{{end}}
           <div class="lk-item-body">
             <div class="lk-item-title">{{.VolunteerName}}</div>
             <p class="lk-item-meta">Откликнулся на: <strong>{{.TaskTitle}}</strong></p>
             <p class="lk-item-meta">Навыки: {{.Skills}} · Контакт: {{.Contact}}</p>
             {{if .Message}}<p class="lk-item-meta lk-item-message">«{{.Message}}»</p>{{end}}
           </div>
+          {{if not .Status}}
           <div class="lk-item-actions">
             <form method="post" action="/lk/partner/applications/{{.ID}}/accept">
-              <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+              <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
               <button type="submit" class="btn btn--primary btn--sm lk-item-action">Принять</button>
             </form>
             <form method="post" action="/lk/partner/applications/{{.ID}}/decline">
-              <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+              <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
               <button type="submit" class="btn btn--outline btn--sm lk-item-action">Отклонить</button>
             </form>
           </div>
+          {{end}}
         </div>
         {{end}}
       </div>
       {{else}}
-      <p class="hint">Новых откликов пока нет.</p>
+      <p class="hint">Откликов пока нет.</p>
       {{end}}
     </div>
+    {{end}}
 
-    <!-- Активные задачи -->
+    {{if or (eq $a "partner-overview") (eq $a "partner-tasks")}}
     <div class="lk-section">
-      <h3>Активные задачи</h3>
+      <h2 class="lk-section-title">Активные задачи</h2>
       {{if .Data.Tasks}}
       <div class="lk-card-row">
         {{range .Data.Tasks}}
         <div class="lk-item">
-          <div class="lk-badge lk-badge--primary">{{.Scale}}</div>
+          <div class="lk-badge lk-badge--ok">{{.Status}}</div>
           <div class="lk-item-body">
             <div class="lk-item-title">{{.Title}}</div>
-            <p class="lk-item-meta">Навыки: {{.Skills}} · Откликов: {{.ApplicationsCount}}</p>
+            <p class="lk-item-meta">Навыки: {{.Skills}} · {{.Scale}} · Откликов: {{.ApplicationsCount}}</p>
           </div>
-          <div class="lk-badge lk-badge--ok">{{.Status}}</div>
         </div>
         {{end}}
       </div>
       {{else}}
-      <p class="hint">У вас нет активных задач. Создайте новую в разделе «Мои задачи».</p>
+      <p class="hint">Активных задач нет.</p>
       {{end}}
     </div>
+    {{end}}
 
-    <!-- Сводка по проектам -->
+    {{if or (eq $a "partner-overview") (eq $a "partner-analytics")}}
     <div class="lk-section">
-      <h3>Сводка по волонтёрству</h3>
+      <h2 class="lk-section-title">Сводка по волонтёрству</h2>
       <table class="lk-table">
-        <thead>
-          <tr>
-            <th>Показатель</th>
-            <th>Значение</th>
-          </tr>
-        </thead>
+        <thead><tr><th scope="col">Показатель</th><th scope="col">Значение</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Задача опубликовано</td>
-            <td><span class="lk-progress-label-value">{{.Data.PublishedTasks}}</span></td>
-          </tr>
-          <tr>
-            <td>Завершено проектов</td>
-            <td><span class="lk-badge lk-badge--ok">{{.Data.CompletedProjects}}</span></td>
-          </tr>
-          <tr>
-            <td>Волонтёров привлечено</td>
-            <td><span class="lk-progress-label-value">{{.Data.TotalVolunteers}}</span></td>
-          </tr>
+          <tr><td>Задач опубликовано</td><td><span class="lk-progress-label-value">{{.Data.PublishedTasks}}</span></td></tr>
+          <tr><td>Завершено проектов</td><td><span class="lk-badge lk-badge--ok">{{.Data.CompletedProjects}}</span></td></tr>
+          <tr><td>Волонтёров привлечено</td><td><span class="lk-progress-label-value">{{.Data.TotalVolunteers}}</span></td></tr>
         </tbody>
       </table>
     </div>
+    {{end}}
+
+    {{if eq $a "partner-settings"}}
+    <div class="lk-section">
+      <h2 class="lk-section-title">Организация</h2>
+      <div class="lk-item">
+        <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
+        <div class="lk-item-body">
+          <div class="lk-item-title">{{.Data.OrganizationName}}</div>
+          <p class="lk-item-meta">Роль в системе: {{.Data.Role}}</p>
+        </div>
+      </div>
+      <p class="hint">Редактирование данных организации появится позже. Сейчас кабинет работает в демонстрационном режиме.</p>
+    </div>
+    {{end}}
   </div>
 </div>
 {{end}}

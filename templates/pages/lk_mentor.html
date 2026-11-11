@@ -1,95 +1,67 @@
 {{define "content"}}
+{{$a := .Active}}
 <div class="lk-layout">
-  <!-- Боковая панель -->
-  <aside class="lk-sidebar">
-    <div class="lk-user">
-      <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
-      <div>
-        <div class="lk-user-name">{{.Data.UserName}}</div>
-        <div class="lk-user-role">Ментор · {{.Data.Specialization}}</div>
-      </div>
-    </div>
-    <ul class="lk-nav">
-      <li><a href="/lk/mentor" aria-current="page"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H8v6H4a1 1 0 0 1-1-1z"/></svg> Обзор</a></li>
-      <li><a href="/lk/mentor/applications"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg> Заявки <span class="lk-badge lk-badge--primary lk-badge-sidebar">{{.Data.NewApplications}}</span></a></li>
-      <li><a href="/lk/mentor/schedule"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Расписание</a></li>
-      <li><a href="/lk/mentor/students"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Мои ученики</a></li>
-      <li><a href="/lk/mentor/profile"><svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Мой профиль</a></li>
-      <li class="lk-logout-wrapper">
-        <form method="post" action="/lk/mentor/logout">
-          <button type="submit" class="lk-logout-btn">
-            <svg class="lk-nav-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8l4-4V5a2 2 0 0 0-2-2h-2V3z"/></svg> Выйти
-          </button>
-        </form>
-      </li>
-    </ul>
-  </aside>
+  {{template "lk_sidebar" .}}
 
-  <!-- Основной контент -->
   <div class="lk-main">
-    <h1 class="lk-heading">Кабинет ментора, {{.Data.UserName}}!</h1>
+    <h1 class="lk-heading">
+      {{if eq $a "mentor-applications"}}Заявки на консультацию
+      {{else if eq $a "mentor-schedule"}}Расписание
+      {{else if eq $a "mentor-students"}}Мои ученики
+      {{else if eq $a "mentor-profile"}}Профиль ментора
+      {{else}}Кабинет ментора, {{.Data.UserName}}!{{end}}
+    </h1>
 
-    <!-- Статистика -->
+    {{if .Alert}}<div class="alert alert--ok" role="status"><strong>{{.Alert}}</strong></div>{{end}}
+
+    {{if eq $a "mentor-overview"}}
     <div class="lk-stats">
-      <div class="lk-stat">
-        <span class="n">{{.Data.NewApplications}}</span>
-        <small>Новых заявок</small>
-      </div>
-      <div class="lk-stat">
-        <span class="n">{{.Data.TotalStudents}}</span>
-        <small>Учеников</small>
-      </div>
-      <div class="lk-stat">
-        <span class="n">{{.Data.TotalSessions}}</span>
-        <small>Консультаций проведено</small>
-      </div>
-      <div class="lk-stat">
-        <span class="n">{{.Data.Rating}}</span>
-        <small>Средний рейтинг</small>
-      </div>
+      <div class="lk-stat"><span class="n">{{.Data.NewApplications}}</span><small>Новых заявок</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.TotalStudents}}</span><small>Учеников</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.TotalSessions}}</span><small>Консультаций проведено</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.Rating}}</span><small>Средний рейтинг</small></div>
     </div>
+    {{end}}
 
-    <!-- Вкладки -->
-    <div class="lk-tabs">
-      <a href="/lk/mentor" aria-current="page">Заявки</a>
-      <a href="/lk/mentor/schedule">Расписание</a>
-      <a href="/lk/mentor/reviews">Отзывы</a>
-    </div>
-
-    <!-- Новые заявки -->
+    {{if or (eq $a "mentor-overview") (eq $a "mentor-applications")}}
     <div class="lk-section">
-      <h3>Новые заявки на консультацию</h3>
+      <h2 class="lk-section-title">Заявки на консультацию</h2>
       {{if .Data.Applications}}
       <div class="lk-card-row">
         {{range .Data.Applications}}
         <div class="lk-item">
-          <div class="lk-badge lk-badge--primary">Новая</div>
+          {{if eq .Status "accepted"}}<div class="lk-badge lk-badge--ok">Принята</div>
+          {{else if eq .Status "declined"}}<div class="lk-badge lk-badge--muted">Отклонена</div>
+          {{else}}<div class="lk-badge lk-badge--primary">Новая</div>{{end}}
           <div class="lk-item-body">
             <div class="lk-item-title">{{.StudentName}}</div>
             <p class="lk-item-meta">Контакт: {{.Contact}} · {{.Date}} в {{.Time}}</p>
             {{if .Message}}<p class="lk-item-meta lk-item-message">{{.Message}}</p>{{end}}
           </div>
+          {{if not .Status}}
           <div class="lk-item-actions">
             <form method="post" action="/lk/mentor/applications/{{.ID}}/accept">
-              <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+              <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
               <button type="submit" class="btn btn--primary btn--sm lk-item-action">Принять</button>
             </form>
             <form method="post" action="/lk/mentor/applications/{{.ID}}/decline">
-              <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+              <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
               <button type="submit" class="btn btn--outline btn--sm lk-item-action">Отклонить</button>
             </form>
           </div>
+          {{end}}
         </div>
         {{end}}
       </div>
       {{else}}
-      <p class="hint">Новых заявок пока нет. Ученики начнут отправлять заявки, когда увидят ваш профиль.</p>
+      <p class="hint">Заявок пока нет. Ученики начнут отправлять их, когда увидят ваш профиль.</p>
       {{end}}
     </div>
+    {{end}}
 
-    <!-- Ближайшее расписание -->
+    {{if or (eq $a "mentor-overview") (eq $a "mentor-schedule")}}
     <div class="lk-section">
-      <h3>Ближайшие консультации</h3>
+      <h2 class="lk-section-title">Ближайшие консультации</h2>
       {{if .Data.UpcomingSessions}}
       <div class="lk-schedule">
         {{range .Data.UpcomingSessions}}
@@ -99,9 +71,6 @@
             <div class="lk-item-title">{{.StudentName}}</div>
             <p class="lk-item-meta">{{.Topic}}</p>
           </div>
-          <div class="lk-item-actions">
-            <a class="btn btn--primary btn--sm lk-item-action" href="#">Подключиться</a>
-          </div>
         </div>
         {{end}}
       </div>
@@ -109,10 +78,11 @@
       <p class="hint">Ближайших консультаций нет.</p>
       {{end}}
     </div>
+    {{end}}
 
-    <!-- Мои ученики -->
+    {{if or (eq $a "mentor-overview") (eq $a "mentor-students")}}
     <div class="lk-section">
-      <h3>Активные ученики</h3>
+      <h2 class="lk-section-title">Активные ученики</h2>
       {{if .Data.ActiveStudents}}
       <div class="lk-card-row">
         {{range .Data.ActiveStudents}}
@@ -120,7 +90,7 @@
           <div class="lk-avatar lk-avatar--sm" aria-hidden="true">{{.Initials}}</div>
           <div class="lk-item-body">
             <div class="lk-item-title">{{.Name}}</div>
-            <p class="lk-item-meta">{{.Direction}} · Направлений: {{.RoadmapsOpened}}</p>
+            <p class="lk-item-meta">{{.Direction}} · Открыто roadmap: {{.RoadmapsOpened}}</p>
           </div>
           <div class="lk-badge lk-badge--ok lk-progress-label-value">{{.Progress}}%</div>
         </div>
@@ -130,6 +100,21 @@
       <p class="hint">У вас пока нет активных учеников.</p>
       {{end}}
     </div>
+    {{end}}
+
+    {{if eq $a "mentor-profile"}}
+    <div class="lk-section">
+      <h2 class="lk-section-title">О себе</h2>
+      <div class="lk-item">
+        <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
+        <div class="lk-item-body">
+          <div class="lk-item-title">{{.Data.UserName}}</div>
+          <p class="lk-item-meta">{{.Data.Specialization}} · рейтинг {{.Data.Rating}} · консультаций: {{.Data.TotalSessions}}</p>
+        </div>
+      </div>
+      <p class="hint">Публичная карточка ментора сейчас ведётся в каталоге. Редактирование профиля из кабинета появится позже.</p>
+    </div>
+    {{end}}
   </div>
 </div>
 {{end}}

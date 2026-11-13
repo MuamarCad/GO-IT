@@ -1,0 +1,612 @@
+{
+ "stages": [
+  {
+   "title": "Основы",
+   "note": "Сервер — это программа, которая отвечает на запросы.",
+   "nodes": [
+    {
+     "id": "be-http",
+     "title": "Как устроен интернет и HTTP",
+     "kind": "core",
+     "summary": "Запрос, метод, заголовки, тело и код ответа. Всё остальное в бэкенде строится на этом.",
+     "links": [
+      {
+       "title": "MDN: Обзор HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Overview"
+      },
+      {
+       "title": "MDN: Методы запросов HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Methods"
+      }
+     ]
+    },
+    {
+     "id": "be-client-server",
+     "title": "Клиент-сервер, запрос-ответ",
+     "kind": "core",
+     "summary": "Сервер ждёт запросов и отвечает на них. Он не видит экран пользователя и не должен доверять данным из браузера.",
+     "links": [
+      {
+       "title": "MDN: Клиент-серверное взаимодействие",
+       "url": "https://developer.mozilla.org/ru/docs/Learn/Server-side/First_steps/Client-Server_overview"
+      }
+     ]
+    },
+    {
+     "id": "be-cli",
+     "title": "Командная строка",
+     "kind": "core",
+     "summary": "Запуск сервера, Git, Docker и скриптов — всё это делается из терминала.",
+     "links": [
+      {
+       "title": "Ubuntu: командная строка для начинающих (англ.)",
+       "url": "https://ubuntu.com/tutorials/command-line-for-beginners"
+      }
+     ]
+    },
+    {
+     "id": "be-git",
+     "title": "Git и GitHub",
+     "kind": "core",
+     "summary": "История изменений и командная работа: commit, branch, pull request.",
+     "links": [
+      {
+       "title": "Pro Git на русском",
+       "url": "https://git-scm.com/book/ru/v2"
+      },
+      {
+       "title": "GitHub Docs: начало работы",
+       "url": "https://docs.github.com/ru/get-started"
+      }
+     ]
+    },
+    {
+     "id": "be-editor",
+     "title": "Текстовый редактор или IDE",
+     "kind": "core",
+     "summary": "VS Code или GoLand: подсветка, подсказки, отладчик. Научитесь ставить точку останова.",
+     "links": [
+      {
+       "title": "VS Code: документация (англ.)",
+       "url": "https://code.visualstudio.com/docs"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Язык программирования",
+   "note": "Главное — довести один язык до рабочего приложения. Выберите один.",
+   "choose": true,
+   "nodes": [
+    {
+     "id": "lang-go",
+     "title": "Go (пример GO-IT)",
+     "kind": "also",
+     "summary": "Простой компилируемый язык с богатой стандартной библиотекой для веб-серверов. На нём написан GO-IT.",
+     "links": [
+      {
+       "title": "Go: A Tour of Go (англ.)",
+       "url": "https://go.dev/tour/"
+      },
+      {
+       "title": "Go: документация (англ.)",
+       "url": "https://go.dev/doc/"
+      },
+      {
+       "title": "Go by Example (англ.)",
+       "url": "https://gobyexample.com/"
+      }
+     ]
+    },
+    {
+     "id": "lang-python",
+     "title": "Python",
+     "kind": "also",
+     "summary": "Читаемый язык с большим набором библиотек. Удобен для первых серверных проектов.",
+     "links": [
+      {
+       "title": "Python: официальный учебник",
+       "url": "https://docs.python.org/ru/3/tutorial/"
+      }
+     ]
+    },
+    {
+     "id": "lang-java",
+     "title": "Java / Kotlin",
+     "kind": "also",
+     "summary": "Основа многих корпоративных систем. Kotlin — современная альтернатива на той же платформе.",
+     "links": [
+      {
+       "title": "dev.java: Learn (англ.)",
+       "url": "https://dev.java/learn/"
+      },
+      {
+       "title": "Kotlin: начало работы (англ.)",
+       "url": "https://kotlinlang.org/docs/getting-started.html"
+      }
+     ]
+    },
+    {
+     "id": "lang-csharp",
+     "title": "C#",
+     "kind": "also",
+     "summary": "Язык платформы .NET: сильная типизация и хорошие инструменты разработки.",
+     "links": [
+      {
+       "title": "Microsoft: тур по C#",
+       "url": "https://learn.microsoft.com/ru-ru/dotnet/csharp/tour-of-csharp/"
+      }
+     ]
+    },
+    {
+     "id": "lang-node",
+     "title": "JavaScript / Node.js",
+     "kind": "also",
+     "summary": "Тот же язык, что и в браузере, но на сервере. Удобно, если вы уже знаете JavaScript.",
+     "links": [
+      {
+       "title": "Node.js: введение (англ.)",
+       "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Веб-сервер",
+   "note": "Запрос пришёл, данные проверили, ответ ушёл.",
+   "nodes": [
+    {
+     "id": "web-routing",
+     "title": "Маршрутизация",
+     "kind": "core",
+     "summary": "Какой код обрабатывает какой путь и метод. В Go для этого есть net/http и роутеры вроде chi.",
+     "links": [
+      {
+       "title": "Go: пакет net/http (англ.)",
+       "url": "https://pkg.go.dev/net/http"
+      },
+      {
+       "title": "chi: HTTP-роутер для Go (англ.)",
+       "url": "https://github.com/go-chi/chi"
+      }
+     ]
+    },
+    {
+     "id": "web-forms",
+     "title": "Обработка форм и валидация",
+     "kind": "core",
+     "summary": "Данные из формы нужно прочитать, проверить и вернуть понятные ошибки по полям.",
+     "links": [
+      {
+       "title": "OWASP: проверка входных данных (англ.)",
+       "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html"
+      },
+      {
+       "title": "Go: пакет net/http (англ.)",
+       "url": "https://pkg.go.dev/net/http"
+      }
+     ]
+    },
+    {
+     "id": "web-templates",
+     "title": "Шаблоны страниц",
+     "kind": "core",
+     "summary": "Сервер собирает HTML из шаблона и данных, а вывод экранируется автоматически.",
+     "links": [
+      {
+       "title": "Go: пакет html/template (англ.)",
+       "url": "https://pkg.go.dev/html/template"
+      }
+     ]
+    },
+    {
+     "id": "web-sessions",
+     "title": "Сессии и cookies",
+     "kind": "core",
+     "summary": "Как сервер помнит пользователя между запросами. Cookie должна быть подписана и защищена.",
+     "links": [
+      {
+       "title": "MDN: Cookie",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Cookies"
+      },
+      {
+       "title": "OWASP: управление сессиями (англ.)",
+       "url": "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"
+      }
+     ]
+    },
+    {
+     "id": "web-middleware",
+     "title": "Middleware: логи, лимиты, защита",
+     "kind": "core",
+     "summary": "Код, который выполняется вокруг каждого запроса: логирование, ограничение размера, заголовки безопасности.",
+     "links": [
+      {
+       "title": "chi: HTTP-роутер для Go (англ.)",
+       "url": "https://github.com/go-chi/chi"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Данные",
+   "nodes": [
+    {
+     "id": "db-sql",
+     "title": "Реляционная модель и SQL",
+     "kind": "core",
+     "summary": "Таблицы, связи, SELECT, INSERT, JOIN. SQL остаётся основным языком работы с данными.",
+     "links": [
+      {
+       "title": "PostgreSQL: учебник",
+       "url": "https://www.postgresql.org/docs/current/tutorial.html"
+      },
+      {
+       "title": "PostgreSQL: язык SQL",
+       "url": "https://www.postgresql.org/docs/current/sql.html"
+      }
+     ]
+    },
+    {
+     "id": "db-postgres",
+     "title": "PostgreSQL",
+     "kind": "core",
+     "summary": "Надёжная бесплатная СУБД. В GO-IT в ней хранятся заявки наставникам и волонтёрам.",
+     "links": [
+      {
+       "title": "PostgreSQL: учебник",
+       "url": "https://www.postgresql.org/docs/current/tutorial.html"
+      }
+     ]
+    },
+    {
+     "id": "db-migrations",
+     "title": "Миграции схемы",
+     "kind": "core",
+     "summary": "Версионируемые изменения структуры базы: схема одинакова у всей команды и на сервере.",
+     "links": [
+      {
+       "title": "golang-migrate (англ.)",
+       "url": "https://github.com/golang-migrate/migrate"
+      }
+     ]
+    },
+    {
+     "id": "db-tx-index",
+     "title": "Транзакции и индексы",
+     "kind": "core",
+     "summary": "Транзакция делает группу операций атомарной, индекс ускоряет поиск по таблице.",
+     "links": [
+      {
+       "title": "PostgreSQL: транзакции",
+       "url": "https://www.postgresql.org/docs/current/tutorial-transactions.html"
+      },
+      {
+       "title": "PostgreSQL: индексы",
+       "url": "https://www.postgresql.org/docs/current/indexes.html"
+      }
+     ]
+    },
+    {
+     "id": "db-nosql",
+     "title": "Кэш и NoSQL",
+     "kind": "optional",
+     "summary": "Redis и документные базы решают узкие задачи: быстрый кэш, гибкие данные. Сначала освойте SQL.",
+     "links": [
+      {
+       "title": "Redis: документация (англ.)",
+       "url": "https://redis.io/docs/latest/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "API",
+   "nodes": [
+    {
+     "id": "api-rest",
+     "title": "REST: ресурсы и методы",
+     "kind": "core",
+     "summary": "Ресурсы имеют адреса, а методы GET, POST, PUT и DELETE описывают действие над ними.",
+     "links": [
+      {
+       "title": "REST API Tutorial (англ.)",
+       "url": "https://restfulapi.net/"
+      },
+      {
+       "title": "MDN: Методы запросов HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Methods"
+      }
+     ]
+    },
+    {
+     "id": "api-json",
+     "title": "JSON и версионирование",
+     "kind": "core",
+     "summary": "Основной формат обмена данными и правила изменения API без поломки клиентов.",
+     "links": [
+      {
+       "title": "JSON: описание формата",
+       "url": "https://www.json.org/json-ru.html"
+      }
+     ]
+    },
+    {
+     "id": "api-auth",
+     "title": "Аутентификация и авторизация",
+     "kind": "core",
+     "summary": "Аутентификация отвечает на вопрос «кто это», авторизация — «что ему можно».",
+     "links": [
+      {
+       "title": "MDN: Аутентификация HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Authentication"
+      },
+      {
+       "title": "OAuth 2.0 (англ.)",
+       "url": "https://oauth.net/2/"
+      }
+     ]
+    },
+    {
+     "id": "api-openapi",
+     "title": "Документация OpenAPI",
+     "kind": "optional",
+     "summary": "Описание API в стандартном формате, из которого строят документацию и клиентов.",
+     "links": [
+      {
+       "title": "OpenAPI: обучение (англ.)",
+       "url": "https://learn.openapis.org/"
+      }
+     ]
+    },
+    {
+     "id": "api-grpc-graphql",
+     "title": "gRPC / GraphQL",
+     "kind": "optional",
+     "summary": "Альтернативы REST для особых задач: быстрый обмен между сервисами и гибкие запросы данных.",
+     "links": [
+      {
+       "title": "gRPC: введение (англ.)",
+       "url": "https://grpc.io/docs/what-is-grpc/introduction/"
+      },
+      {
+       "title": "GraphQL: обучение (англ.)",
+       "url": "https://graphql.org/learn/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Надёжность",
+   "note": "Сервер не должен доверять браузеру.",
+   "nodes": [
+    {
+     "id": "rel-errors",
+     "title": "Обработка ошибок",
+     "kind": "core",
+     "summary": "Ошибка — обычное значение. Пользователю показывают понятное сообщение, в логах пишут подробности, а внутренности наружу не отдают.",
+     "links": [
+      {
+       "title": "Go Blog: обработка ошибок (англ.)",
+       "url": "https://go.dev/blog/error-handling-and-go"
+      }
+     ]
+    },
+    {
+     "id": "rel-unit",
+     "title": "Unit-тесты",
+     "kind": "core",
+     "summary": "Проверяют небольшой кусок логики отдельно, например расчёт балла кейса.",
+     "links": [
+      {
+       "title": "Go: пакет testing (англ.)",
+       "url": "https://pkg.go.dev/testing"
+      }
+     ]
+    },
+    {
+     "id": "rel-logs",
+     "title": "Логи без персональных данных",
+     "kind": "core",
+     "summary": "Логи нужны для разбора проблем, но в них не место паролям, контактам и токенам.",
+     "links": [
+      {
+       "title": "OWASP: журналирование (англ.)",
+       "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html"
+      },
+      {
+       "title": "Go: пакет log/slog (англ.)",
+       "url": "https://pkg.go.dev/log/slog"
+      }
+     ]
+    },
+    {
+     "id": "rel-config",
+     "title": "Конфигурация и секреты",
+     "kind": "core",
+     "summary": "Настройки и пароли берутся из окружения, а не из кода и репозитория.",
+     "links": [
+      {
+       "title": "The Twelve-Factor App: конфигурация",
+       "url": "https://12factor.net/ru/config"
+      }
+     ]
+    },
+    {
+     "id": "rel-integration",
+     "title": "Интеграционные тесты",
+     "kind": "optional",
+     "summary": "Проверяют, как части работают вместе: сервер, шаблоны, база.",
+     "links": [
+      {
+       "title": "Go: пакет httptest (англ.)",
+       "url": "https://pkg.go.dev/net/http/httptest"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Безопасность",
+   "nodes": [
+    {
+     "id": "sec-sqli",
+     "title": "Параметризованные запросы против SQL-инъекций",
+     "kind": "core",
+     "summary": "Значения передаются отдельно от текста запроса, поэтому ввод пользователя не может изменить сам запрос.",
+     "links": [
+      {
+       "title": "OWASP: защита от SQL-инъекций (англ.)",
+       "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+      }
+     ]
+    },
+    {
+     "id": "sec-csrf",
+     "title": "CSRF-защита форм",
+     "kind": "core",
+     "summary": "Одноразовый токен в форме доказывает, что запрос отправила ваша страница, а не чужой сайт.",
+     "links": [
+      {
+       "title": "OWASP: CSRF (англ.)",
+       "url": "https://owasp.org/www-community/attacks/csrf"
+      }
+     ]
+    },
+    {
+     "id": "sec-xss",
+     "title": "Экранирование вывода (XSS)",
+     "kind": "core",
+     "summary": "Всё, что пришло от пользователя, выводится как текст, а не как разметка. html/template делает это сам.",
+     "links": [
+      {
+       "title": "OWASP: защита от XSS (англ.)",
+       "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html"
+      }
+     ]
+    },
+    {
+     "id": "sec-passwords",
+     "title": "Безопасное хранение паролей",
+     "kind": "core",
+     "summary": "Пароли хранят только в виде медленных солёных хешей (bcrypt, argon2), никогда открытым текстом.",
+     "links": [
+      {
+       "title": "OWASP: хранение паролей (англ.)",
+       "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
+      }
+     ]
+    },
+    {
+     "id": "sec-limits",
+     "title": "Лимиты на размер запроса",
+     "kind": "core",
+     "summary": "Ограничение размера тела запроса защищает сервер от перегрузки.",
+     "links": [
+      {
+       "title": "Go: http.MaxBytesReader (англ.)",
+       "url": "https://pkg.go.dev/net/http#MaxBytesReader"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Поставка",
+   "nodes": [
+    {
+     "id": "ship-docker",
+     "title": "Docker",
+     "kind": "core",
+     "summary": "Упаковывает приложение со всем окружением, чтобы оно одинаково запускалось у всех.",
+     "links": [
+      {
+       "title": "Docker: начало работы (англ.)",
+       "url": "https://docs.docker.com/get-started/"
+      }
+     ]
+    },
+    {
+     "id": "ship-compose",
+     "title": "Docker Compose",
+     "kind": "core",
+     "summary": "Поднимает приложение и базу данных одной командой. Так запускается GO-IT.",
+     "links": [
+      {
+       "title": "Docker Compose (англ.)",
+       "url": "https://docs.docker.com/compose/"
+      }
+     ]
+    },
+    {
+     "id": "ship-ci",
+     "title": "CI: автозапуск тестов",
+     "kind": "core",
+     "summary": "Тесты запускаются автоматически при каждом изменении, и поломка заметна сразу.",
+     "links": [
+      {
+       "title": "GitHub Actions (англ.)",
+       "url": "https://docs.github.com/en/actions"
+      }
+     ]
+    },
+    {
+     "id": "ship-deploy",
+     "title": "Развёртывание на сервере",
+     "kind": "optional",
+     "summary": "Публикация приложения на удалённом сервере или в облаке. Для учебного MVP не обязательна."
+    }
+   ]
+  },
+  {
+   "title": "Практика",
+   "nodes": [
+    {
+     "id": "practice-db",
+     "title": "Мини-проект: сохранение заявки в БД",
+     "kind": "core",
+     "summary": "Форма, проверка данных, запись в PostgreSQL и понятный ответ пользователю.",
+     "links": [
+      {
+       "title": "PostgreSQL: учебник",
+       "url": "https://www.postgresql.org/docs/current/tutorial.html"
+      },
+      {
+       "title": "Go: пакет net/http (англ.)",
+       "url": "https://pkg.go.dev/net/http"
+      }
+     ]
+    },
+    {
+     "id": "practice-tests",
+     "title": "Тесты ключевой логики",
+     "kind": "core",
+     "summary": "Покройте тестами то, чем нельзя ошибиться: расчёт результата, проверку шагов, валидацию.",
+     "links": [
+      {
+       "title": "Go: пакет testing (англ.)",
+       "url": "https://pkg.go.dev/testing"
+      }
+     ]
+    },
+    {
+     "id": "volunteering",
+     "title": "Волонтёрская задача",
+     "kind": "core",
+     "href": "/volunteering"
+    },
+    {
+     "id": "mentors",
+     "title": "Консультация наставника",
+     "kind": "core",
+     "href": "/mentors"
+    }
+   ]
+  }
+ ]
+}

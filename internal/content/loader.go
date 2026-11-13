@@ -2,9 +2,11 @@ package content
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -35,7 +37,117 @@ func New(root string) *Loader {
 }
 
 func (l *Loader) Roadmaps() ([]domain.Roadmap, error) {
-	return loadMarkdown(l, filepath.Join(l.root, "roadmaps"), parseRoadmapMeta)
+	items, err := loadMarkdown(l, filepath.Join(l.root, "roadmaps"), parseRoadmapMeta)
+	if err != nil {
+		return nil, err
+	}
+	for i := range items {
+		d, err := l.loadDiagram(items[i].Slug)
+		if err != nil {
+			return nil, fmt.Errorf("roadmap %s: схема: %w", items[i].Slug, err)
+		}
+		items[i].Diagram = d
+	}
+	return items, nil
+}
+
+const (
+	maxSummaryRunes = 400
+	maxNodeLinks    = 5
+)
+
+var nodeID = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
+
+type diagramFile struct {
+	Stages []struct {
+		Title  string `json:"title"`
+		Note   string `json:"note"`
+		Choose bool   `json:"choose"`
+		Nodes  []struct {
+			ID      string `json:"id"`
+			Title   string `json:"title"`
+			Kind    string `json:"kind"`
+			Href    string `json:"href"`
+			Summary string `json:"summary"`
+			Links   []struct {
+				Title string `json:"title"`
+				URL   string `json:"url"`
+			} `json:"links"`
+		} `json:"nodes"`
+	} `json:"stages"`
+}
+
+// loadDiagram читает roadmaps/<slug>.diagram.json. Нет файла — нет схемы (не ошибка).
+// Формат строгий: лишние поля, пустые названия и неизвестные виды узлов считаются ошибкой.
+func (l *Loader) loadDiagram(slug string) (*domain.Diagram, error) {
+	raw, err := os.ReadFile(filepath.Join(l.root, "roadmaps", slug+".diagram.json"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var f diagramFile
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&f); err != nil {
+		return nil, err
+	}
+	if len(f.Stages) == 0 {
+		return nil, fmt.Errorf("нет этапов")
+	}
+	d := &domain.Diagram{}
+	seen := map[string]bool{}
+	for si, s := range f.Stages {
+		if strings.TrimSpace(s.Title) == "" {
+			return nil, fmt.Errorf("этап %d: пустое название", si+1)
+		}
+		if len(s.Nodes) == 0 {
+			return nil, fmt.Errorf("этап %q: нет узлов", s.Title)
+		}
+		stage := domain.DiagramStage{Title: s.Title, Note: s.Note, Choose: s.Choose}
+		for _, n := range s.Nodes {
+			if strings.TrimSpace(n.Title) == "" {
+				return nil, fmt.Errorf("этап %q: узел без названия", s.Title)
+			}
+			kind := n.Kind
+			if kind == "" {
+				kind = domain.NodeCore
+			}
+			if kind != domain.NodeCore && kind != domain.NodeAlso && kind != domain.NodeOptional {
+				return nil, fmt.Errorf("узел %q: неизвестный вид %q", n.Title, kind)
+			}
+			if n.Href != "" && !strings.HasPrefix(n.Href, "/") && !strings.HasPrefix(n.Href, "https://") {
+				return nil, fmt.Errorf("узел %q: ссылка должна начинаться с / или https://", n.Title)
+			}
+			if !nodeID.MatchString(n.ID) {
+				return nil, fmt.Errorf("узел %q: id должен состоять из латинских строчных букв, цифр и дефисов", n.Title)
+			}
+			if seen[n.ID] {
+				return nil, fmt.Errorf("узел %q: id %q повторяется", n.Title, n.ID)
+			}
+			seen[n.ID] = true
+			if n.Href != "" && n.Summary != "" {
+				return nil, fmt.Errorf("узел %q: нельзя задавать и href, и summary", n.Title)
+			}
+			if len([]rune(n.Summary)) > maxSummaryRunes {
+				return nil, fmt.Errorf("узел %q: summary длиннее %d символов", n.Title, maxSummaryRunes)
+			}
+			if len(n.Links) > maxNodeLinks {
+				return nil, fmt.Errorf("узел %q: больше %d ссылок", n.Title, maxNodeLinks)
+			}
+			node := domain.DiagramNode{ID: n.ID, Title: n.Title, Kind: kind, Href: n.Href, Summary: strings.TrimSpace(n.Summary)}
+			for _, lk := range n.Links {
+				if strings.TrimSpace(lk.Title) == "" || !strings.HasPrefix(lk.URL, "https://") {
+					return nil, fmt.Errorf("узел %q: у ссылки нужны название и адрес на https://", n.Title)
+				}
+				node.Links = append(node.Links, domain.Link{Title: lk.Title, URL: lk.URL})
+			}
+			stage.Nodes = append(stage.Nodes, node)
+		}
+		d.Stages = append(d.Stages, stage)
+	}
+	return d, nil
 }
 
 func (l *Loader) Roadmap(slug string) (domain.Roadmap, bool, error) {
@@ -105,11 +217,17 @@ func loadMarkdown[T any](l *Loader, dir string, parse func(slug, raw, html strin
 
 func parseRoadmapMeta(slug, raw, html string) domain.Roadmap {
 	title := firstHeading(raw, slug)
+	intro, body := html, ""
+	if i := strings.Index(html, "<h2"); i >= 0 {
+		intro, body = html[:i], html[i:]
+	}
 	return domain.Roadmap{
-		Slug:    slug,
-		Title:   title,
-		Summary: firstParagraph(raw),
-		HTML:    html,
+		Slug:      slug,
+		Title:     title,
+		Summary:   firstParagraph(raw),
+		HTML:      html,
+		IntroHTML: intro,
+		BodyHTML:  body,
 	}
 }
 

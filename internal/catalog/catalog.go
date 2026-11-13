@@ -7,7 +7,7 @@ func Directions() []domain.Direction {
 		{
 			Slug:        "frontend",
 			Title:       "Frontend",
-			ShortTitle:  "Frontend",
+			ShortTitle:  "Front",
 			Icon:        "</>",
 			Summary:     "Интерфейсы, вёрстка, доступность и состояния кнопок.",
 			RoadmapSlug: "frontend",
@@ -16,20 +16,29 @@ func Directions() []domain.Direction {
 		{
 			Slug:        "backend",
 			Title:       "Backend",
-			ShortTitle:  "Go",
+			ShortTitle:  "Back",
 			Icon:        "Go",
 			Summary:     "Обработка ошибок, данные и правила, которые проверяет сервер.",
 			RoadmapSlug: "backend",
-			CaseSlug:    "", // кейс для Backend ещё не написан
+			CaseSlug:    "backend",
 		},
 		{
 			Slug:        "project-manager",
 			Title:       "IT Project Manager",
-			ShortTitle:  "PM",
-			Icon:        "PM",
+			ShortTitle:  "PjM",
+			Icon:        "PjM",
 			Summary:     "Неполные требования, команда с разным пониманием результата.",
 			RoadmapSlug: "project-manager",
-			CaseSlug:    "", // кейс для PM ещё не написан
+			CaseSlug:    "project-manager",
+		},
+		{
+			Slug:        "product-manager",
+			Title:       "IT Product Manager",
+			ShortTitle:  "PM",
+			Icon:        "PM",
+			Summary:     "Метрики, гипотезы и приоритеты: что делать в первую очередь и почему.",
+			RoadmapSlug: "product-manager",
+			CaseSlug:    "product-manager",
 		},
 	}
 }

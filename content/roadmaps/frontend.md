@@ -40,3 +40,4 @@
 - [MDN: HTML](https://developer.mozilla.org/ru/docs/Web/HTML)
 - [MDN: CSS](https://developer.mozilla.org/ru/docs/Web/CSS)
 - [web.dev: Learn Accessibility](https://web.dev/learn/accessibility/)
+- [roadmap.sh — большие интерактивные карты по профессиям](https://roadmap.sh/) (на английском; для сравнения и дальнейшего чтения)

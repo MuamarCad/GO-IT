@@ -1,0 +1,77 @@
+{{define "content"}}
+<div class="lk-layout">
+  {{template "lk_sidebar" .}}
+
+  <div class="lk-main">
+    <h1 class="lk-heading">Волонтёрство</h1>
+
+    <p class="hint" style="margin-bottom: 24px;">
+      Цифровое волонтёрство — помогайте социальным организациям с IT-задачами. Это реальный опыт и вклад в общество.
+    </p>
+
+    <!-- Моя активность -->
+    <div class="lk-section">
+      <h3>Моя активность</h3>
+      <div class="lk-stats" style="margin-bottom: 0;">
+        <div class="lk-stat">
+          <span class="n">{{.Data.TasksApplied}}</span>
+          <small>Заявок отправлено</small>
+        </div>
+        <div class="lk-stat">
+          <span class="n">{{.Data.TasksAccepted}}</span>
+          <small>Принято задач</small>
+        </div>
+        <div class="lk-stat">
+          <span class="n">{{.Data.TasksCompleted}}</span>
+          <small>Выполнено</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Мои задачи -->
+    <div class="lk-section">
+      <h3>Мои задачи</h3>
+      {{if .Data.MyTasks}}
+      <div class="lk-card-row">
+        {{range .Data.MyTasks}}
+        <div class="lk-item">
+          <div class="lk-badge {{if eq .Status "completed"}}lk-badge--ok{{else}}lk-badge--primary{{end}}">{{.StatusLabel}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Title}}</div>
+            <p class="lk-item-meta">{{.Organization}} · Сделано: {{.CompletedDays}} из {{.TotalDays}} дн.</p>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">У вас пока нет назначенных задач.</p>
+      {{end}}
+    </div>
+
+    <!-- Доступные задачи -->
+    <div class="lk-section">
+      <h3>Доступные задачи</h3>
+      <div class="lk-card-row">
+        {{range .Data.AvailableTasks}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--ok">{{.Scale}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Title}}</div>
+            <p class="lk-item-meta">{{.Organization}} · Навыки: {{.Skills}} · Сроков: {{.Deadline}}</p>
+          </div>
+          <a class="btn btn--primary btn--sm lk-item-action" href="/volunteering/{{.Slug}}">Откликнуться</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{if not .Data.AvailableTasks}}
+    <div class="empty">
+      <h2>Новых задач пока нет</h2>
+      <p>Следите за обновлениями — социальные партнёры публикуют новые задачи регулярно.</p>
+      <a class="btn btn--primary" href="/volunteering">Все задачи</a>
+    </div>
+    {{end}}
+  </div>
+</div>
+{{end}}

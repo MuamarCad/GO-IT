@@ -15,7 +15,7 @@
   <script src="/static/js/htmx.min.js" defer></script>
   <script src="/static/js/theme.js" defer></script>
 </head>
-<body>
+<body{{if .LK}} class="lk-page"{{end}}>
   <a class="skip-link" href="#main">К содержанию</a>
   {{template "header" .}}
   <main id="main">

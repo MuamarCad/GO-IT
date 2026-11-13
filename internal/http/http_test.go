@@ -2,6 +2,7 @@ package web
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -41,7 +42,7 @@ func testServer(t *testing.T) *httptest.Server {
 		Catalog:  store,
 		Content:  content.New("content"),
 	}
-	return httptest.NewServer(NewRouter(h, "static"))
+	return httptest.NewServer(NewRouter(slog.Default(), h, "static"))
 }
 
 func moduleRoot(t *testing.T) string {
@@ -224,18 +225,16 @@ func TestAllPagesRender(t *testing.T) {
 	}
 }
 
-func TestDirectionWithoutCaseHidesCTA(t *testing.T) {
+func TestDirectionsHaveCases(t *testing.T) {
 	ts := testServer(t)
 	defer ts.Close()
 	client := &http.Client{}
 
-	_, backend := get(t, client, ts.URL+"/directions/backend")
-	if strings.Contains(backend, `href="/cases/`) || !strings.Contains(backend, "в разработке") {
-		t.Fatal("у Backend нет кейса: кнопка «Пройти кейс» не должна вести на чужой кейс")
-	}
-	_, front := get(t, client, ts.URL+"/directions/frontend")
-	if !strings.Contains(front, `href="/cases/frontend"`) {
-		t.Fatal("у Frontend кнопка кейса должна быть")
+	for _, slug := range []string{"frontend", "backend", "project-manager", "product-manager"} {
+		status, body := get(t, client, ts.URL+"/directions/"+slug)
+		if status != http.StatusOK || !strings.Contains(body, `href="/cases/`+slug+`"`) {
+			t.Errorf("направление %s: нет кнопки на кейс (статус %d)", slug, status)
+		}
 	}
 }
 
@@ -304,8 +303,8 @@ func TestRoadmapLinksToCaseOnlyWhenItExists(t *testing.T) {
 		t.Fatal("roadmap Frontend: нужен data-roadmap и ссылка на кейс")
 	}
 	_, back := get(t, client, ts.URL+"/roadmaps/backend")
-	if strings.Contains(back, `href="/cases/`) {
-		t.Fatal("roadmap Backend не должен вести на кейс, которого нет")
+	if !strings.Contains(back, `data-roadmap="backend"`) || !strings.Contains(back, `href="/cases/backend"`) {
+		t.Fatal("roadmap Backend: нужен data-roadmap и ссылка на кейс")
 	}
 }
 
@@ -315,9 +314,15 @@ func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{Jar: jar}
 
-	correct := map[string]string{"q1": "q1_b", "q2": "q2_b", "q3": "q3_b", "q4": "q4_b"}
+	correct := map[string]string{
+		"q1": "q1_b", "q2": "q2_b", "q3": "q3_a", "q4": "q4_a",
+		"q5": "q5_a", "q6": "q6_b", "q7": "q7_a", "q8": "q8_a",
+		"q9": "q9_a", "q10": "q10_a", "q11": "q11_a", "q12": "q12_b",
+		"q13": "q13_a", "q14": "q14_a", "q15": "q15_a", "q16": "q16_a",
+		"q17": "q17_a", "q18": "q18_a", "q19": "q19_a", "q20": "q20_a",
+	}
 	_, body := get(t, client, ts.URL+"/cases/frontend")
-	for step := 0; step < 4; step++ {
+	for step := 0; step < 20; step++ {
 		if !strings.Contains(body, `role="progressbar"`) || !strings.Contains(body, `<span class="letter"`) {
 			t.Fatalf("шаг %d: нет прогресса или букв вариантов", step+1)
 		}
@@ -330,9 +335,68 @@ func TestCaseFullFlowShowsResultWithTopics(t *testing.T) {
 		body = string(mustRead(res))
 		res.Body.Close()
 	}
-	for _, want := range []string{"4 из 4", "По темам", "Доступность форм", "Пройти заново", `href="/roadmaps/frontend"`} {
+	for _, want := range []string{"20 из 20", "По темам", "Состояния форм", "Пройти заново", `href="/roadmaps/frontend"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("на странице результата нет %q", want)
 		}
+	}
+}
+
+func TestRoadmapDiagramRendered(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	client := &http.Client{}
+
+	for _, slug := range []string{"frontend", "backend", "project-manager"} {
+		_, body := get(t, client, ts.URL+"/roadmaps/"+slug)
+		if n := strings.Count(body, `class="rm-stage"`); n < 6 {
+			t.Errorf("%s: этапов схемы %d, ожидали не меньше 6", slug, n)
+		}
+		for _, want := range []string{`class="rm-flow"`, "rm-node--core", "Выберите один", `href="/volunteering"`, `href="/mentors"`, "Основа: "} {
+			if !strings.Contains(body, want) {
+				t.Errorf("%s: в схеме нет %q", slug, want)
+			}
+		}
+		// схема стоит между введением и разделами, а чек-лист и оглавление остаются в основной части
+		if strings.Index(body, `class="rm-flow"`) < strings.Index(body, "<h1") || strings.Index(body, `class="rm-flow"`) > strings.Index(body, `data-roadmap="`+slug+`"`) {
+			t.Errorf("%s: схема стоит не на своём месте", slug)
+		}
+		if strings.Count(body, "<h1") != 1 {
+			t.Errorf("%s: на странице должен быть ровно один h1", slug)
+		}
+	}
+}
+
+func TestRoadmapTopicPanel(t *testing.T) {
+	ts := testServer(t)
+	defer ts.Close()
+	_, body := get(t, &http.Client{}, ts.URL+"/roadmaps/frontend")
+
+	for _, want := range []string{
+		`<dialog class="rm-panel" id="rm-panel"`,    // панель
+		`data-topic="t-html-semantic"`,              // узел открывает панель
+		`href="#t-html-semantic"`,                   // запасной якорь без JS
+		`id="t-html-semantic"`,                      // справочник тем
+		`target="_blank" rel="noopener noreferrer"`, // внешние ссылки безопасны
+		"developer.mozilla.org",                     // домен показывается
+		"(откроется в новой вкладке)",               // подсказка для скринридера
+		`data-panel-close`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("нет %q", want)
+		}
+	}
+	// Узел-ссылка (волонтёрство) остаётся обычной ссылкой, а не открывает панель.
+	if strings.Contains(body, `data-topic="t-volunteering"`) || !strings.Contains(body, `href="/volunteering"`) {
+		t.Error("узел волонтёрства должен быть обычной ссылкой")
+	}
+	if strings.Contains(body, "javascript:") {
+		t.Error("javascript: в ссылках недопустим")
+	}
+	// Для каждого узла с панелью есть и якорь, и статья справочника.
+	anchors := strings.Count(body, `data-topic="t-`)
+	articles := strings.Count(body, `class="rm-topic"`)
+	if anchors == 0 || anchors != articles {
+		t.Errorf("узлов с панелью %d, статей справочника %d", anchors, articles)
 	}
 }

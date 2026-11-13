@@ -1,0 +1,57 @@
+{{define "content"}}
+<div class="lk-layout">
+  {{template "lk_sidebar" .}}
+
+  <div class="lk-main">
+    <h1 class="lk-heading">Менторы</h1>
+
+    <p class="hint" style="margin-bottom: 24px;">
+      Выберите ментора для бесплатной консультации. Менторы — студенты и выпускники, которые помогут разобраться в профессии.
+    </p>
+
+    <!-- Мои менторы -->
+    <div class="lk-section">
+      <h3>Мои консультации</h3>
+      {{if .Data.MySessions}}
+      <div class="lk-card-row">
+        {{range .Data.MySessions}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--ok">{{.Status}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.MentorName}}</div>
+            <p class="lk-item-meta">{{.Date}} в {{.Time}} · {{.Topic}}</p>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">У вас пока нет запланированных консультаций.</p>
+      {{end}}
+    </div>
+
+    <!-- Каталог менторов -->
+    <div class="lk-section">
+      <h3>Каталог менторов</h3>
+      <div class="lk-card-row">
+        {{range .Data.AvailableMentors}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--primary">{{.Specialization}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Name}}</div>
+            <p class="lk-item-meta">{{.Level}} · {{.Format}}</p>
+          </div>
+          <a class="btn btn--outline btn--sm lk-item-action" href="/mentors/{{.Slug}}">Профиль</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{if not .Data.AvailableMentors}}
+    <div class="empty">
+      <h2>Менторы скоро появятся</h2>
+      <p>Мы набираем менторов из числа выпускников проекта GO-IT.</p>
+    </div>
+    {{end}}
+  </div>
+</div>
+{{end}}

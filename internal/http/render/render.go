@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
@@ -60,9 +61,11 @@ type Page struct {
 	Title       string
 	Description string
 	Active      string
+	LK          bool // страница личного кабинета: скрывает шапку сайта (класс lk-page)
 	CSRF        string
 	Flash       string
 	FlashError  string
+	Alert       string
 	Data        any
 }
 
@@ -75,6 +78,8 @@ func (r *Renderer) HTML(w http.ResponseWriter, name string, page Page, status in
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// В страницах лежат CSRF-токены: кнопка «Назад» не должна показывать устаревшую форму.
+	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(status)
 	_, _ = w.Write(buf.Bytes())
 }
@@ -99,6 +104,8 @@ func funcs() template.FuncMap {
 		"capfirst": capfirst,
 		"ruDate":   ruDate,
 		"dict":     dict,
+		"kindName": kindName,
+		"host":     host,
 	}
 }
 
@@ -173,3 +180,28 @@ func dict(pairs ...any) (map[string]any, error) {
 	}
 	return m, nil
 }
+
+// kindName — подпись вида узла схемы. Нужна и в легенде, и для скринридеров (вид не должен передаваться только цветом).
+func kindName(kind string) string {
+	switch kind {
+	case "core":
+		return "Основа"
+	case "also":
+		return "На выбор"
+	case "optional":
+		return "По желанию"
+	}
+	return ""
+}
+
+// host возвращает домен ссылки для подписи («developer.mozilla.org»); при ошибке разбора — пустую строку.
+func host(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimPrefix(u.Hostname(), "www.")
+}
+
+// Initials — экспортируемая обёртка для обработчиков: «Анна К.» -> «АК».
+func Initials(name string) string { return initials(name) }

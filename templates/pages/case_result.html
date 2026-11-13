@@ -24,7 +24,7 @@
       {{if .Question.Topic}}<span class="tag">{{.Question.Topic}}</span>{{end}}
       <p style="margin-top:10px"><strong>{{.Question.Text}}</strong></p>
       <p>Ваш ответ: {{.Chosen.Text}}</p>
-      {{if .IsCorrect}}<p class="status ok">✓ Подходящий выбор</p>{{else}}<p class="status miss">✗ Более точный вариант: {{.Correct.Text}}</p>{{end}}
+      {{if .IsCorrect}}<p class="status ok"><span aria-hidden="true">✓</span> Подходящий выбор</p>{{else}}<p class="status miss"><span aria-hidden="true">✗</span> Более точный вариант: {{.Correct.Text}}</p>{{end}}
       <p>{{.Explanation}}</p>
     </li>
     {{end}}

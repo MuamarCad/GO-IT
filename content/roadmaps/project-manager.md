@@ -37,3 +37,4 @@
 
 - [12 недель. Принцип фокуса — обзор идеи MVP](https://www.productplan.com/glossary/minimum-viable-product/)
 - [User story mapping (введение)](https://www.jpattonassociates.com/user-story-mapping/)
+- [roadmap.sh — большие интерактивные карты по профессиям](https://roadmap.sh/) (на английском; для сравнения и дальнейшего чтения)

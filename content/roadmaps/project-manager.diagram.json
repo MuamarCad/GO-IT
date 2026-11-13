@@ -1,0 +1,468 @@
+{
+ "stages": [
+  {
+   "title": "Роль",
+   "note": "Это не «управлять людьми», а прояснять результат.",
+   "nodes": [
+    {
+     "id": "pm-role",
+     "title": "Что делает IT Project Manager",
+     "kind": "core",
+     "summary": "Помогает команде довести проект до результата: уточняет цели, сроки и границы, снимает препятствия.",
+     "links": [
+      {
+       "title": "Atlassian: управление проектами (англ.)",
+       "url": "https://www.atlassian.com/agile/project-management"
+      }
+     ]
+    },
+    {
+     "id": "pm-team",
+     "title": "Роли в команде: разработка, тестирование, дизайн",
+     "kind": "core",
+     "summary": "Кто за что отвечает и кого спросить. Понятные роли сокращают недопонимания."
+    },
+    {
+     "id": "pm-lifecycle",
+     "title": "Жизненный цикл продукта",
+     "kind": "core",
+     "summary": "Идея, разработка, запуск, развитие и завершение. На каждом этапе меняются задачи команды.",
+     "links": [
+      {
+       "title": "Манифест Agile на русском",
+       "url": "https://agilemanifesto.org/iso/ru/manifesto.html"
+      }
+     ]
+    },
+    {
+     "id": "pm-mvp",
+     "title": "Проект, продукт и MVP: в чём разница",
+     "kind": "core",
+     "summary": "Проект ограничен по времени, продукт живёт дольше. MVP — минимальная версия, которая проверяет главную гипотезу.",
+     "links": [
+      {
+       "title": "ProductPlan: что такое MVP (англ.)",
+       "url": "https://www.productplan.com/glossary/minimum-viable-product/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Проблема и аудитория",
+   "nodes": [
+    {
+     "id": "pm-user",
+     "title": "Кто пользователь и что ему мешает",
+     "kind": "core",
+     "summary": "Начните с человека и его затруднения, а не со списка функций.",
+     "links": [
+      {
+       "title": "NN/g: персоны (англ.)",
+       "url": "https://www.nngroup.com/articles/persona/"
+      }
+     ]
+    },
+    {
+     "id": "pm-interviews",
+     "title": "Интервью и опросы",
+     "kind": "core",
+     "summary": "Короткие разговоры с будущими пользователями показывают, как они действуют на самом деле.",
+     "links": [
+      {
+       "title": "NN/g: пользовательские интервью (англ.)",
+       "url": "https://www.nngroup.com/articles/user-interviews/"
+      }
+     ]
+    },
+    {
+     "id": "pm-persona",
+     "title": "Портрет аудитории",
+     "kind": "core",
+     "summary": "Обобщённое описание типичного пользователя: цели, ограничения, контекст.",
+     "links": [
+      {
+       "title": "NN/g: персоны (англ.)",
+       "url": "https://www.nngroup.com/articles/persona/"
+      }
+     ]
+    },
+    {
+     "id": "pm-problem",
+     "title": "Формулировка проблемы одним предложением",
+     "kind": "core",
+     "summary": "Если проблему нельзя изложить одной фразой, она пока непонятна. Проверьте себя на этом."
+    },
+    {
+     "id": "pm-jtbd",
+     "title": "Jobs To Be Done",
+     "kind": "optional",
+     "summary": "Подход, который рассматривает продукт как способ выполнить задачу, ради которой человек его «нанимает».",
+     "links": [
+      {
+       "title": "HBR: Know Your Customers' Jobs to Be Done (англ.)",
+       "url": "https://hbr.org/2016/09/know-your-customers-jobs-to-be-done"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Требования",
+   "note": "Задача понятна, когда её можно проверить.",
+   "nodes": [
+    {
+     "id": "req-scenarios",
+     "title": "Пользовательские сценарии",
+     "kind": "core",
+     "summary": "Путь человека по шагам от цели до результата. Хороший сценарий умещается в 4–7 шагов.",
+     "links": [
+      {
+       "title": "Jeff Patton: User story mapping (англ.)",
+       "url": "https://www.jpattonassociates.com/user-story-mapping/"
+      }
+     ]
+    },
+    {
+     "id": "req-stories",
+     "title": "User stories",
+     "kind": "core",
+     "summary": "Короткое описание: кто, что хочет и зачем. Удобная единица для планирования.",
+     "links": [
+      {
+       "title": "Atlassian: User stories (англ.)",
+       "url": "https://www.atlassian.com/agile/project-management/user-stories"
+      }
+     ]
+    },
+    {
+     "id": "req-acceptance",
+     "title": "Критерии приёмки",
+     "kind": "core",
+     "summary": "Список проверок, по которым ясно, что задача готова. Без них спорят о том, «сделано или нет».",
+     "links": [
+      {
+       "title": "Atlassian: User stories (англ.)",
+       "url": "https://www.atlassian.com/agile/project-management/user-stories"
+      }
+     ]
+    },
+    {
+     "id": "req-scope",
+     "title": "Границы MVP: Must / Should / не входит",
+     "kind": "core",
+     "summary": "Честно назвать, что войдёт в первую версию, а чего в ней не будет.",
+     "links": [
+      {
+       "title": "ProductPlan: MoSCoW (англ.)",
+       "url": "https://www.productplan.com/glossary/moscow-prioritization/"
+      },
+      {
+       "title": "ProductPlan: что такое MVP (англ.)",
+       "url": "https://www.productplan.com/glossary/minimum-viable-product/"
+      }
+     ]
+    },
+    {
+     "id": "req-nfr",
+     "title": "Нефункциональные требования: доступность, скорость",
+     "kind": "core",
+     "summary": "Как система должна работать: быстро, безопасно, доступно для людей с особенностями. Их нужно записывать так же, как функции.",
+     "links": [
+      {
+       "title": "web.dev: Learn Accessibility (англ.)",
+       "url": "https://web.dev/learn/accessibility"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Планирование",
+   "note": "Если сроки горят, режем объём, а не качество главного сценария.",
+   "nodes": [
+    {
+     "id": "plan-wbs",
+     "title": "Декомпозиция на задачи",
+     "kind": "core",
+     "summary": "Разбейте большую цель на задачи, которые можно сделать за день-два и проверить."
+    },
+    {
+     "id": "plan-estimate",
+     "title": "Оценка и допущения",
+     "kind": "core",
+     "summary": "Оценка — это не обещание. Записывайте, на какие допущения она опирается.",
+     "links": [
+      {
+       "title": "Atlassian: оценка задач (англ.)",
+       "url": "https://www.atlassian.com/agile/project-management/estimation"
+      }
+     ]
+    },
+    {
+     "id": "plan-priority",
+     "title": "Приоритизация",
+     "kind": "core",
+     "summary": "Что делать первым. Если сроки горят, режем объём, а не качество главного сценария.",
+     "links": [
+      {
+       "title": "ProductPlan: MoSCoW (англ.)",
+       "url": "https://www.productplan.com/glossary/moscow-prioritization/"
+      }
+     ]
+    },
+    {
+     "id": "plan-risks",
+     "title": "Риски и план Б",
+     "kind": "core",
+     "summary": "Заранее выпишите, что может пойти не так, и решите, что делать в этом случае."
+    },
+    {
+     "id": "plan-roadmap",
+     "title": "Продуктовая дорожная карта",
+     "kind": "optional",
+     "summary": "Картина развития продукта по этапам: куда идём и в каком порядке.",
+     "links": [
+      {
+       "title": "ProductPlan: продуктовая дорожная карта (англ.)",
+       "url": "https://www.productplan.com/learn/what-is-a-product-roadmap/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Методология",
+   "note": "Выберите ту, что подходит команде. Ритуалы не заменяют результат.",
+   "choose": true,
+   "nodes": [
+    {
+     "id": "meth-scrum",
+     "title": "Scrum",
+     "kind": "also",
+     "summary": "Короткие итерации (спринты) с планированием, демонстрацией и ретроспективой.",
+     "links": [
+      {
+       "title": "Scrum Guide (англ.)",
+       "url": "https://scrumguides.org/scrum-guide.html"
+      },
+      {
+       "title": "Atlassian: Scrum (англ.)",
+       "url": "https://www.atlassian.com/agile/scrum"
+      }
+     ]
+    },
+    {
+     "id": "meth-kanban",
+     "title": "Kanban",
+     "kind": "also",
+     "summary": "Непрерывный поток задач на доске с ограничением работ в процессе.",
+     "links": [
+      {
+       "title": "Atlassian: Kanban (англ.)",
+       "url": "https://www.atlassian.com/agile/kanban"
+      }
+     ]
+    },
+    {
+     "id": "meth-hybrid",
+     "title": "Гибридный подход",
+     "kind": "also",
+     "summary": "Практики из разных методологий под конкретную команду. Часто так и работают."
+    },
+    {
+     "id": "meth-waterfall",
+     "title": "Каскадная модель (для сравнения)",
+     "kind": "also",
+     "summary": "Этапы идут строго друг за другом. Знать полезно, чтобы понимать, чем от неё отличаются гибкие подходы.",
+     "links": [
+      {
+       "title": "Atlassian: Waterfall (англ.)",
+       "url": "https://www.atlassian.com/agile/project-management/waterfall-methodology"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Инструменты",
+   "nodes": [
+    {
+     "id": "tool-tracker",
+     "title": "Трекер задач: GitHub Projects, Trello, Jira",
+     "kind": "core",
+     "summary": "Доска, где видно, кто что делает и на каком этапе задача.",
+     "links": [
+      {
+       "title": "GitHub Projects (англ.)",
+       "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects"
+      },
+      {
+       "title": "Trello: руководство (англ.)",
+       "url": "https://trello.com/guide"
+      }
+     ]
+    },
+    {
+     "id": "tool-docs",
+     "title": "Документация: Notion, Confluence",
+     "kind": "core",
+     "summary": "Единое место для требований, решений и договорённостей.",
+     "links": [
+      {
+       "title": "Notion: справка (англ.)",
+       "url": "https://www.notion.com/help"
+      }
+     ]
+    },
+    {
+     "id": "tool-boards",
+     "title": "Доска и схемы: Miro, Figma",
+     "kind": "core",
+     "summary": "Схемы процессов и макеты экранов помогают договориться до начала разработки.",
+     "links": [
+      {
+       "title": "Figma: справка (англ.)",
+       "url": "https://help.figma.com/hc/en-us"
+      }
+     ]
+    },
+    {
+     "id": "tool-sheets",
+     "title": "Таблицы для учёта и отчётов",
+     "kind": "core",
+     "summary": "Простые таблицы часто достаточны для учёта сроков, рисков и результатов."
+    }
+   ]
+  },
+  {
+   "title": "Коммуникация",
+   "nodes": [
+    {
+     "id": "comm-meetings",
+     "title": "Встречи: планирование, ежедневная, обзор",
+     "kind": "core",
+     "summary": "Короткие регулярные встречи с понятной целью. Если цели нет, встречу можно заменить сообщением.",
+     "links": [
+      {
+       "title": "Atlassian: встречи в Scrum (англ.)",
+       "url": "https://www.atlassian.com/agile/scrum/ceremonies"
+      }
+     ]
+    },
+    {
+     "id": "comm-customer",
+     "title": "Ожидания заказчика",
+     "kind": "core",
+     "summary": "Договоритесь о результате заранее и показывайте промежуточные итоги, чтобы не было сюрпризов."
+    },
+    {
+     "id": "comm-feedback",
+     "title": "Обратная связь внутри команды",
+     "kind": "core",
+     "summary": "Говорите о работе и фактах, а не о людях. Регулярная обратная связь помогает расти.",
+     "links": [
+      {
+       "title": "Atlassian Team Playbook (англ.)",
+       "url": "https://www.atlassian.com/team-playbook"
+      }
+     ]
+    },
+    {
+     "id": "comm-conflicts",
+     "title": "Конфликты и компромиссы",
+     "kind": "core",
+     "summary": "Разногласия о приоритетах — норма. Возвращайтесь к цели проекта и критериям приёмки."
+    }
+   ]
+  },
+  {
+   "title": "Результат",
+   "nodes": [
+    {
+     "id": "res-demo",
+     "title": "Демо за 5–7 минут",
+     "kind": "core",
+     "summary": "Один сквозной путь без лишнего: проблема, решение, показ, ограничения.",
+     "links": [
+      {
+       "title": "Atlassian: sprint review (англ.)",
+       "url": "https://www.atlassian.com/agile/scrum/sprint-reviews"
+      }
+     ]
+    },
+    {
+     "id": "res-acceptance",
+     "title": "План приёмки",
+     "kind": "core",
+     "summary": "Какие проверки пройдёт результат, чтобы считать его готовым."
+    },
+    {
+     "id": "res-retro",
+     "title": "Ретроспектива",
+     "kind": "core",
+     "summary": "Что получилось, что нет и что изменим в следующий раз. Без поиска виноватых.",
+     "links": [
+      {
+       "title": "Atlassian: ретроспектива (англ.)",
+       "url": "https://www.atlassian.com/team-playbook/plays/retrospective"
+      }
+     ]
+    },
+    {
+     "id": "res-limits",
+     "title": "Честный список заглушек и ограничений",
+     "kind": "core",
+     "summary": "Назвать, чего в MVP нет, без извинений. Это признак зрелости проекта."
+    },
+    {
+     "id": "res-metrics",
+     "title": "Метрики после запуска",
+     "kind": "optional",
+     "summary": "Как узнать, что продукт работает: например, сколько людей дошли до конца сценария."
+    }
+   ]
+  },
+  {
+   "title": "Практика",
+   "nodes": [
+    {
+     "id": "practice-task",
+     "title": "Описать волонтёрскую задачу: навыки, масштаб, результат",
+     "kind": "core",
+     "summary": "Опишите реальную задачу так, чтобы её мог взять исполнитель: цель, нужные навыки, объём, критерии готовности.",
+     "links": [
+      {
+       "title": "Atlassian: User stories (англ.)",
+       "url": "https://www.atlassian.com/agile/project-management/user-stories"
+      }
+     ]
+    },
+    {
+     "id": "practice-script",
+     "title": "Сценарий защиты проекта по минутам",
+     "kind": "core",
+     "summary": "Распишите демонстрацию по минутам: что показываете, что говорите и какой результат ждёте.",
+     "links": [
+      {
+       "title": "Atlassian: sprint review (англ.)",
+       "url": "https://www.atlassian.com/agile/scrum/sprint-reviews"
+      }
+     ]
+    },
+    {
+     "id": "volunteering",
+     "title": "Волонтёрская задача",
+     "kind": "core",
+     "href": "/volunteering"
+    },
+    {
+     "id": "mentors",
+     "title": "Консультация наставника",
+     "kind": "core",
+     "href": "/mentors"
+    }
+   ]
+  }
+ ]
+}

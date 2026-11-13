@@ -1,0 +1,72 @@
+{{define "content"}}
+<div class="lk-layout">
+  {{template "lk_sidebar" .}}
+
+  <!-- Основной контент: настройки -->
+  <div class="lk-main">
+    <h1 class="lk-heading">Настройки аккаунта</h1>
+
+    {{if .Alert}}<div class="alert alert--ok" role="status"><strong>{{.Alert}}</strong></div>{{end}}
+    {{if .Data.Errors}}<div class="alert alert--error" role="alert" data-focus><strong>Проверьте форму.</strong> Исправьте отмеченные поля.</div>{{end}}
+
+    <!-- Профиль -->
+    <div class="lk-section">
+      <h3>Профиль</h3>
+      <form method="post" action="/lk/student/settings" class="settings-form">
+        <div class="settings-row">
+          <div class="field">
+            <label for="settings-name">ФИО</label>
+            <input type="text" id="settings-name" name="name" value="{{.Data.Form.name}}" autocomplete="name" maxlength="100" {{with .Data.Errors.name}}aria-invalid="true" aria-describedby="settings-name-err"{{end}}>
+            {{with .Data.Errors.name}}<div class="field-error" id="settings-name-err">{{.}}</div>{{end}}
+          </div>
+          <div class="field">
+            <label for="settings-email">Email</label>
+            <input type="text" id="settings-email" name="email" value="{{.Data.Form.email}}" autocomplete="email" {{with .Data.Errors.email}}aria-invalid="true" aria-describedby="settings-email-err"{{end}}>
+            {{with .Data.Errors.email}}<div class="field-error" id="settings-email-err">{{.}}</div>{{end}}
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="settings-phone">Телефон</label>
+            <input type="text" id="settings-phone" name="phone" value="{{.Data.Form.phone}}" autocomplete="tel" placeholder="+7 (___) ___-__-__" {{with .Data.Errors.phone}}aria-invalid="true" aria-describedby="settings-phone-err"{{end}}>
+            {{with .Data.Errors.phone}}<div class="field-error" id="settings-phone-err">{{.}}</div>{{end}}
+          </div>
+          <div class="field">
+            <label for="settings-avatar">Аватар</label>
+            <div class="avatar-upload">
+              <div class="lk-avatar lk-avatar--sm" aria-hidden="true">{{.Data.Initials}}</div>
+              <input type="file" id="settings-avatar" name="avatar" accept="image/*" disabled aria-describedby="settings-avatar-hint">
+              <small class="hint" id="settings-avatar-hint">Загрузка аватара появится позже.</small>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary" name="action" value="profile">Сохранить профиль</button>
+      </form>
+    </div>
+
+    <!-- Смена пароля -->
+    <div class="lk-section">
+      <h3>Смена пароля</h3>
+      <form method="post" action="/lk/student/settings" class="settings-form" data-once>
+        <p class="hint">Демо-режим: пароль не хранится, поэтому текущий пароль не проверяется.</p>
+        <div class="field">
+          <label for="settings-password-old">Текущий пароль</label>
+          <input type="password" id="settings-password-old" name="password_old" autocomplete="current-password" placeholder="В демо-режиме не проверяется">
+          
+        </div>
+        <div class="field">
+          <label for="settings-password-new">Новый пароль</label>
+          <input type="password" id="settings-password-new" name="password_new" autocomplete="new-password" placeholder="Минимум 8 символов, буквы и цифры" {{with .Data.Errors.password_new}}aria-invalid="true" aria-describedby="settings-password-new-err"{{end}}>
+          {{with .Data.Errors.password_new}}<div class="field-error" id="settings-password-new-err">{{.}}</div>{{end}}
+        </div>
+        <div class="field">
+          <label for="settings-password-confirm">Подтвердите пароль</label>
+          <input type="password" id="settings-password-confirm" name="password_confirm" autocomplete="new-password" placeholder="Повторите новый пароль" {{with .Data.Errors.password_confirm}}aria-invalid="true" aria-describedby="settings-password-confirm-err"{{end}}>
+          {{with .Data.Errors.password_confirm}}<div class="field-error" id="settings-password-confirm-err">{{.}}</div>{{end}}
+        </div>
+        <button type="submit" class="btn btn--primary" name="action" value="password">Изменить пароль</button>
+      </form>
+    </div>
+  </div>
+</div>
+{{end}}

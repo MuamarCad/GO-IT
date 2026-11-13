@@ -110,6 +110,52 @@
     }
   }
 
+  /* Боковая панель темы на схеме roadmap. Без JS узлы ведут по якорям к «Справочнику тем». */
+  var rm = document.querySelector(".rm");
+  var panel = document.getElementById("rm-panel");
+  if (rm && panel && typeof panel.showModal === "function") {
+    rm.classList.add("rm-enhanced");
+    var pKind = panel.querySelector("[data-panel-kind]");
+    var pStage = panel.querySelector("[data-panel-stage]");
+    var pTitle = panel.querySelector("#rm-panel-title");
+    var pBody = panel.querySelector("[data-panel-body]");
+
+    var openTopic = function (id, updateHash) {
+      var src = document.getElementById(id);
+      if (!src || !src.classList.contains("rm-topic")) return false;
+      pTitle.textContent = src.querySelector("h3").textContent;
+      pStage.textContent = src.getAttribute("data-stage");
+      pKind.textContent = src.getAttribute("data-kind");
+      pBody.textContent = "";
+      Array.prototype.forEach.call(src.children, function (child) {
+        if (child.tagName !== "H3") pBody.appendChild(child.cloneNode(true));
+      });
+      panel.scrollTop = 0;
+      if (!panel.open) panel.showModal();
+      if (updateHash) history.replaceState(null, "", "#" + id);
+      return true;
+    };
+
+    rm.addEventListener("click", function (e) {
+      var node = e.target.closest("[data-topic]");
+      if (!node) return;
+      e.preventDefault();
+      openTopic(node.getAttribute("data-topic"), true);
+    });
+    panel.addEventListener("click", function (e) {
+      /* клик по затемнению (сам <dialog>) или по кнопке закрытия */
+      if (e.target === panel || e.target.closest("[data-panel-close]")) panel.close();
+    });
+    panel.addEventListener("close", function () {
+      if (location.hash.indexOf("#t-") === 0) history.replaceState(null, "", location.pathname + location.search);
+    });
+    window.addEventListener("hashchange", function () {
+      if (location.hash.indexOf("#t-") === 0) openTopic(location.hash.slice(1), false);
+      else if (panel.open) panel.close();
+    });
+    if (location.hash.indexOf("#t-") === 0) openTopic(location.hash.slice(1), false);
+  }
+
   /* Чек-лист «Критерии прогресса» в roadmap: отметки хранятся только в браузере */
   var box = document.querySelector("[data-roadmap]");
   if (box) {

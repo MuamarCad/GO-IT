@@ -1,0 +1,65 @@
+{{define "content"}}
+<div class="lk-layout">
+  {{template "lk_sidebar" .}}
+
+  <div class="lk-main">
+    <h1 class="lk-heading">Мой учебный маршрут</h1>
+
+    <!-- Прогресс -->
+    <div class="lk-section">
+      <h3>Общий прогресс</h3>
+      <div class="lk-progress-row">
+        <span class="lk-progress-label-muted">{{.Data.UserName}}, уровень {{.Data.CurrentLevel}}</span>
+        <span class="lk-progress-label-value">{{.Data.ProgressPercent}}%</span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuenow="{{.Data.ProgressPercent}}" aria-valuemin="0" aria-valuemax="100">
+        <span style="width: {{.Data.ProgressPercent}}%"></span>
+      </div>
+    </div>
+
+    <!-- Мои направления -->
+    <div class="lk-section">
+      <h3>Активные направления</h3>
+      <div class="lk-card-row">
+        {{range .Data.Roadmaps}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--primary">{{.Name}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Title}}</div>
+            <p class="lk-item-meta">{{.CompletedSteps}} из {{.TotalSteps}} тем пройдено</p>
+          </div>
+          <div>
+            {{if .ProgressPercent}}
+            <div class="progress" role="progressbar" aria-valuenow="{{.ProgressPercent}}" aria-valuemin="0" aria-valuemax="100">
+              <span style="width: {{.ProgressPercent}}%"></span>
+            </div>
+            <div class="hint" style="margin-top:6px">{{.ProgressPercent}}%</div>
+            {{end}}
+          </div>
+        </div>
+        {{else}}
+        <p class="hint">Вы ещё не выбрали направление. Перейдите в каталог дорожных карт.</p>
+        <a class="btn btn--primary" href="/roadmaps">Смотреть roadmap'ы</a>
+        {{end}}
+      </div>
+    </div>
+
+    <!-- Рекомендуемые темы -->
+    <div class="lk-section">
+      <h3>Что изучить дальше</h3>
+      <div class="lk-card-row">
+        {{range .Data.NextTopics}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--ok">{{.Phase}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Name}}</div>
+            <p class="lk-item-meta">{{.Description}}</p>
+          </div>
+          <a class="btn btn--outline btn--sm lk-item-action" href="/roadmaps/{{.Slug}}">Открыть</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

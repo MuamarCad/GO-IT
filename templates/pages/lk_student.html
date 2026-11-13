@@ -1,0 +1,120 @@
+{{define "content"}}
+<div class="lk-layout">
+  {{template "lk_sidebar" .}}
+
+  <!-- Основной контент -->
+  <div class="lk-main">
+    <h1 class="lk-heading">Добро пожаловать, {{.Data.UserName}}!</h1>
+
+    <!-- Статистика -->
+    <div class="lk-stats">
+      <div class="lk-stat">
+        <span class="n">{{.Data.CasesCompleted}}</span>
+        <small>Кейса пройдено</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.Data.Points}}</span>
+        <small>Баллов набрано</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.Data.RoadmapsOpened}}</span>
+        <small>Roadmap открыт</small>
+      </div>
+      <div class="lk-stat">
+        <span class="n">{{.Data.Consultations}}</span>
+        <small>Консультаций</small>
+      </div>
+    </div>
+
+    <!-- Радар-чарт навыков -->
+    <div class="lk-section">
+      <h3>Навыки</h3>
+      <svg viewBox="0 0 400 300" class="radar-chart" role="img" aria-labelledby="radar-title radar-desc">
+        <title id="radar-title">Радар навыков ученика</title>
+        <desc id="radar-desc">{{.Data.Radar.Summary}}</desc>
+        {{range .Data.Radar.Rings}}<polygon class="radar-ring" points="{{.}}"/>{{end}}
+        {{range .Data.Radar.Axes}}<line class="radar-axis" x1="200" y1="150" x2="{{.X}}" y2="{{.Y}}"/>{{end}}
+        <polygon class="radar-data" points="{{.Data.Radar.Poly}}"/>
+        {{range .Data.Radar.Axes}}<text class="radar-label" x="{{.LX}}" y="{{.LY}}" text-anchor="{{.Anchor}}">{{.Label}}</text>{{end}}
+      </svg>
+    </div>
+
+    <!-- Текущий прогресс -->
+    <div class="lk-section">
+      <h3>Текущий прогресс · {{.Data.ActiveRoadmap}}</h3>
+      <div class="lk-progress-row">
+        <span class="lk-progress-label-muted">Уровень {{.Data.CurrentLevel}} из {{.Data.TotalLevels}}</span>
+        <span class="lk-progress-label-value">{{.Data.ProgressPercent}}%</span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuenow="{{.Data.ProgressPercent}}" aria-valuemin="0" aria-valuemax="100">
+        <span style="width: {{.Data.ProgressPercent}}%"></span>
+      </div>
+      <p class="hint">{{.Data.NextCaseHint}}</p>
+    </div>
+
+    <!-- Рекомендации -->
+    <div class="lk-section">
+      <h3>Рекомендуем продолжить</h3>
+      <div class="lk-card-row">
+        {{range .Data.RecommendedCases}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--primary">Кейс</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Title}}</div>
+            <p class="lk-item-meta">{{.Topic}} · {{if .CurrentStep}}шаг {{.CurrentStep}} из {{.TotalSteps}}{{else}}вопросов: {{.TotalSteps}}{{end}}</p>
+          </div>
+          <a class="btn btn--primary btn--sm lk-item-action" href="/cases/{{.Slug}}">{{if .CurrentStep}}Продолжить{{else}}Начать{{end}}</a>
+        </div>
+        {{end}}
+        {{range .Data.AvailableMentors}}
+        <div class="lk-item">
+          <div class="lk-badge lk-badge--ok">Ментор</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Name}}</div>
+            <p class="lk-item-meta">{{.Specialization}} · {{.Level}} · {{.Format}}</p>
+          </div>
+          <a class="btn btn--outline btn--sm lk-item-action" href="/mentors/{{.Slug}}">Записаться</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    <!-- Недавно пройденные -->
+    <div class="lk-section">
+      <h3>Недавно пройденные кейсы</h3>
+      <div class="lk-card-row">
+        {{range .Data.CompletedCases}}
+        <div class="lk-item">
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Direction}} · Кейс «{{.Title}}»</div>
+            <p class="lk-item-meta">Ответов: {{.Correct}} из {{.Total}} · {{.Percent}}%</p>
+          </div>
+          {{if .Passed}}
+          <div class="lk-badge lk-badge--ok">✓ Сдано</div>
+          {{else}}
+          <div class="lk-badge lk-badge--primary">Попробовать ещё</div>
+          {{end}}
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    <!-- Ближайшая консультация -->
+    <div class="lk-section">
+      <h3>Ближайшая консультация</h3>
+      {{if .Data.NextConsultation}}
+      <div class="lk-item">
+        <div class="lk-item-body">
+          <div class="lk-item-title">{{.Data.NextConsultation.MentorName}}</div>
+          <p class="lk-item-meta">{{.Data.NextConsultation.Date}} в {{.Data.NextConsultation.Time}} · {{.Data.NextConsultation.Topic}}</p>
+        </div>
+        <a class="btn btn--primary btn--sm lk-item-action" href="#">Подключиться</a>
+      </div>
+      {{else}}
+      <p class="hint lk-hint-spaced">У вас пока нет записей. Выберите ментора из каталога.</p>
+      <a class="btn btn--primary" href="/mentors">Найти ментора</a>
+      {{end}}
+    </div>
+  </div>
+</div>
+{{end}}

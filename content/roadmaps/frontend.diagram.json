@@ -1,0 +1,599 @@
+{
+ "stages": [
+  {
+   "title": "Как устроен веб",
+   "note": "Без этой картины дальше всё кажется магией.",
+   "nodes": [
+    {
+     "id": "web-request",
+     "title": "Браузер и запрос страницы",
+     "kind": "core",
+     "summary": "Что происходит между вводом адреса и показом страницы: поиск сервера, запрос, ответ, отрисовка. С этой картиной проще понимать любую ошибку.",
+     "links": [
+      {
+       "title": "MDN: Обзор HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Overview"
+      }
+     ]
+    },
+    {
+     "id": "http-basics",
+     "title": "URL, HTTP и коды ответа",
+     "kind": "core",
+     "summary": "URL указывает на ресурс, HTTP описывает запрос и ответ. Коды 200, 404 и 500 сразу говорят, что пошло не так.",
+     "links": [
+      {
+       "title": "MDN: Обзор HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Overview"
+      },
+      {
+       "title": "MDN: Коды состояния HTTP",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Status"
+      }
+     ]
+    },
+    {
+     "id": "client-server",
+     "title": "Клиент и сервер",
+     "kind": "core",
+     "summary": "Браузер (клиент) просит, сервер отвечает. Часть логики живёт на сервере, а данным из браузера доверять нельзя.",
+     "links": [
+      {
+       "title": "MDN: Клиент-серверное взаимодействие",
+       "url": "https://developer.mozilla.org/ru/docs/Learn/Server-side/First_steps/Client-Server_overview"
+      }
+     ]
+    },
+    {
+     "id": "devtools",
+     "title": "DevTools: Elements, Network, Console",
+     "kind": "core",
+     "summary": "Встроенные инструменты браузера: смотреть и менять разметку, видеть запросы, читать ошибки. Главный инструмент отладки.",
+     "links": [
+      {
+       "title": "Chrome DevTools (англ.)",
+       "url": "https://developer.chrome.com/docs/devtools"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "HTML",
+   "note": "Разметка — основа любой страницы.",
+   "nodes": [
+    {
+     "id": "html-semantic",
+     "title": "Семантические теги",
+     "kind": "core",
+     "summary": "header, nav, main, article и button вместо div на всё. Семантика помогает скринридерам, поиску и вам самим.",
+     "links": [
+      {
+       "title": "web.dev: Семантический HTML (англ.)",
+       "url": "https://web.dev/learn/html/semantic-html"
+      },
+      {
+       "title": "MDN: Справочник HTML-элементов",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTML/Element"
+      }
+     ]
+    },
+    {
+     "id": "html-basics",
+     "title": "Ссылки, списки, таблицы",
+     "kind": "core",
+     "summary": "Базовые элементы контента: когда нужна ссылка, а когда кнопка, как размечать списки и таблицы данных.",
+     "links": [
+      {
+       "title": "MDN: HTML",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTML"
+      }
+     ]
+    },
+    {
+     "id": "html-forms",
+     "title": "Формы и поля ввода",
+     "kind": "core",
+     "summary": "form, label, input, button: как собирать данные и сообщать об ошибках. У каждого поля должна быть подпись.",
+     "links": [
+      {
+       "title": "MDN: Элемент form",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTML/Element/form"
+      },
+      {
+       "title": "MDN: Элемент input",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTML/Element/input"
+      }
+     ]
+    },
+    {
+     "id": "html-a11y",
+     "title": "Доступность: подписи, alt, порядок заголовков",
+     "kind": "core",
+     "summary": "Подписи полей, текст для картинок, логичные заголовки h1–h3, управление с клавиатуры. Основа сайта, которым смогут пользоваться все.",
+     "links": [
+      {
+       "title": "web.dev: Learn Accessibility (англ.)",
+       "url": "https://web.dev/learn/accessibility"
+      },
+      {
+       "title": "MDN: Доступность",
+       "url": "https://developer.mozilla.org/ru/docs/Web/Accessibility"
+      }
+     ]
+    },
+    {
+     "id": "html-meta",
+     "title": "Метаданные и SEO-основы",
+     "kind": "optional",
+     "summary": "title, description, lang и viewport определяют, как страница выглядит в поиске и на телефоне.",
+     "links": [
+      {
+       "title": "MDN: Элемент meta",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTML/Element/meta"
+      },
+      {
+       "title": "Google: Руководство по SEO для начинающих",
+       "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "CSS",
+   "note": "От «поехало» к управляемой вёрстке.",
+   "nodes": [
+    {
+     "id": "css-cascade",
+     "title": "Каскад и специфичность",
+     "kind": "core",
+     "summary": "Какое правило победит, если их несколько. Понимание каскада избавляет от !important.",
+     "links": [
+      {
+       "title": "MDN: Каскад",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/Cascade"
+      },
+      {
+       "title": "MDN: Специфичность",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/Specificity"
+      }
+     ]
+    },
+    {
+     "id": "css-box",
+     "title": "Блочная модель",
+     "kind": "core",
+     "summary": "У каждого элемента есть content, padding, border и margin. Из них складываются размеры и отступы.",
+     "links": [
+      {
+       "title": "MDN: Блочная модель CSS",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/CSS_box_model"
+      }
+     ]
+    },
+    {
+     "id": "css-flex",
+     "title": "Flexbox",
+     "kind": "core",
+     "summary": "Раскладка в одну линию: выравнивание, распределение места, перенос. Подходит для панелей и рядов карточек.",
+     "links": [
+      {
+       "title": "MDN: Flexbox",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/CSS_flexible_box_layout"
+      },
+      {
+       "title": "web.dev: Flexbox (англ.)",
+       "url": "https://web.dev/learn/css/flexbox"
+      }
+     ]
+    },
+    {
+     "id": "css-grid",
+     "title": "Grid",
+     "kind": "core",
+     "summary": "Двумерная сетка со строками и колонками сразу. Хорош для каркаса страницы и галерей.",
+     "links": [
+      {
+       "title": "MDN: CSS Grid",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/CSS_grid_layout"
+      },
+      {
+       "title": "web.dev: Grid (англ.)",
+       "url": "https://web.dev/learn/css/grid"
+      }
+     ]
+    },
+    {
+     "id": "css-responsive",
+     "title": "Адаптивность и медиазапросы",
+     "kind": "core",
+     "summary": "Страница должна работать и на телефоне, и на широком экране: относительные единицы, медиазапросы, подход mobile first.",
+     "links": [
+      {
+       "title": "MDN: Медиазапросы",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/CSS_media_queries/Using_media_queries"
+      }
+     ]
+    },
+    {
+     "id": "css-vars",
+     "title": "Переменные и темы оформления",
+     "kind": "core",
+     "summary": "Custom properties держат цвета в одном месте и позволяют переключать светлую, тёмную и контрастную темы. Так устроен и сам GO-IT.",
+     "links": [
+      {
+       "title": "MDN: CSS-переменные",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/Using_CSS_custom_properties"
+      },
+      {
+       "title": "MDN: prefers-color-scheme",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/@media/prefers-color-scheme"
+      }
+     ]
+    },
+    {
+     "id": "css-anim",
+     "title": "Анимации и переходы",
+     "kind": "optional",
+     "summary": "transition и @keyframes оживляют интерфейс. Уважайте настройку prefers-reduced-motion.",
+     "links": [
+      {
+       "title": "MDN: CSS-анимации",
+       "url": "https://developer.mozilla.org/ru/docs/Web/CSS/CSS_animations"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "JavaScript",
+   "note": "Сначала язык, потом библиотеки.",
+   "nodes": [
+    {
+     "id": "js-basics",
+     "title": "Переменные, типы, функции",
+     "kind": "core",
+     "summary": "Основа языка: let и const, числа, строки, условия, функции.",
+     "links": [
+      {
+       "title": "MDN: Руководство по JavaScript",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide"
+      },
+      {
+       "title": "MDN: Функции",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide/Functions"
+      }
+     ]
+    },
+    {
+     "id": "js-data",
+     "title": "Массивы и объекты",
+     "kind": "core",
+     "summary": "Основные структуры данных и методы map, filter, find. Данные с сервера почти всегда приходят в таком виде.",
+     "links": [
+      {
+       "title": "MDN: Array",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Array"
+      },
+      {
+       "title": "MDN: Работа с объектами",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide/Working_with_objects"
+      }
+     ]
+    },
+    {
+     "id": "js-dom",
+     "title": "DOM и события",
+     "kind": "core",
+     "summary": "Как скрипт находит элементы страницы и реагирует на клики и ввод.",
+     "links": [
+      {
+       "title": "MDN: DOM",
+       "url": "https://developer.mozilla.org/ru/docs/Web/API/Document_Object_Model"
+      },
+      {
+       "title": "MDN: События",
+       "url": "https://developer.mozilla.org/ru/docs/Web/API/Event"
+      }
+     ]
+    },
+    {
+     "id": "js-async",
+     "title": "fetch и асинхронность",
+     "kind": "core",
+     "summary": "Запросы к серверу не блокируют страницу: промисы, async/await, обработка сетевых ошибок.",
+     "links": [
+      {
+       "title": "MDN: Fetch API",
+       "url": "https://developer.mozilla.org/ru/docs/Web/API/Fetch_API"
+      },
+      {
+       "title": "MDN: Promise",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Promise"
+      }
+     ]
+    },
+    {
+     "id": "js-modules",
+     "title": "Модули",
+     "kind": "core",
+     "summary": "import и export делят код на файлы с понятными границами.",
+     "links": [
+      {
+       "title": "MDN: Модули JavaScript",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide/Modules"
+      }
+     ]
+    },
+    {
+     "id": "js-errors",
+     "title": "Работа с ошибками и отладка",
+     "kind": "core",
+     "summary": "try/catch, чтение сообщений в консоли, точки останова. Ошибки — обычная часть работы.",
+     "links": [
+      {
+       "title": "MDN: Управление потоком и ошибки",
+       "url": "https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide/Control_flow_and_error_handling"
+      },
+      {
+       "title": "Chrome DevTools (англ.)",
+       "url": "https://developer.chrome.com/docs/devtools"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Инструменты",
+   "nodes": [
+    {
+     "id": "tools-terminal",
+     "title": "Терминал",
+     "kind": "core",
+     "summary": "Командная строка нужна для Git, пакетов и запуска проектов. Хватит десятка базовых команд.",
+     "links": [
+      {
+       "title": "Ubuntu: командная строка для начинающих (англ.)",
+       "url": "https://ubuntu.com/tutorials/command-line-for-beginners"
+      }
+     ]
+    },
+    {
+     "id": "tools-git",
+     "title": "Git и GitHub",
+     "kind": "core",
+     "summary": "История изменений и совместная работа: commit, branch, pull request. Без Git в команду не возьмут.",
+     "links": [
+      {
+       "title": "Pro Git на русском",
+       "url": "https://git-scm.com/book/ru/v2"
+      },
+      {
+       "title": "GitHub Docs: начало работы",
+       "url": "https://docs.github.com/ru/get-started"
+      }
+     ]
+    },
+    {
+     "id": "tools-npm",
+     "title": "npm и менеджеры пакетов",
+     "kind": "core",
+     "summary": "Подключение чужих библиотек и запуск скриптов проекта.",
+     "links": [
+      {
+       "title": "npm Docs: об npm (англ.)",
+       "url": "https://docs.npmjs.com/about-npm"
+      }
+     ]
+    },
+    {
+     "id": "tools-lint",
+     "title": "Линтер и форматтер",
+     "kind": "also",
+     "summary": "ESLint находит ошибки, Prettier приводит код к единому стилю. Экономят время на ревью.",
+     "links": [
+      {
+       "title": "ESLint: начало работы (англ.)",
+       "url": "https://eslint.org/docs/latest/use/getting-started"
+      },
+      {
+       "title": "Prettier: введение (англ.)",
+       "url": "https://prettier.io/docs/en/index.html"
+      }
+     ]
+    },
+    {
+     "id": "tools-bundler",
+     "title": "Сборщик (Vite и аналоги)",
+     "kind": "optional",
+     "summary": "Собирает проект для публикации и даёт быстрый dev-сервер. Понадобится, когда начнёте работать с фреймворком.",
+     "links": [
+      {
+       "title": "Vite: руководство (англ.)",
+       "url": "https://vite.dev/guide/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Фреймворк",
+   "note": "Фреймворк — следующий шаг, а не начало. Выберите один.",
+   "choose": true,
+   "nodes": [
+    {
+     "id": "fw-react",
+     "title": "React",
+     "kind": "also",
+     "summary": "Самая распространённая библиотека для интерфейсов: компоненты и состояние. Много вакансий и материалов.",
+     "links": [
+      {
+       "title": "React: быстрый старт (англ.)",
+       "url": "https://react.dev/learn"
+      }
+     ]
+    },
+    {
+     "id": "fw-vue",
+     "title": "Vue",
+     "kind": "also",
+     "summary": "Фреймворк с мягким порогом входа и хорошей документацией на русском сообществе.",
+     "links": [
+      {
+       "title": "Vue: введение (англ.)",
+       "url": "https://vuejs.org/guide/introduction.html"
+      }
+     ]
+    },
+    {
+     "id": "fw-svelte",
+     "title": "Svelte",
+     "kind": "also",
+     "summary": "Компилируемый фреймворк с коротким синтаксисом. Меньше кода, меньше шаблонных конструкций.",
+     "links": [
+      {
+       "title": "Svelte: учебник (англ.)",
+       "url": "https://svelte.dev/tutorial"
+      }
+     ]
+    },
+    {
+     "id": "fw-htmx",
+     "title": "Без фреймворка: HTML с сервера + HTMX",
+     "kind": "also",
+     "summary": "Сервер отдаёт готовый HTML, а HTMX обновляет часть страницы без перезагрузки. Так сделан кейс в GO-IT.",
+     "links": [
+      {
+       "title": "HTMX: документация (англ.)",
+       "url": "https://htmx.org/docs/"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Качество",
+   "nodes": [
+    {
+     "id": "qa-keyboard",
+     "title": "Проверка клавиатурой и скринридером",
+     "kind": "core",
+     "summary": "Пройдите страницу только клавишей Tab и послушайте её скринридером. Так находят то, чего не видно глазами.",
+     "links": [
+      {
+       "title": "WebAIM: доступность с клавиатуры (англ.)",
+       "url": "https://webaim.org/techniques/keyboard/"
+      },
+      {
+       "title": "WebAIM: скринридер NVDA (англ.)",
+       "url": "https://webaim.org/articles/nvda/"
+      }
+     ]
+    },
+    {
+     "id": "qa-contrast",
+     "title": "Контраст и тёмная тема",
+     "kind": "core",
+     "summary": "Обычный текст должен иметь контраст не ниже 4,5:1. Проверяйте обе темы и режим высокой контрастности.",
+     "links": [
+      {
+       "title": "WebAIM: проверка контраста (англ.)",
+       "url": "https://webaim.org/resources/contrastchecker/"
+      },
+      {
+       "title": "WCAG 2.2: краткий справочник (англ.)",
+       "url": "https://www.w3.org/WAI/WCAG22/quickref/"
+      }
+     ]
+    },
+    {
+     "id": "qa-security",
+     "title": "Базовая безопасность: XSS, CSP",
+     "kind": "core",
+     "summary": "XSS — внедрение чужого скрипта через данные. Защита: экранирование вывода и политика Content-Security-Policy.",
+     "links": [
+      {
+       "title": "OWASP: Cross-Site Scripting (англ.)",
+       "url": "https://owasp.org/www-community/attacks/xss/"
+      },
+      {
+       "title": "MDN: Content-Security-Policy",
+       "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP"
+      }
+     ]
+    },
+    {
+     "id": "qa-perf",
+     "title": "Производительность загрузки",
+     "kind": "core",
+     "summary": "Размер картинок и скриптов, шрифты, кэш. Быстрый сайт важен для слабых телефонов и медленного интернета.",
+     "links": [
+      {
+       "title": "web.dev: Learn Performance (англ.)",
+       "url": "https://web.dev/learn/performance"
+      }
+     ]
+    },
+    {
+     "id": "qa-e2e",
+     "title": "Автотесты интерфейса",
+     "kind": "optional",
+     "summary": "Скрипт проходит сценарий в настоящем браузере и проверяет результат.",
+     "links": [
+      {
+       "title": "Playwright: введение (англ.)",
+       "url": "https://playwright.dev/docs/intro"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Практика",
+   "note": "Знания закрепляются в деле.",
+   "nodes": [
+    {
+     "id": "practice-form",
+     "title": "Мини-проект: страница с формой",
+     "kind": "core",
+     "summary": "Соберите страницу: разметка, адаптивная вёрстка, проверка полей и понятные сообщения об ошибках.",
+     "links": [
+      {
+       "title": "MDN: Элемент form",
+       "url": "https://developer.mozilla.org/ru/docs/Web/HTML/Element/form"
+      },
+      {
+       "title": "web.dev: Learn Accessibility (англ.)",
+       "url": "https://web.dev/learn/accessibility"
+      }
+     ]
+    },
+    {
+     "id": "practice-portfolio",
+     "title": "Портфолио на GitHub",
+     "kind": "core",
+     "summary": "Публичный репозиторий с README, скриншотами и описанием вашей роли. Это то, на что смотрят при найме.",
+     "links": [
+      {
+       "title": "GitHub Pages (англ.)",
+       "url": "https://pages.github.com/"
+      }
+     ]
+    },
+    {
+     "id": "volunteering",
+     "title": "Волонтёрская задача",
+     "kind": "core",
+     "href": "/volunteering"
+    },
+    {
+     "id": "mentors",
+     "title": "Консультация наставника",
+     "kind": "core",
+     "href": "/mentors"
+    }
+   ]
+  }
+ ]
+}

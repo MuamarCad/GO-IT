@@ -1,0 +1,112 @@
+{{define "content"}}
+{{$a := .Active}}
+<div class="lk-layout">
+  {{template "lk_sidebar" .}}
+
+  <div class="lk-main">
+    <h1 class="lk-heading">
+      {{if eq $a "mentor-applications"}}Заявки на консультацию
+      {{else if eq $a "mentor-schedule"}}Расписание
+      {{else if eq $a "mentor-students"}}Мои ученики
+      {{else if eq $a "mentor-profile"}}Профиль ментора
+      {{else}}Кабинет ментора, {{.Data.UserName}}!{{end}}
+    </h1>
+
+    {{if eq $a "mentor-overview"}}
+    <div class="lk-stats">
+      <div class="lk-stat"><span class="n">{{.Data.NewApplications}}</span><small>Новых заявок</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.TotalStudents}}</span><small>Учеников</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.TotalSessions}}</span><small>Консультаций проведено</small></div>
+      <div class="lk-stat"><span class="n">{{.Data.Rating}}</span><small>Средний рейтинг</small></div>
+    </div>
+    {{end}}
+
+    {{if or (eq $a "mentor-overview") (eq $a "mentor-applications")}}
+    <div class="lk-section">
+      <h2 class="lk-section-title">Заявки на консультацию</h2>
+      {{if .Data.Applications}}
+      <div class="lk-card-row">
+        {{range .Data.Applications}}
+        <div class="lk-item">
+          {{if eq .Status "accepted"}}<div class="lk-badge lk-badge--ok">Принята</div>
+          {{else if eq .Status "declined"}}<div class="lk-badge lk-badge--muted">Отклонена</div>
+          {{else}}<div class="lk-badge lk-badge--primary">Новая</div>{{end}}
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.StudentName}}</div>
+            <p class="lk-item-meta">Контакт: {{.Contact}} · {{.Date}} в {{.Time}}</p>
+            {{if .Message}}<p class="lk-item-meta lk-item-message">{{.Message}}</p>{{end}}
+          </div>
+          {{if not .Status}}
+          <div class="lk-item-actions">
+            <a class="btn btn--primary btn--sm lk-item-action" href="{{.AcceptHref}}">Принять</a>
+            <a class="btn btn--outline btn--sm lk-item-action" href="{{.DeclineHref}}">Отклонить</a>
+          </div>
+          {{end}}
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">Заявок пока нет. Ученики начнут отправлять их, когда увидят ваш профиль.</p>
+      {{end}}
+    </div>
+    {{end}}
+
+    {{if or (eq $a "mentor-overview") (eq $a "mentor-schedule")}}
+    <div class="lk-section">
+      <h2 class="lk-section-title">Ближайшие консультации</h2>
+      {{if .Data.UpcomingSessions}}
+      <div class="lk-schedule">
+        {{range .Data.UpcomingSessions}}
+        <div class="lk-schedule-item">
+          <div class="lk-schedule-time">{{.Date}} · {{.Time}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.StudentName}}</div>
+            <p class="lk-item-meta">{{.Topic}}</p>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">Ближайших консультаций нет.</p>
+      {{end}}
+    </div>
+    {{end}}
+
+    {{if or (eq $a "mentor-overview") (eq $a "mentor-students")}}
+    <div class="lk-section">
+      <h2 class="lk-section-title">Активные ученики</h2>
+      {{if .Data.ActiveStudents}}
+      <div class="lk-card-row">
+        {{range .Data.ActiveStudents}}
+        <div class="lk-item">
+          <div class="lk-avatar lk-avatar--sm" aria-hidden="true">{{.Initials}}</div>
+          <div class="lk-item-body">
+            <div class="lk-item-title">{{.Name}}</div>
+            <p class="lk-item-meta">{{.Direction}} · Открыто roadmap: {{.RoadmapsOpened}}</p>
+          </div>
+          <div class="lk-badge lk-badge--ok lk-progress-label-value">{{.Progress}}%</div>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <p class="hint">У вас пока нет активных учеников.</p>
+      {{end}}
+    </div>
+    {{end}}
+
+    {{if eq $a "mentor-profile"}}
+    <div class="lk-section">
+      <h2 class="lk-section-title">О себе</h2>
+      <div class="lk-item">
+        <div class="lk-avatar" aria-hidden="true">{{.Data.Initials}}</div>
+        <div class="lk-item-body">
+          <div class="lk-item-title">{{.Data.UserName}}</div>
+          <p class="lk-item-meta">{{.Data.Specialization}} · рейтинг {{.Data.Rating}} · консультаций: {{.Data.TotalSessions}}</p>
+        </div>
+      </div>
+      <p class="hint">Публичная карточка ментора сейчас ведётся в каталоге. Редактирование профиля из кабинета появится позже.</p>
+    </div>
+    {{end}}
+  </div>
+</div>
+{{end}}

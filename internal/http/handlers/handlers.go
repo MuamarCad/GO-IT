@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -107,7 +108,9 @@ func (s *Server) CaseStart(w http.ResponseWriter, r *http.Request) {
 		s.NotFound(w, r)
 		return
 	}
-	s.Sessions.Save(w, id, sess)
+	if r.URL.Query().Get("error") == "invalid_answer" {
+		view.Error = "Неверный вариант. Выберите ответ ещё раз."
+	}
 	s.Render.HTML(w, "case_question.html", render.Page{
 		Title:  view.Case.Title + " — GO-IT",
 		Active: "cases",
@@ -123,7 +126,7 @@ func (s *Server) CaseAnswer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, sess := s.Sessions.Load(r)
-	if !s.Sessions.CheckCSRF(r, sess) {
+	if !s.csrfOK(r, sess) {
 		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и ответьте ещё раз.")
 		return
 	}
@@ -135,13 +138,7 @@ func (s *Server) CaseAnswer(w http.ResponseWriter, r *http.Request) {
 	sess.Attempt = state
 	s.Sessions.Save(w, id, sess)
 	if errors.Is(err, service.ErrUnknownOption) && outcome.Next != nil {
-		s.Render.HTML(w, "case_question.html", render.Page{
-			Title:      outcome.Next.Case.Title + " — GO-IT",
-			Active:     "cases",
-			CSRF:       sess.CSRF,
-			FlashError: outcome.Next.Error,
-			Data:       *outcome.Next,
-		}, http.StatusUnprocessableEntity)
+		http.Redirect(w, r, "/cases/"+slug+"?error=invalid_answer", http.StatusSeeOther)
 		return
 	}
 	if err != nil {
@@ -207,7 +204,6 @@ func (s *Server) Mentors(w http.ResponseWriter, r *http.Request) {
 		for _, m := range items {
 			if strings.EqualFold(m.Specialization, filter) {
 				shown = append(shown, m)
-				filter = m.Specialization
 			}
 		}
 	}
@@ -288,7 +284,7 @@ func (s *Server) submitApp(w http.ResponseWriter, r *http.Request, kind domain.A
 		return
 	}
 	id, sess := s.Sessions.Load(r)
-	if !s.Sessions.CheckCSRF(r, sess) {
+	if !s.csrfOK(r, sess) {
 		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и отправьте форму ещё раз.")
 		return
 	}
@@ -387,8 +383,19 @@ func (s *Server) Ready(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("ok"))
 }
 
+// NotFound не трогает сессию: браузеры сами запрашивают иконки и служебные адреса, и каждый такой
+// запрос без cookie иначе создавал бы новую сессию и мог перезаписать cookie открытой страницы.
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
-	s.page(w, r, "not_found.html", "Страница не найдена — GO-IT", "", nil, http.StatusNotFound)
+	s.Render.HTML(w, "not_found.html", render.Page{Title: "Страница не найдена — GO-IT"}, http.StatusNotFound)
+}
+
+// csrfOK проверяет CSRF-токен и при отказе пишет причину в журнал.
+func (s *Server) csrfOK(r *http.Request, sess session.Data) bool {
+	if s.Sessions.CheckCSRF(r, sess) {
+		return true
+	}
+	slog.Warn("CSRF отклонён", "метод", r.Method, "путь", r.URL.Path, "причина", s.Sessions.Diagnose(r))
+	return false
 }
 
 func (s *Server) internal(w http.ResponseWriter) {
@@ -406,7 +413,8 @@ type errorView struct {
 
 // fail показывает оформленную страницу ошибки, не раскрывая технических деталей.
 func (s *Server) fail(w http.ResponseWriter, r *http.Request, status int, heading, message string) {
-	_, sess := s.Sessions.Load(r)
+	id, sess := s.Sessions.Load(r)
+	s.Sessions.Save(w, id, sess)
 	s.Render.HTML(w, "error.html", render.Page{
 		Title: heading + " — GO-IT",
 		CSRF:  sess.CSRF,
@@ -438,18 +446,10 @@ func firstTask(items []domain.VolunteerTask) *domain.VolunteerTask {
 	return &items[0]
 }
 
+// LimitBody ограничивает размер тела запроса (1 МиБ).
 func LimitBody(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
-		next.ServeHTTP(w, r)
-	})
-}
-
-func RequestID(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Request-ID") == "" {
-			w.Header().Set("X-Request-ID", strings.TrimSpace(r.RemoteAddr))
-		}
 		next.ServeHTTP(w, r)
 	})
 }

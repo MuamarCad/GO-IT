@@ -26,23 +26,12 @@ const MaxSessionAge = 24 * time.Hour
 // CleanupInterval — интервал фоновой очистки старых сессий (1 час).
 const CleanupInterval = 1 * time.Hour
 
-// Profile — данные профиля из «Настроек» (демо: хранятся только в сессии).
-type Profile struct {
-	Name  string
-	Email string
-	Phone string
-}
-
+// Data — состояние пользователя между запросами. Сессия нужна только кейсам и формам заявок
+// (токен CSRF и ход прохождения); вход и кабинеты сессий не используют.
 type Data struct {
 	CSRF      string
 	Attempt   domain.AttemptState
-	LoggedIn  bool
-	Role      string // "student", "mentor", "partner"
 	ExpiresAt time.Time
-	Profile   Profile
-	// Handled хранит решения по демо-заявкам в ЛК ментора и партнёра:
-	// ключ "mentor:1" или "partner:2", значение "accepted" или "declined".
-	Handled map[string]string
 }
 
 type Manager struct {
@@ -120,13 +109,6 @@ func (d Data) clone() Data {
 		}
 		d.Attempt.Answers = answers
 	}
-	if d.Handled != nil {
-		handled := make(map[string]string, len(d.Handled))
-		for k, v := range d.Handled {
-			handled[k] = v
-		}
-		d.Handled = handled
-	}
 	return d
 }
 
@@ -151,11 +133,6 @@ func (m *Manager) Load(r *http.Request) (id string, data Data) {
 	return newID(), Data{CSRF: newID()}
 }
 
-// SaveWithExpiry оставлена для совместимости: срок жизни теперь задаёт Save для любой сессии.
-func (m *Manager) SaveWithExpiry(w http.ResponseWriter, id string, data Data) {
-	m.Save(w, id, data)
-}
-
 // Save сохраняет сессию и выдаёт подписанный cookie. Если срок не задан, он ставится
 // на MaxSessionAge вперёд, поэтому анонимные сессии тоже очищаются фоновой задачей.
 func (m *Manager) Save(w http.ResponseWriter, id string, data Data) {
@@ -175,36 +152,35 @@ func (m *Manager) Save(w http.ResponseWriter, id string, data Data) {
 	})
 }
 
-// Rotate переводит сессию на новый идентификатор и новый CSRF-токен (вызывать при входе,
-// чтобы заранее известный идентификатор не давал доступа к вошедшему пользователю).
-func (m *Manager) Rotate(w http.ResponseWriter, oldID string, data Data) string {
-	m.Delete(oldID)
-	data.CSRF = newID()
-	data.ExpiresAt = time.Time{}
-	id := newID()
-	m.Save(w, id, data)
-	return id
-}
-
-// Clear удаляет сессию и сбрасывает cookie.
-func (m *Manager) Clear(w http.ResponseWriter, id string) {
-	m.Delete(id)
-	http.SetCookie(w, &http.Cookie{
-		Name:     cookieName,
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   -1,
-	})
-}
-
 func (m *Manager) CheckCSRF(r *http.Request, data Data) bool {
 	if r.Method != http.MethodPost && r.Method != http.MethodPut && r.Method != http.MethodPatch && r.Method != http.MethodDelete {
 		return true
 	}
 	token := r.FormValue(csrfName)
 	return token != "" && hmac.Equal([]byte(token), []byte(data.CSRF))
+}
+
+// Diagnose объясняет, почему запрос не прошёл проверку сессии. Нужна для журнала: из браузера
+// «Сессия устарела» выглядит одинаково при перезапуске сервера, чужой cookie и просроченной странице.
+func (m *Manager) Diagnose(r *http.Request) string {
+	c, err := r.Cookie(cookieName)
+	if err != nil {
+		return "cookie сессии не получена (браузер не отправил её)"
+	}
+	id, ok := m.unsign(c.Value)
+	if !ok {
+		return "подпись cookie неверна (cookie от другой версии или другого SESSION_SECRET)"
+	}
+	m.mu.Lock()
+	d, found := m.store[id]
+	m.mu.Unlock()
+	switch {
+	case !found:
+		return "сессия неизвестна серверу (сервер перезапускался или срок жизни вышел)"
+	case !d.ExpiresAt.IsZero() && time.Now().After(d.ExpiresAt):
+		return "срок жизни сессии вышел"
+	}
+	return "токен формы не совпал с токеном сессии (страница устарела или открыта в другой вкладке после входа)"
 }
 
 // sign возвращает значение cookie вида "<id>.<hmac>".

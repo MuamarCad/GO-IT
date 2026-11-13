@@ -4,19 +4,15 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/go-chi/chi/v5"
-
 	"go-it/internal/http/render"
-	"go-it/internal/session"
 )
 
-// Авторизация в проекте демонстрационная: учётных записей и паролей нет.
-// Любой вход (в том числе с пустыми полями) создаёт сессию выбранной роли — так требует REQ-002.
-// Заполненные поля проверяются по формату, чтобы форма вела себя как настоящая.
+// Вход в проекте только визуальная механика для демонстрации: нет проверок, cookie, сессий и
+// CSRF-токенов. Выбранная роль превращается в переход на страницу её кабинета. Кабинеты открыты
+// по адресу `/lk/<роль>` и ничего не помнят. Реальной аутентификации нет сознательно (REQ-002 п.1).
 
 const (
 	roleStudent = "student"
@@ -28,7 +24,8 @@ func validRole(role string) bool {
 	return role == roleStudent || role == roleMentor || role == rolePartner
 }
 
-// normalizeRole возвращает роль из белого списка, по умолчанию — ученик.
+// normalizeRole возвращает роль из белого списка, по умолчанию — ученик. Белый список нужен,
+// чтобы адрес перехода всегда строился из фиксированных путей (никаких открытых редиректов).
 func normalizeRole(v string) string {
 	if validRole(v) {
 		return v
@@ -47,108 +44,27 @@ func lkHome(role string) string {
 	}
 }
 
-// socialProviders — допустимые провайдеры входа (демо: реального OAuth нет).
-var socialProviders = map[string]bool{"vk": true, "yandex": true}
-
-func (s *Server) renderLogin(w http.ResponseWriter, sess session.Data, p render.Page, status int) {
-	p.Title = "Войти — GO-IT"
-	p.CSRF = sess.CSRF
-	s.Render.HTML(w, "login.html", p, status)
-}
-
-// Login показывает страницу авторизации.
+// Login показывает страницу входа. Сессия не создаётся.
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
-	id, sess := s.Sessions.Load(r)
-	s.Sessions.Save(w, id, sess)
-	s.renderLogin(w, sess, render.Page{}, http.StatusOK)
+	s.Render.HTML(w, "login.html", render.Page{Title: "Войти — GO-IT"}, http.StatusOK)
 }
 
-// LoginPost обрабатывает форму входа. Роль берётся из радиокнопок; кнопки быстрого входа
-// («Войти как Ментор/Партнёр») передают роль в поле quick.
+// LoginPost ведёт в кабинет выбранной роли при любом содержимом формы, в том числе пустом.
+// Кнопки «Войти как Ментор/Партнёр» передают роль в поле quick.
 func (s *Server) LoginPost(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		s.fail(w, r, http.StatusBadRequest, "Некорректный запрос", "Не удалось обработать форму.")
-		return
-	}
-	id, sess := s.Sessions.Load(r)
-	if !s.Sessions.CheckCSRF(r, sess) {
-		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и попробуйте снова.")
-		return
-	}
-
+	_ = r.ParseForm() // ошибки разбора формы не важны: роль по умолчанию — ученик
 	role := normalizeRole(r.FormValue("role"))
 	if q := r.FormValue("quick"); validRole(q) {
 		role = q
 	}
-
-	if email := strings.TrimSpace(r.FormValue("email")); email != "" {
-		if err := validateEmail(email); err != nil {
-			s.Sessions.Save(w, id, sess)
-			s.renderLogin(w, sess, render.Page{EmailError: err.Error(), AlertError: "Проверьте правильность email."}, http.StatusUnprocessableEntity)
-			return
-		}
-	}
-	if phone := strings.TrimSpace(r.FormValue("phone")); phone != "" {
-		if err := validatePhone(phone); err != nil {
-			s.Sessions.Save(w, id, sess)
-			s.renderLogin(w, sess, render.Page{PhoneError: err.Error(), AlertError: "Проверьте правильность телефона."}, http.StatusUnprocessableEntity)
-			return
-		}
-	}
-	// Пустой пароль допустим (демо). Если пароль введён, он должен быть «настоящим» по правилам сайта.
-	if password := r.FormValue("password"); password != "" {
-		if err := validatePassword(password); err != nil {
-			s.Sessions.Save(w, id, sess)
-			s.renderLogin(w, sess, render.Page{AlertError: "Пароль должен содержать минимум 8 символов, буквы и цифры."}, http.StatusUnprocessableEntity)
-			return
-		}
-	}
-
-	s.startSession(w, r, id, sess, role)
-}
-
-// LoginProvider — демо-вход через VK / Yandex ID. Только POST с CSRF-токеном:
-// вход по GET позволял бы открыть чужой браузер в кабинете по ссылке.
-func (s *Server) LoginProvider(w http.ResponseWriter, r *http.Request) {
-	if !socialProviders[chi.URLParam(r, "provider")] {
-		s.NotFound(w, r)
-		return
-	}
-	if err := r.ParseForm(); err != nil {
-		s.fail(w, r, http.StatusBadRequest, "Некорректный запрос", "Не удалось обработать форму.")
-		return
-	}
-	id, sess := s.Sessions.Load(r)
-	if !s.Sessions.CheckCSRF(r, sess) {
-		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и попробуйте снова.")
-		return
-	}
-	s.startSession(w, r, id, sess, normalizeRole(r.FormValue("role")))
-}
-
-// LoginProviderGet: старые GET-ссылки на вход через провайдера больше не входят, а ведут на форму.
-func (s *Server) LoginProviderGet(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/auth", http.StatusSeeOther)
-}
-
-// startSession выдаёт новый идентификатор сессии (защита от фиксации) и ведёт в кабинет роли.
-func (s *Server) startSession(w http.ResponseWriter, r *http.Request, oldID string, sess session.Data, role string) {
-	sess.LoggedIn = true
-	sess.Role = role
-	s.Sessions.Rotate(w, oldID, sess)
 	http.Redirect(w, r, lkHome(role), http.StatusSeeOther)
 }
 
-// Logout завершает сессию. Выход идемпотентен, поэтому CSRF-токен не требуется;
-// GET не разлогинивает, а просто ведёт на форму входа.
-func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/auth", http.StatusSeeOther)
-		return
-	}
-	id, _ := s.Sessions.Load(r)
-	s.Sessions.Clear(w, id)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+// LoginProvider — демо-вход «через VK / Yandex ID»: провайдер не вызывается, это тот же переход
+// в кабинет выбранной роли (GET и POST). Роль берётся из query или формы.
+func (s *Server) LoginProvider(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
+	http.Redirect(w, r, lkHome(normalizeRole(r.FormValue("role"))), http.StatusSeeOther)
 }
 
 // ---------- Валидация ----------

@@ -6,21 +6,20 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
-	"github.com/go-chi/chi/v5"
-
 	"go-it/internal/domain"
 	"go-it/internal/http/render"
-	"go-it/internal/session"
 )
 
-// Личные кабинеты демонстрационные: данные в них условные (кроме каталога менторов и последнего
-// реально пройденного кейса ученика), решения по заявкам живут только в сессии.
+// Личные кабинеты демонстрационные и ничего не хранят: нет входа, cookie, сессий и CSRF.
+// Страница кабинета определяется адресом `/lk/<роль>`. Данные условные; настоящий только
+// каталог менторов. Решения по заявкам «запоминаются» в самом адресе (параметр h).
 
-// ---------- Общее: навигация, доступ, вывод ----------
+// ---------- Общее: навигация и вывод ----------
 
 type lkNavItem struct {
 	Href  string
@@ -70,53 +69,76 @@ func roleLabel(role string) string {
 	}
 }
 
-// lkGuard пропускает только вошедшего пользователя нужной роли.
-// Чужую роль перенаправляем в её собственный кабинет, незнакомую или анонимную — на форму входа.
-func (s *Server) lkGuard(w http.ResponseWriter, r *http.Request, role string) (string, session.Data, bool) {
-	id, sess := s.Sessions.Load(r)
-	switch {
-	case !sess.LoggedIn || !validRole(sess.Role):
-		http.Redirect(w, r, "/auth", http.StatusSeeOther)
-		return "", sess, false
-	case sess.Role != role:
-		http.Redirect(w, r, lkHome(sess.Role), http.StatusSeeOther)
-		return "", sess, false
-	}
-	return id, sess, true
-}
-
 // lkFlash переводит код из ?done= в фиксированный текст. Произвольный текст из адреса не показываем.
 func lkFlash(r *http.Request) string {
 	switch r.URL.Query().Get("done") {
 	case "profile":
-		return "Профиль сохранён."
+		return "Профиль сохранён. В демо-режиме данные нигде не хранятся."
 	case "password":
 		return "Пароль изменён. В демо-режиме он нигде не хранится."
-	case "app-accepted":
-		return "Заявка принята."
-	case "app-declined":
-		return "Заявка отклонена."
-	case "resp-accepted":
-		return "Отклик принят."
-	case "resp-declined":
-		return "Отклик отклонён."
 	}
 	return ""
 }
 
-func (s *Server) lkRender(w http.ResponseWriter, id string, sess session.Data, role, tmpl, active string, data map[string]any, alert string, status int) {
+func (s *Server) lkRender(w http.ResponseWriter, role, tmpl, active string, data map[string]any, alert string, status int) {
 	data["Nav"] = lkNav(role)
 	data["RoleLabel"] = roleLabel(role)
-	data["LogoutAction"] = lkHome(role) + "/logout"
-	s.Sessions.Save(w, id, sess)
 	s.Render.HTML(w, tmpl, render.Page{
 		Title:  "Личный кабинет · " + roleLabel(role) + " — GO-IT",
 		Active: active,
 		LK:     true,
-		CSRF:   sess.CSRF,
 		Alert:  alert,
 		Data:   data,
 	}, status)
+}
+
+// ---------- Решения по заявкам в адресе ----------
+
+// decisions хранит решения по демо-заявкам: номер заявки -> "accepted" или "declined".
+// Состояние лежит в параметре адреса h (например, h=1:accepted,2:declined), поэтому
+// сервер ничего не помнит, а ссылка «Принять» просто ведёт на ту же страницу с новым h.
+type decisions map[int]string
+
+// demoApplicationIDs — номера демо-заявок, по которым можно принять решение.
+var demoApplicationIDs = map[string]map[int]bool{
+	roleMentor:  {1: true, 2: true},
+	rolePartner: {1: true, 2: true, 3: true},
+}
+
+func parseDecisions(raw, role string) decisions {
+	d := decisions{}
+	for _, part := range strings.Split(raw, ",") {
+		idStr, action, ok := strings.Cut(part, ":")
+		if !ok || (action != "accepted" && action != "declined") {
+			continue
+		}
+		if n, err := strconv.Atoi(idStr); err == nil && demoApplicationIDs[role][n] {
+			d[n] = action
+		}
+	}
+	return d
+}
+
+func (d decisions) href(path string, id int, action string) string {
+	next := make(decisions, len(d)+1)
+	for k, v := range d {
+		next[k] = v
+	}
+	next[id] = action
+	ids := make([]int, 0, len(next))
+	for k := range next {
+		ids = append(ids, k)
+	}
+	sort.Ints(ids)
+	parts := make([]string, 0, len(ids))
+	for _, k := range ids {
+		parts = append(parts, strconv.Itoa(k)+":"+next[k])
+	}
+	return path + "?h=" + url.QueryEscape(strings.Join(parts, ","))
+}
+
+func (d decisions) pending(total int) int {
+	return total - len(d)
 }
 
 // ---------- Радар навыков (SVG строится на сервере) ----------
@@ -240,32 +262,14 @@ func completedRow(c domain.CareerCase, correct int) studentCompletedCase {
 }
 
 // studentData собирает данные обзора ученика. Каталог менторов настоящий; результаты по двум
-// кейсам условные, но согласованы с реальным числом вопросов; если ученик в этой сессии
-// прошёл кейс по-настоящему, его результат заменяет условный.
-func (s *Server) studentData(ctx context.Context, sess session.Data) (map[string]any, error) {
-	name := sess.Profile.Name
-	if name == "" {
-		name = "Алексей Иванов"
-	}
+// кейсам условные, но согласованы с реальным числом вопросов.
+func (s *Server) studentData(ctx context.Context) (map[string]any, error) {
+	name := "Алексей Иванов"
 
 	demo := map[string]int{"frontend": 17, "backend": 14} // правильных ответов в демо
 	var completed []studentCompletedCase
 	done := map[string]bool{}
-	var real *studentCompletedCase
-	if sess.Attempt.Completed {
-		if res, err := s.CaseSvc.Result(sess.Attempt); err == nil {
-			row := completedRow(res.Case, res.Score)
-			real = &row
-			done[res.Case.Slug] = true
-		}
-	}
-	if real != nil {
-		completed = append(completed, *real)
-	}
 	for _, slug := range []string{"frontend", "backend"} {
-		if done[slug] {
-			continue
-		}
 		if c, err := s.CaseSvc.Get(slug); err == nil {
 			completed = append(completed, completedRow(c, demo[slug]))
 			done[slug] = true
@@ -285,20 +289,11 @@ func (s *Server) studentData(ctx context.Context, sess session.Data) (map[string
 
 	var recommended []studentRecommendedCase
 	hint := ""
-	attempt := sess.Attempt
-	if attempt.Slug != "" && !attempt.Completed {
-		if c, err := s.CaseSvc.Get(attempt.Slug); err == nil {
-			recommended = append(recommended, studentRecommendedCase{c.Slug, c.Title, attempt.Index + 1, len(c.Questions), directionLabel(c.Slug)})
-			hint = "Рекомендуем продолжить кейс «" + c.Title + "»"
-		}
-	}
-	if len(recommended) == 0 {
-		for _, c := range s.CaseSvc.List() {
-			if !done[c.Slug] {
-				recommended = append(recommended, studentRecommendedCase{c.Slug, c.Title, 0, len(c.Questions), directionLabel(c.Slug)})
-				hint = "Рекомендуем начать кейс «" + c.Title + "»"
-				break
-			}
+	for _, c := range s.CaseSvc.List() {
+		if !done[c.Slug] {
+			recommended = append(recommended, studentRecommendedCase{c.Slug, c.Title, 0, len(c.Questions), directionLabel(c.Slug)})
+			hint = "Рекомендуем начать кейс «" + c.Title + "»"
+			break
 		}
 	}
 
@@ -342,13 +337,13 @@ func (s *Server) studentData(ctx context.Context, sess session.Data) (map[string
 }
 
 func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current string) {
-	id, sess, ok := s.lkGuard(w, r, roleStudent)
-	if !ok {
-		return
-	}
-	data, err := s.studentData(r.Context(), sess)
+	data, err := s.studentData(r.Context())
 	if err != nil {
 		s.internal(w)
+		return
+	}
+	if current == "student-settings" {
+		s.lkSettings(w, r, data, nil, nil, http.StatusOK)
 		return
 	}
 	tmpl := map[string]string{
@@ -356,16 +351,11 @@ func (s *Server) lkStudentPage(w http.ResponseWriter, r *http.Request, current s
 		"student-roadmap":      "lk_student_roadmap.html",
 		"student-mentors":      "lk_student_mentors.html",
 		"student-volunteering": "lk_student_volunteering.html",
-		"student-settings":     "lk_settings.html",
 	}[current]
 	if tmpl == "" {
 		tmpl = "lk_student.html"
 	}
-	if current == "student-settings" {
-		s.lkSettings(w, r, id, sess, data, nil, nil, http.StatusOK)
-		return
-	}
-	s.lkRender(w, id, sess, roleStudent, tmpl, current, data, "", http.StatusOK)
+	s.lkRender(w, roleStudent, tmpl, current, data, "", http.StatusOK)
 }
 
 func (s *Server) LKStudent(w http.ResponseWriter, r *http.Request) {
@@ -388,35 +378,23 @@ func (s *Server) LKStudentSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 // lkSettings показывает «Настройки». form и errs заполнены при повторном показе после ошибки.
-func (s *Server) lkSettings(w http.ResponseWriter, r *http.Request, id string, sess session.Data, data map[string]any, form, errs map[string]string, status int) {
+func (s *Server) lkSettings(w http.ResponseWriter, r *http.Request, data map[string]any, form, errs map[string]string, status int) {
 	if form == nil {
-		form = map[string]string{"name": data["UserName"].(string), "email": sess.Profile.Email, "phone": sess.Profile.Phone}
+		form = map[string]string{"name": data["UserName"].(string), "email": "", "phone": ""}
 	}
 	if errs == nil {
 		errs = map[string]string{}
 	}
 	data["Form"] = form
 	data["Errors"] = errs
-	alert := lkFlash(r)
-	s.lkRender(w, id, sess, roleStudent, "lk_settings.html", "student-settings", data, alert, status)
+	s.lkRender(w, roleStudent, "lk_settings.html", "student-settings", data, lkFlash(r), status)
 }
 
-// LKStudentSettingsPost принимает формы «Профиль» и «Смена пароля». Профиль сохраняется
-// в сессии; пароль в демо нигде не хранится, поэтому проверяется только новый пароль.
+// LKStudentSettingsPost проверяет формы «Профиль» и «Смена пароля» и показывает результат.
+// Данные нигде не сохраняются (демо), поэтому сессия и CSRF-токен не нужны.
 func (s *Server) LKStudentSettingsPost(w http.ResponseWriter, r *http.Request) {
-	id, sess, ok := s.lkGuard(w, r, roleStudent)
-	if !ok {
-		return
-	}
-	if err := r.ParseForm(); err != nil {
-		s.fail(w, r, http.StatusBadRequest, "Некорректный запрос", "Не удалось обработать форму.")
-		return
-	}
-	if !s.Sessions.CheckCSRF(r, sess) {
-		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и отправьте форму ещё раз.")
-		return
-	}
-	data, err := s.studentData(r.Context(), sess)
+	_ = r.ParseForm()
+	data, err := s.studentData(r.Context())
 	if err != nil {
 		s.internal(w)
 		return
@@ -443,11 +421,9 @@ func (s *Server) LKStudentSettingsPost(w http.ResponseWriter, r *http.Request) {
 		}
 		if len(errs) > 0 {
 			form := map[string]string{"name": name, "email": email, "phone": phone}
-			s.lkSettings(w, r, id, sess, data, form, errs, http.StatusUnprocessableEntity)
+			s.lkSettings(w, r, data, form, errs, http.StatusUnprocessableEntity)
 			return
 		}
-		sess.Profile = session.Profile{Name: name, Email: email, Phone: phone}
-		s.Sessions.Save(w, id, sess)
 		http.Redirect(w, r, "/lk/student/settings?done=profile", http.StatusSeeOther)
 	case "password":
 		pw, confirm := r.FormValue("password_new"), r.FormValue("password_confirm")
@@ -458,13 +434,12 @@ func (s *Server) LKStudentSettingsPost(w http.ResponseWriter, r *http.Request) {
 			errs["password_confirm"] = "Пароли не совпадают."
 		}
 		if len(errs) > 0 {
-			s.lkSettings(w, r, id, sess, data, nil, errs, http.StatusUnprocessableEntity)
+			s.lkSettings(w, r, data, nil, errs, http.StatusUnprocessableEntity)
 			return
 		}
-		s.Sessions.Save(w, id, sess)
 		http.Redirect(w, r, "/lk/student/settings?done=password", http.StatusSeeOther)
 	default:
-		s.fail(w, r, http.StatusBadRequest, "Некорректный запрос", "Неизвестное действие формы.")
+		s.lkSettings(w, r, data, nil, nil, http.StatusBadRequest)
 	}
 }
 
@@ -478,6 +453,8 @@ type mentorApplication struct {
 	Time        string
 	Message     string
 	Status      string // "", "accepted", "declined"
+	AcceptHref  string
+	DeclineHref string
 }
 
 type mentorSession struct {
@@ -495,39 +472,22 @@ type mentorStudent struct {
 	Progress       int
 }
 
-func handledStatus(sess session.Data, role string, id int) string {
-	return sess.Handled[role+":"+strconv.Itoa(id)]
-}
-
-func countPending(apps []string) int {
-	n := 0
-	for _, st := range apps {
-		if st == "" {
-			n++
-		}
-	}
-	return n
-}
-
 func (s *Server) lkMentorPage(w http.ResponseWriter, r *http.Request, current string) {
-	id, sess, ok := s.lkGuard(w, r, roleMentor)
-	if !ok {
-		return
-	}
+	dec := parseDecisions(r.URL.Query().Get("h"), roleMentor)
 	apps := []mentorApplication{
 		{ID: 1, StudentName: "Дмитрий П.", Contact: "dmitry@mail.ru", Date: "12 ноя", Time: "15:00", Message: "Хотел бы обсудить работу с React Hooks"},
 		{ID: 2, StudentName: "Мария Л.", Contact: "@maria_tg", Date: "14 ноя", Time: "12:00", Message: "Нужна помощь с TypeScript типами"},
 	}
-	statuses := make([]string, len(apps))
 	for i := range apps {
-		apps[i].Status = handledStatus(sess, roleMentor, apps[i].ID)
-		statuses[i] = apps[i].Status
+		apps[i].Status = dec[apps[i].ID]
+		apps[i].AcceptHref = dec.href(r.URL.Path, apps[i].ID, "accepted")
+		apps[i].DeclineHref = dec.href(r.URL.Path, apps[i].ID, "declined")
 	}
 	data := map[string]any{
 		"UserName":        "Анна К.",
 		"Initials":        "АК",
 		"Specialization":  "Frontend",
-		"NewApplications": countPending(statuses),
+		"NewApplications": dec.pending(len(apps)),
 		"TotalStudents":   5,
 		"TotalSessions":   18,
 		"Rating":          "4.9",
@@ -542,7 +502,7 @@ func (s *Server) lkMentorPage(w http.ResponseWriter, r *http.Request, current st
 			{Initials: "ПМ", Name: "Пётр М.", Direction: "Backend", RoadmapsOpened: 0, Progress: 10},
 		},
 	}
-	s.lkRender(w, id, sess, roleMentor, "lk_mentor.html", current, data, lkFlash(r), http.StatusOK)
+	s.lkRender(w, roleMentor, "lk_mentor.html", current, data, "", http.StatusOK)
 }
 
 func (s *Server) LKMentor(w http.ResponseWriter, r *http.Request) {
@@ -560,12 +520,6 @@ func (s *Server) LKMentorStudents(w http.ResponseWriter, r *http.Request) {
 func (s *Server) LKMentorProfile(w http.ResponseWriter, r *http.Request) {
 	s.lkMentorPage(w, r, "mentor-profile")
 }
-func (s *Server) LKMentorAccept(w http.ResponseWriter, r *http.Request) {
-	s.lkDecide(w, r, roleMentor, "accepted")
-}
-func (s *Server) LKMentorDecline(w http.ResponseWriter, r *http.Request) {
-	s.lkDecide(w, r, roleMentor, "declined")
-}
 
 // ---------- ЛК: партнёр ----------
 
@@ -577,6 +531,8 @@ type partnerApplication struct {
 	Contact       string
 	Message       string
 	Status        string // "", "accepted", "declined"
+	AcceptHref    string
+	DeclineHref   string
 }
 
 type partnerTask struct {
@@ -588,20 +544,17 @@ type partnerTask struct {
 }
 
 func (s *Server) lkPartnerPage(w http.ResponseWriter, r *http.Request, current string) {
-	id, sess, ok := s.lkGuard(w, r, rolePartner)
-	if !ok {
-		return
-	}
+	dec := parseDecisions(r.URL.Query().Get("h"), rolePartner)
 	apps := []partnerApplication{
 		{ID: 1, VolunteerName: "Елена В.", TaskTitle: "Вёрстка лендинга для акции", Skills: "HTML, CSS", Contact: "elena@example.com", Message: "Есть опыт вёрстки, могу помочь на этой неделе"},
 		{ID: 2, VolunteerName: "Сергей К.", TaskTitle: "Телеграм-бот для регистрации", Skills: "Python", Contact: "@sergey_tg"},
 		{ID: 3, VolunteerName: "Алина Р.", TaskTitle: "Аналитика опросов участников", Skills: "Excel, анализ данных", Contact: "alina@example.com", Message: "Работала с аналогичными данными"},
 	}
-	statuses := make([]string, len(apps))
 	accepted := 9
 	for i := range apps {
-		apps[i].Status = handledStatus(sess, rolePartner, apps[i].ID)
-		statuses[i] = apps[i].Status
+		apps[i].Status = dec[apps[i].ID]
+		apps[i].AcceptHref = dec.href(r.URL.Path, apps[i].ID, "accepted")
+		apps[i].DeclineHref = dec.href(r.URL.Path, apps[i].ID, "declined")
 		if apps[i].Status == "accepted" {
 			accepted++
 		}
@@ -611,7 +564,7 @@ func (s *Server) lkPartnerPage(w http.ResponseWriter, r *http.Request, current s
 		"Role":              "Координатор",
 		"UserName":          "Фонд «Открытый код»",
 		"Initials":          "ОК",
-		"NewApplications":   countPending(statuses),
+		"NewApplications":   dec.pending(len(apps)),
 		"ActiveTasks":       4,
 		"TotalApplications": 17,
 		"Accepted":          accepted,
@@ -626,7 +579,7 @@ func (s *Server) lkPartnerPage(w http.ResponseWriter, r *http.Request, current s
 			{Title: "Презентация для вебинара", Skills: "PowerPoint, дизайн", Scale: "Удалённо", Status: "Активна", ApplicationsCount: 2},
 		},
 	}
-	s.lkRender(w, id, sess, rolePartner, "lk_partner.html", current, data, lkFlash(r), http.StatusOK)
+	s.lkRender(w, rolePartner, "lk_partner.html", current, data, "", http.StatusOK)
 }
 
 func (s *Server) LKPartner(w http.ResponseWriter, r *http.Request) {
@@ -643,48 +596,4 @@ func (s *Server) LKPartnerAnalytics(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) LKPartnerSettings(w http.ResponseWriter, r *http.Request) {
 	s.lkPartnerPage(w, r, "partner-settings")
-}
-func (s *Server) LKPartnerAccept(w http.ResponseWriter, r *http.Request) {
-	s.lkDecide(w, r, rolePartner, "accepted")
-}
-func (s *Server) LKPartnerDecline(w http.ResponseWriter, r *http.Request) {
-	s.lkDecide(w, r, rolePartner, "declined")
-}
-
-// demoApplicationIDs — номера демо-заявок, по которым можно принять решение.
-var demoApplicationIDs = map[string]map[int]bool{
-	roleMentor:  {1: true, 2: true},
-	rolePartner: {1: true, 2: true, 3: true},
-}
-
-// lkDecide запоминает решение по демо-заявке в сессии. Реальных заявок за этим нет.
-func (s *Server) lkDecide(w http.ResponseWriter, r *http.Request, role, action string) {
-	id, sess, ok := s.lkGuard(w, r, role)
-	if !ok {
-		return
-	}
-	if err := r.ParseForm(); err != nil {
-		s.fail(w, r, http.StatusBadRequest, "Некорректный запрос", "Не удалось обработать форму.")
-		return
-	}
-	if !s.Sessions.CheckCSRF(r, sess) {
-		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и повторите действие.")
-		return
-	}
-	n, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil || !demoApplicationIDs[role][n] {
-		s.NotFound(w, r)
-		return
-	}
-	if sess.Handled == nil {
-		sess.Handled = map[string]string{}
-	}
-	sess.Handled[role+":"+strconv.Itoa(n)] = action
-	s.Sessions.Save(w, id, sess)
-
-	prefix, back := "app-", "/lk/mentor/applications"
-	if role == rolePartner {
-		prefix, back = "resp-", "/lk/partner/applications"
-	}
-	http.Redirect(w, r, back+"?done="+url.QueryEscape(prefix+action), http.StatusSeeOther)
 }

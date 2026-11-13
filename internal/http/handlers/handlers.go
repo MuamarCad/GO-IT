@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -125,7 +126,7 @@ func (s *Server) CaseAnswer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, sess := s.Sessions.Load(r)
-	if !s.Sessions.CheckCSRF(r, sess) {
+	if !s.csrfOK(r, sess) {
 		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и ответьте ещё раз.")
 		return
 	}
@@ -283,7 +284,7 @@ func (s *Server) submitApp(w http.ResponseWriter, r *http.Request, kind domain.A
 		return
 	}
 	id, sess := s.Sessions.Load(r)
-	if !s.Sessions.CheckCSRF(r, sess) {
+	if !s.csrfOK(r, sess) {
 		s.fail(w, r, http.StatusForbidden, "Сессия устарела", "Обновите страницу и отправьте форму ещё раз.")
 		return
 	}
@@ -382,8 +383,19 @@ func (s *Server) Ready(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("ok"))
 }
 
+// NotFound не трогает сессию: браузеры сами запрашивают иконки и служебные адреса, и каждый такой
+// запрос без cookie иначе создавал бы новую сессию и мог перезаписать cookie открытой страницы.
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
-	s.page(w, r, "not_found.html", "Страница не найдена — GO-IT", "", nil, http.StatusNotFound)
+	s.Render.HTML(w, "not_found.html", render.Page{Title: "Страница не найдена — GO-IT"}, http.StatusNotFound)
+}
+
+// csrfOK проверяет CSRF-токен и при отказе пишет причину в журнал.
+func (s *Server) csrfOK(r *http.Request, sess session.Data) bool {
+	if s.Sessions.CheckCSRF(r, sess) {
+		return true
+	}
+	slog.Warn("CSRF отклонён", "метод", r.Method, "путь", r.URL.Path, "причина", s.Sessions.Diagnose(r))
+	return false
 }
 
 func (s *Server) internal(w http.ResponseWriter) {

@@ -66,10 +66,7 @@ type Page struct {
 	Flash       string
 	FlashError  string
 	Alert       string
-	AlertError  string
 	Data        any
-	EmailError  string
-	PhoneError  string
 }
 
 // HTML сначала полностью рендерит страницу в буфер, чтобы при ошибке шаблона
@@ -81,6 +78,8 @@ func (r *Renderer) HTML(w http.ResponseWriter, name string, page Page, status in
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// В страницах лежат CSRF-токены: кнопка «Назад» не должна показывать устаревшую форму.
+	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(status)
 	_, _ = w.Write(buf.Bytes())
 }

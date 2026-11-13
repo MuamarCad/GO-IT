@@ -716,6 +716,7 @@ a { color: var(--primary); }
 }
 
 /* LK: кнопка выхода в сайдбаре */
+a.lk-logout-btn { text-decoration: none; }
 .lk-logout-btn {
   display: flex;
   align-items: center;

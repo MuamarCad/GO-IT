@@ -1,7 +1,6 @@
 package web
 
 import (
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
@@ -21,7 +20,6 @@ import (
 	"go-it/internal/session"
 )
 
-// newTestRouter собирает боевой роутер на хранилище в памяти; stop завершает фоновые задачи сессий.
 func newTestRouter(t *testing.T) http.Handler {
 	t.Helper()
 	root := moduleRoot(t)
@@ -64,7 +62,6 @@ func jarClient(t *testing.T) *http.Client {
 	return &http.Client{Jar: jar}
 }
 
-// postForm отправляет POST-форму через указанный клиент (с cookie jar).
 func postForm(client *http.Client, u string, data url.Values) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodPost, u, strings.NewReader(data.Encode()))
 	if err != nil {
@@ -74,7 +71,6 @@ func postForm(client *http.Client, u string, data url.Values) (*http.Response, e
 	return client.Do(req)
 }
 
-// extractCSRF извлекает CSRF-токен из тела страницы.
 func extractCSRF(t *testing.T, body string) string {
 	t.Helper()
 	re := regexp.MustCompile(`name="csrf_token" value="([^"]+)"`)
@@ -87,514 +83,103 @@ func extractCSRF(t *testing.T, body string) string {
 
 // --- Auth: страница логина ---
 
-func TestAuthPageReturnsForm(t *testing.T) {
-	ts := authTestServer(t)
-	res, err := http.Get(ts.URL + "/auth")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		t.Fatalf("status %d, expected 200", res.StatusCode)
-	}
-	body, _ := io.ReadAll(res.Body)
-	bodyStr := string(body)
-	for _, want := range []string{`name="role"`, "Ученик", "Ментор", "Партнёр", `name="csrf_token"`, "Войти через VK"} {
-		if !strings.Contains(bodyStr, want) {
-			t.Errorf("в странице логина нет %q", want)
-		}
-	}
-}
-
-func TestAuthPageShowsCleanHTML(t *testing.T) {
-	ts := authTestServer(t)
-	res, err := http.Get(ts.URL + "/auth")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
-	bodyStr := string(body)
-	for _, bad := range []string{"ZgotmplZ", "<no value>", "%!"} {
-		if strings.Contains(bodyStr, bad) {
-			t.Errorf("в HTML найдено %q", bad)
-		}
-	}
-}
-
-// --- Auth: основной сценарий (POST /auth) ---
-
-func TestAuthLoginStudentRedirectsToDashboard(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"email":      {"student@example.com"},
-		"password":   {"abc12345"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/lk/student") {
-		t.Fatalf("redirect на %s, ожидается /lk/student", loc)
-	}
-}
-
-func TestAuthLoginMentorRedirectsToMentorLK(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"mentor"},
-		"email":      {"mentor@example.com"},
-		"password":   {"pass1234"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/lk/mentor") {
-		t.Fatalf("redirect на %s, ожидается /lk/mentor", loc)
-	}
-}
-
-func TestAuthLoginPartnerRedirectsToPartnerLK(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"partner"},
-		"email":      {"partner@example.com"},
-		"password":   {"pass1234"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/lk/partner") {
-		t.Fatalf("redirect на %s, ожидается /lk/partner", loc)
-	}
-}
-
-// --- Auth: пограничные сценарии ---
-
-func TestAuthLoginWithEmailTooLong(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	longEmail := strings.Repeat("a", 250) + "@b.c"
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"email":      {longEmail},
-		"password":   {"pass1234"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.Request.URL.Path != "/auth" {
-		t.Errorf("ожидается страница логина с ошибкой, но got path=%s", res.Request.URL.Path)
-	}
-}
-
-func TestAuthLoginWithEmailInvalidFormat(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"email":      {"invalid-email"},
-		"password":   {"pass1234"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.Request.URL.Path != "/auth" {
-		t.Errorf("некорректный email не прошёл валидацию: path=%s", res.Request.URL.Path)
-	}
-}
-
-func TestAuthLoginWithEmailTooShort(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"email":      {"a@b"},
-		"password":   {"pass1234"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.Request.URL.Path != "/auth" {
-		t.Errorf("короткий email не прошёл валидацию: path=%s", res.Request.URL.Path)
-	}
-}
-
-func TestAuthLoginWithPasswordTooShort(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"email":      {"test@example.com"},
-		"password":   {"abc"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.Request.URL.Path != "/auth" {
-		t.Errorf("короткий пароль не прошёл валидацию: path=%s", res.Request.URL.Path)
-	}
-}
-
-func TestAuthLoginWithPasswordNoDigit(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"email":      {"test@example.com"},
-		"password":   {"abcdefgh"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.Request.URL.Path != "/auth" {
-		t.Errorf("пароль без цифр не прошёл валидацию: path=%s", res.Request.URL.Path)
-	}
-}
-
-func TestAuthLoginWithPhoneTooShort(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-
-	form := url.Values{
-		"csrf_token": {csrf},
-		"role":       {"student"},
-		"phone":      {"123"},
-		"password":   {"pass1234"},
-	}
-	res, err := postForm(client, ts.URL+"/auth", form)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.Request.URL.Path != "/auth" {
-		t.Errorf("короткий телефон не прошёл валидацию: path=%s", res.Request.URL.Path)
-	}
-}
-
-func TestAuthLoginWithoutCSRF(t *testing.T) {
-	ts := authTestServer(t)
-	res, err := http.PostForm(ts.URL+"/auth", url.Values{
-		"csrf_token": {"invalid-csrf"},
-		"role":       {"student"},
-		"email":      {"test@example.com"},
-		"password":   {"pass1234"},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusForbidden {
-		t.Errorf("без CSRF ожидаем 403, got %d", res.StatusCode)
-	}
-	body, _ := io.ReadAll(res.Body)
-	if !strings.Contains(string(body), "Сессия устарела") {
-		t.Errorf("ожидалась страница ошибки сессии, got: %s", string(body))
-	}
-}
-
-// --- LK: доступ без сессии ---
-
-func TestStudentLKRedirectsToAuthWithoutSession(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-	res, err := client.Get(ts.URL + "/lk/student")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/auth") {
-		t.Errorf("без сессии ожидается redirect на /auth, got path=%s", loc)
-	}
-}
-
-func TestMentorLKRedirectsToAuthWithoutSession(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-	res, err := client.Get(ts.URL + "/lk/mentor")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/auth") {
-		t.Errorf("без сессии ожидается redirect на /auth, got path=%s", loc)
-	}
-}
-
-func TestPartnerLKRedirectsToAuthWithoutSession(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-	res, err := client.Get(ts.URL + "/lk/partner")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/auth") {
-		t.Errorf("без сессии ожидается redirect на /auth, got path=%s", loc)
-	}
-}
-
-// Рендеринг ЛК-страниц уже покрыт косвенно через:
-// - TestAuthLoginStudentRedirectsToDashboard (POST /auth → 302 → /lk/student)
-// - TestLogoutStudentClearsSessionAndRedirectsHome (после logout /lk/student → /auth)
-// - Все страницы проверяются в TestAllPagesRendered из http_test.go
-
-// --- Logout ---
-
-func TestLogoutStudentClearsSessionAndRedirectsHome(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-	form := url.Values{"csrf_token": {csrf}, "role": {"student"}, "email": {"a@b.c"}, "password": {"pass1234"}}
-	res, _ = postForm(client, ts.URL+"/auth", form)
-	res.Body.Close()
-
-	res, err := http.Post(ts.URL+"/lk/student/logout", "text/plain", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	cookies := client.Jar.Cookies(parsedURL(ts.URL))
-	for _, c := range cookies {
-		if c.Name == "goit_session" && c.MaxAge > 0 {
-			t.Errorf("cookie goit_session не сброшен (MaxAge=%d)", c.MaxAge)
-		}
-	}
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/") {
-		t.Errorf("logout redirect на %s, ожидается /", loc)
-	}
-}
-
-func TestLogoutMentorClearsSession(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-	form := url.Values{"csrf_token": {csrf}, "role": {"mentor"}, "email": {"a@b.c"}, "password": {"pass1234"}}
-	res, _ = postForm(client, ts.URL+"/auth", form)
-	res.Body.Close()
-
-	res, err := http.Post(ts.URL+"/lk/mentor/logout", "text/plain", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/") {
-		t.Errorf("mentor logout redirect на %s, ожидается /", loc)
-	}
-
-	// После logout ЛК должен редиректить на auth.
-	res, err = client.Get(ts.URL + "/lk/mentor")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc = res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/auth") {
-		t.Errorf("после logout mentor LK redirect на %s, ожидается /auth", loc)
-	}
-}
-
-func TestLogoutPartnerClearsSession(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, _ := client.Get(ts.URL + "/auth")
-	body, _ := io.ReadAll(res.Body)
-	res.Body.Close()
-	csrf := extractCSRF(t, string(body))
-	form := url.Values{"csrf_token": {csrf}, "role": {"partner"}, "email": {"a@b.c"}, "password": {"pass1234"}}
-	res, _ = postForm(client, ts.URL+"/auth", form)
-	res.Body.Close()
-
-	res, err := http.Post(ts.URL+"/lk/partner/logout", "text/plain", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/") {
-		t.Errorf("partner logout redirect на %s, ожидается /", loc)
-	}
-
-	res, err = client.Get(ts.URL + "/lk/partner")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc = res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/auth") {
-		t.Errorf("после logout partner LK redirect на %s, ожидается /auth", loc)
-	}
-}
-
-func TestLogoutViaGETRedirectsToAuth(t *testing.T) {
-	ts := authTestServer(t)
-	client := jarClient(t)
-
-	res, err := client.Get(ts.URL + "/lk/student/logout")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
-
-	loc := res.Header.Get("Location")
-	if loc == "" {
-		loc = res.Request.URL.Path
-	}
-	if !strings.HasSuffix(loc, "/auth") {
-		t.Errorf("GET /lk/student/logout redirect на %s, ожидается /auth", loc)
-	}
-}
-
 func parsedURL(s string) *url.URL {
 	u, _ := url.Parse(s)
 	return u
+}
+
+// ---------- Вход: только визуальная механика ----------
+
+var lkHome = map[string]string{"student": "/lk/student", "mentor": "/lk/mentor", "partner": "/lk/partner"}
+
+func TestLoginPageIsPlainAndStateless(t *testing.T) {
+	ts := authTestServer(t)
+	res, err := http.Get(ts.URL + "/auth")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := readBody(t, res)
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("статус %d", res.StatusCode)
+	}
+	if res.Header.Get("Set-Cookie") != "" {
+		t.Error("страница входа не должна выдавать cookie")
+	}
+	if strings.Contains(body, "csrf_token") {
+		t.Error("на странице входа не должно быть CSRF-токена")
+	}
+	if strings.Count(body, `type="radio" name="role"`) != 3 || strings.Contains(body, `role="radio"`) {
+		t.Error("роли должны быть тремя настоящими радиокнопками")
+	}
+	if strings.Contains(body, "<script>") || strings.Contains(body, "onclick=") {
+		t.Error("на странице входа не должно быть inline-скриптов и onclick")
+	}
+	if regexp.MustCompile(`name="(email|password|phone)"[^>]*value="[^"]+"`).MatchString(body) {
+		t.Error("поля входа должны быть пустыми")
+	}
+	for _, want := range []string{`formaction="/auth/vk"`, `formaction="/auth/yandex"`, `name="quick" value="mentor"`, `name="quick" value="partner"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("нет элемента %s", want)
+		}
+	}
+}
+
+// Любой ввод, в том числе пустой, ведёт в выбранный кабинет; ни одна из операций не выдаёт cookie.
+func TestLoginAlwaysRedirectsToChosenRoleWithoutCookies(t *testing.T) {
+	ts := authTestServer(t)
+	c := noFollow(&http.Client{})
+	cases := []struct {
+		name, method, path string
+		form               url.Values
+		want               string
+	}{
+		{"пустая форма", "POST", "/auth", url.Values{}, "/lk/student"},
+		{"ученик", "POST", "/auth", url.Values{"role": {"student"}}, "/lk/student"},
+		{"ментор", "POST", "/auth", url.Values{"role": {"mentor"}}, "/lk/mentor"},
+		{"партнёр", "POST", "/auth", url.Values{"role": {"partner"}}, "/lk/partner"},
+		{"мусор в полях", "POST", "/auth", url.Values{"role": {"mentor"}, "email": {"не почта"}, "password": {"1"}, "phone": {"abc"}}, "/lk/mentor"},
+		{"очень длинный email", "POST", "/auth", url.Values{"role": {"partner"}, "email": {strings.Repeat("a", 500) + "@x.ru"}}, "/lk/partner"},
+		{"неизвестная роль", "POST", "/auth", url.Values{"role": {"admin"}}, "/lk/student"},
+		{"быстрый вход ментора", "POST", "/auth", url.Values{"role": {"student"}, "quick": {"mentor"}}, "/lk/mentor"},
+		{"быстрый вход партнёра", "POST", "/auth", url.Values{"quick": {"partner"}}, "/lk/partner"},
+		{"быстрый вход с мусором", "POST", "/auth", url.Values{"quick": {"root"}, "role": {"partner"}}, "/lk/partner"},
+		{"VK, POST", "POST", "/auth/vk", url.Values{"role": {"mentor"}}, "/lk/mentor"},
+		{"Yandex, POST", "POST", "/auth/yandex", url.Values{"role": {"partner"}}, "/lk/partner"},
+		{"VK, GET", "GET", "/auth/vk?role=mentor", nil, "/lk/mentor"},
+		{"неизвестный провайдер", "POST", "/auth/anything", url.Values{"role": {"student"}}, "/lk/student"},
+	}
+	for _, tc := range cases {
+		var res *http.Response
+		var err error
+		if tc.method == "GET" {
+			res, err = c.Get(ts.URL + tc.path)
+		} else {
+			res, err = c.PostForm(ts.URL+tc.path, tc.form)
+		}
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		res.Body.Close()
+		if res.StatusCode != http.StatusSeeOther || res.Header.Get("Location") != tc.want {
+			t.Errorf("%s: статус %d, Location=%q, ожидали 303 на %s", tc.name, res.StatusCode, res.Header.Get("Location"), tc.want)
+		}
+		if res.Header.Get("Set-Cookie") != "" {
+			t.Errorf("%s: вход не должен выдавать cookie, получили %q", tc.name, res.Header.Get("Set-Cookie"))
+		}
+	}
+}
+
+func TestLoginRedirectTargetsAreFixedPaths(t *testing.T) {
+	ts := authTestServer(t)
+	c := noFollow(&http.Client{})
+	for _, evil := range []string{"//evil.example", "https://evil.example", "/lk/../admin", "student\r\nLocation: https://evil.example"} {
+		res, err := c.PostForm(ts.URL+"/auth", url.Values{"role": {evil}, "quick": {evil}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		res.Body.Close()
+		if res.Header.Get("Location") != "/lk/student" {
+			t.Errorf("role=%q: Location=%q (адрес перехода должен строиться из фиксированных путей)", evil, res.Header.Get("Location"))
+		}
+	}
 }

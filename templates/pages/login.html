@@ -37,14 +37,9 @@
       <h2 class="auth-form-title">Вход в аккаунт</h2>
       <p class="auth-form-subtitle">Выберите роль и способ входа</p>
 
-      {{if .Alert}}<div class="alert alert--ok" role="status"><strong>{{.Alert}}</strong></div>{{end}}
-      {{if .AlertError}}<div class="alert alert--error" role="alert"><strong>{{.AlertError}}</strong></div>{{end}}
-
-      <p class="hint auth-demo-note">Демонстрационный режим: учётных записей нет. Можно войти с пустыми полями, откроется кабинет выбранной роли.</p>
+      <p class="hint auth-demo-note">Это демонстрация: проверок нет. Выберите роль и нажмите «Войти» (поля можно не заполнять), откроется кабинет выбранной роли.</p>
 
       <form id="auth-form" method="post" action="/auth">
-        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-
         <fieldset class="auth-role-tabs">
           <legend class="visually-hidden">Роль</legend>
           <label class="auth-role-tab">
@@ -79,8 +74,7 @@
 
         <div class="field">
           <label for="auth-email">Email</label>
-          <input type="text" id="auth-email" name="email" value="" autocomplete="off" placeholder="you@example.com" {{if .EmailError}}aria-invalid="true" aria-describedby="auth-email-err"{{end}}>
-          {{if .EmailError}}<div class="field-error" id="auth-email-err">{{.EmailError}}</div>{{end}}
+          <input type="text" id="auth-email" name="email" value="" autocomplete="off" placeholder="you@example.com">
         </div>
         <div class="field">
           <label for="auth-password">Пароль</label>
@@ -88,8 +82,7 @@
         </div>
         <div class="field">
           <label for="auth-phone">Телефон</label>
-          <input type="text" id="auth-phone" name="phone" value="" autocomplete="off" placeholder="+7 (___) ___-__-__" {{if .PhoneError}}aria-invalid="true" aria-describedby="auth-phone-err"{{end}}>
-          {{if .PhoneError}}<div class="field-error" id="auth-phone-err">{{.PhoneError}}</div>{{end}}
+          <input type="text" id="auth-phone" name="phone" value="" autocomplete="off" placeholder="+7 (___) ___-__-__">
         </div>
         <button type="submit" class="btn btn--primary auth-submit">Войти</button>
 

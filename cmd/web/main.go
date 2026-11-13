@@ -23,6 +23,7 @@ import (
 
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(log)
 	cfg, err := config.Load()
 	if err != nil {
 		log.Error("config", "err", err)

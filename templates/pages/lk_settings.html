@@ -13,7 +13,6 @@
     <div class="lk-section">
       <h3>Профиль</h3>
       <form method="post" action="/lk/student/settings" class="settings-form">
-        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <div class="settings-row">
           <div class="field">
             <label for="settings-name">ФИО</label>
@@ -49,7 +48,6 @@
     <div class="lk-section">
       <h3>Смена пароля</h3>
       <form method="post" action="/lk/student/settings" class="settings-form" data-once>
-        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <p class="hint">Демо-режим: пароль не хранится, поэтому текущий пароль не проверяется.</p>
         <div class="field">
           <label for="settings-password-old">Текущий пароль</label>

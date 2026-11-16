@@ -1,4 +1,4 @@
-.PHONY: run test fmt compose check-links
+.PHONY: run test fmt compose check-links docs-check
 
 run:
 	go run ./cmd/web
@@ -15,3 +15,7 @@ compose:
 # Нужен интернет: проверяет, что ссылки на материалы в схемах roadmap открываются.
 check-links:
 	CHECK_LINKS=1 go test ./internal/content -run TestLinksAlive -v
+
+# Проверяет документацию по стандарту docs/standards/documentation-standard.md.
+docs-check:
+	go test ./internal/docscheck -v
